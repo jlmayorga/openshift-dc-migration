@@ -49,8 +49,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          args: "--timeout=10m"
-          version: v1.59
+          args: "--timeout=10m --verbose"
+          version: latest
 
   security-check:
     name: Security Check
