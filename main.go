@@ -77,7 +77,8 @@ func run() error {
 func runConverter(cmd *cobra.Command, args []string) error {
 	var err error
 	// Create log file
-	logFile, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	sanitizedLogPath := filepath.Clean(logFilePath)
+	logFile, err = os.OpenFile(sanitizedLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("error creating log file: %w", err)
 	}
@@ -362,8 +363,12 @@ func saveDeploymentYAML(deployment *unstructured.Unstructured, namespace string)
 		return fmt.Errorf("error creating temporary file: %w", err)
 	}
 	defer func() {
-		tempFile.Close()
-		os.Remove(tempFile.Name())
+		if err := tempFile.Close(); err != nil {
+			fmt.Printf("Warning: Failed to close temporary file: %v\n", err)
+		}
+		if err := os.Remove(tempFile.Name()); err != nil {
+			fmt.Printf("Warning: Failed to remove temporary file: %v\n", err)
+		}
 	}()
 
 	if _, err := tempFile.Write(data); err != nil {
