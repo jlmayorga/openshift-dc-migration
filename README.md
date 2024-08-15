@@ -27,23 +27,23 @@ DeploymentConfigs have been deprecated since OpenShift 4.14. While they continue
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/openshift-dc-converter.git
-   cd openshift-dc-converter
+   git clone https://github.com/jlmayorga/openshift-dc-migration.git
+   cd openshift-dc-migration
    ```
 
 2. Build the binary:
    ```
-   go build -o openshift-dc-converter
+   go build -o openshift-dc-migration
    ```
 
 ### Using Pre-built Binaries
 
-You can download pre-built binaries for various platforms from the [Releases](https://github.com/yourusername/openshift-dc-converter/releases) page.
+You can download pre-built binaries for various platforms from the [Releases](https://github.com/jlmayorga/openshift-dc-migration/releases) page.
 
 ## Usage
 
 ```
-./openshift-dc-converter [flags]
+./openshift-dc-migration [flags]
 ```
 
 ### Flags
@@ -62,13 +62,13 @@ You can download pre-built binaries for various platforms from the [Releases](ht
 To convert DeploymentConfigs in projects "project1" and "project2" without applying changes:
 
 ```
-./openshift-dc-converter --projects=project1,project2 --output-dir=./converted
+./openshift-dc-migration --projects=project1,project2 --output-dir=./converted
 ```
 
 To convert and apply changes:
 
 ```
-./openshift-dc-converter --projects=project1,project2 --apply-changes=true
+./openshift-dc-migration --projects=project1,project2 --apply-changes=true
 ```
 
 ## Output
@@ -97,11 +97,3 @@ Each generated Deployment YAML file will include annotations indicating it was c
 ## Contributing
 
 Contributions to improve the tool are welcome. Please submit issues and pull requests through the project's repository.
-
-## License
-
-[Insert your chosen license here]
-
-## Acknowledgments
-
-This project was inspired by the need to migrate from OpenShift-specific resources to standard Kubernetes resources, ensuring better compatibility and future-proofing of deployments.
