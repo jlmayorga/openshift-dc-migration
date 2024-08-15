@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,11 +35,18 @@ var (
 )
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	rootCmd := &cobra.Command{
 		Use:   "openshift-dc-converter",
 		Short: "Convert OpenShift DeploymentConfigs to Kubernetes Deployments",
 		Long:  `A CLI tool to convert OpenShift DeploymentConfigs to Kubernetes Deployments across specified projects.`,
-		RunE:  run,
+		RunE:  runConverter,
 	}
 
 	rootCmd.Flags().StringVar(&kubeconfig, "kubeconfig", filepath.Join(homedir.HomeDir(), ".kube", "config"), "Path to the kubeconfig file")
@@ -51,8 +59,7 @@ func main() {
 	rootCmd.Flags().StringSliceVar(&openShiftProjects, "projects", []string{}, "List of OpenShift projects to scan and convert")
 
 	if err := rootCmd.MarkFlagRequired("projects"); err != nil {
-		fmt.Fprintf(os.Stderr, "Error marking 'projects' flag as required: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error marking 'projects' flag as required: %w", err)
 	}
 
 	dcSpecificAnnotations = []string{
@@ -64,55 +71,62 @@ func main() {
 		"openshift.io/deployment-config.name",
 	}
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	return rootCmd.Execute()
 }
 
-func run(cmd *cobra.Command, args []string) error {
+func runConverter(cmd *cobra.Command, args []string) error {
 	var err error
 	// Create log file
-	logFile, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		return fmt.Errorf("error creating log file: %v", err)
+		return fmt.Errorf("error creating log file: %w", err)
 	}
-	defer logFile.Close()
+	defer func() {
+		if closeErr := logFile.Close(); closeErr != nil {
+			err = fmt.Errorf("error closing log file: %w", closeErr)
+		}
+	}()
 
 	// Initialize Kubernetes client
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return fmt.Errorf("error building kubeconfig: %v", err)
+		return fmt.Errorf("error building kubeconfig: %w", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return fmt.Errorf("error creating Kubernetes client: %v", err)
+		return fmt.Errorf("error creating Kubernetes client: %w", err)
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
-		return fmt.Errorf("error creating dynamic client: %v", err)
+		return fmt.Errorf("error creating dynamic client: %w", err)
 	}
 
 	// Log start of migration
-	logMessage(fmt.Sprintf("Migration started at %s", time.Now().Format(time.RFC3339)))
+	if err := logMessage(fmt.Sprintf("Migration started at %s", time.Now().Format(time.RFC3339))); err != nil {
+		return fmt.Errorf("error logging migration start: %w", err)
+	}
 
 	// Validate input projects
 	validProjects, err := validateProjects(clientset, openShiftProjects)
 	if err != nil {
-		return fmt.Errorf("error validating projects: %v", err)
+		return fmt.Errorf("error validating projects: %w", err)
 	}
 
 	// Process each valid project
 	totalConversions := 0
 	for _, project := range validProjects {
-		logMessage(fmt.Sprintf("Processing project: %s", project))
+		if err := logMessage(fmt.Sprintf("Processing project: %s", project)); err != nil {
+			return fmt.Errorf("error logging project processing: %w", err)
+		}
 
 		// Get DeploymentConfigs in the project
 		dcList, err := getDCs(dynamicClient, project)
 		if err != nil {
-			logMessage(fmt.Sprintf("Error getting DeploymentConfigs in project %s: %v", project, err))
+			if logErr := logMessage(fmt.Sprintf("Error getting DeploymentConfigs in project %s: %v", project, err)); logErr != nil {
+				return fmt.Errorf("error logging DeploymentConfig retrieval failure: %w", logErr)
+			}
 			continue
 		}
 
@@ -120,14 +134,17 @@ func run(cmd *cobra.Command, args []string) error {
 		for _, dc := range dcList.Items {
 			deployment, err := convertDCtoDeployment(&dc)
 			if err != nil {
-				logMessage(fmt.Sprintf("Error converting DeploymentConfig %s in project %s: %v", dc.GetName(), project, err))
+				if logErr := logMessage(fmt.Sprintf("Error converting DeploymentConfig %s in project %s: %v", dc.GetName(), project, err)); logErr != nil {
+					return fmt.Errorf("error logging DeploymentConfig conversion failure: %w", logErr)
+				}
 				continue
 			}
 
 			// Save Deployment YAML
-			err = saveDeploymentYAML(deployment, project)
-			if err != nil {
-				logMessage(fmt.Sprintf("Error saving Deployment YAML for %s in project %s: %v", deployment.GetName(), project, err))
+			if err := saveDeploymentYAML(deployment, project); err != nil {
+				if logErr := logMessage(fmt.Sprintf("Error saving Deployment YAML for %s in project %s: %v", deployment.GetName(), project, err)); logErr != nil {
+					return fmt.Errorf("error logging Deployment YAML save failure: %w", logErr)
+				}
 				continue
 			}
 
@@ -135,16 +152,19 @@ func run(cmd *cobra.Command, args []string) error {
 
 			// Apply Deployment if requested
 			if applyChanges {
-				err = applyDeployment(dynamicClient, deployment)
-				if err != nil {
-					logMessage(fmt.Sprintf("Error applying Deployment %s in project %s: %v", deployment.GetName(), project, err))
+				if err := applyDeployment(dynamicClient, deployment); err != nil {
+					if logErr := logMessage(fmt.Sprintf("Error applying Deployment %s in project %s: %v", deployment.GetName(), project, err)); logErr != nil {
+						return fmt.Errorf("error logging Deployment application failure: %w", logErr)
+					}
 				}
 			}
 		}
 	}
 
 	// Log summary
-	logMessage(fmt.Sprintf("Summary: Total projects processed: %d, Total DeploymentConfigs converted: %d", len(validProjects), totalConversions))
+	if err := logMessage(fmt.Sprintf("Summary: Total projects processed: %d, Total DeploymentConfigs converted: %d", len(validProjects), totalConversions)); err != nil {
+		return fmt.Errorf("error logging summary: %w", err)
+	}
 
 	return nil
 }
@@ -154,14 +174,21 @@ func validateProjects(clientset *kubernetes.Clientset, projects []string) ([]str
 	for _, project := range projects {
 		_, err := clientset.CoreV1().Namespaces().Get(context.Background(), project, metav1.GetOptions{})
 		if err != nil {
-			logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible", project))
+			if logErr := logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible: %v", project, err)); logErr != nil {
+				return nil, fmt.Errorf("error logging project validation warning: %w", logErr)
+			}
 			continue
 		}
 		if isReservedNamespace(project) {
-			logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project))
+			if logErr := logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project)); logErr != nil {
+				return nil, fmt.Errorf("error logging reserved namespace warning: %w", logErr)
+			}
 			continue
 		}
 		validProjects = append(validProjects, project)
+	}
+	if len(validProjects) == 0 {
+		return nil, fmt.Errorf("no valid projects found among the provided projects")
 	}
 	return validProjects, nil
 }
@@ -191,7 +218,7 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	// Copy metadata
 	metadata, found, err := unstructured.NestedMap(dc.Object, "metadata")
 	if err != nil {
-		return nil, fmt.Errorf("error getting metadata: %v", err)
+		return nil, fmt.Errorf("error getting metadata: %w", err)
 	}
 	if !found {
 		return nil, fmt.Errorf("metadata not found in DeploymentConfig")
@@ -204,7 +231,7 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 			delete(labels, label)
 		}
 		if err := unstructured.SetNestedStringMap(metadata, labels, "labels"); err != nil {
-			return nil, fmt.Errorf("error setting labels: %v", err)
+			return nil, fmt.Errorf("error setting labels: %w", err)
 		}
 	} else {
 		unstructured.RemoveNestedField(metadata, "labels")
@@ -219,7 +246,7 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 		annotations["openshift.io/generated-by"] = "deploymentconfig-to-deployment-migration"
 		annotations["openshift.io/migration-timestamp"] = time.Now().Format(time.RFC3339)
 		if err := unstructured.SetNestedStringMap(metadata, annotations, "annotations"); err != nil {
-			return nil, fmt.Errorf("error setting annotations: %v", err)
+			return nil, fmt.Errorf("error setting annotations: %w", err)
 		}
 	} else {
 		unstructured.RemoveNestedField(metadata, "annotations")
@@ -230,13 +257,13 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	}
 
 	if err := unstructured.SetNestedMap(deployment.Object, metadata, "metadata"); err != nil {
-		return nil, fmt.Errorf("error setting metadata: %v", err)
+		return nil, fmt.Errorf("error setting metadata: %w", err)
 	}
 
 	// Convert spec
 	spec, found, err := unstructured.NestedMap(dc.Object, "spec")
 	if err != nil {
-		return nil, fmt.Errorf("error getting spec: %v", err)
+		return nil, fmt.Errorf("error getting spec: %w", err)
 	}
 	if !found {
 		return nil, fmt.Errorf("spec not found in DeploymentConfig")
@@ -245,43 +272,43 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	// Set replicas
 	replicas, found, err := unstructured.NestedInt64(spec, "replicas")
 	if err != nil {
-		return nil, fmt.Errorf("error getting replicas: %v", err)
+		return nil, fmt.Errorf("error getting replicas: %w", err)
 	}
 	if !found {
 		replicas = 1 // Default to 1 if not specified
 	}
 	if err := unstructured.SetNestedField(deployment.Object, replicas, "spec", "replicas"); err != nil {
-		return nil, fmt.Errorf("error setting replicas: %v", err)
+		return nil, fmt.Errorf("error setting replicas: %w", err)
 	}
 
 	// Set selector
 	selector, found, err := unstructured.NestedMap(spec, "selector")
 	if err != nil {
-		return nil, fmt.Errorf("error getting selector: %v", err)
+		return nil, fmt.Errorf("error getting selector: %w", err)
 	}
 	if !found {
 		return nil, fmt.Errorf("selector not found in DeploymentConfig spec")
 	}
 	if err := unstructured.SetNestedMap(deployment.Object, map[string]interface{}{"matchLabels": selector}, "spec", "selector"); err != nil {
-		return nil, fmt.Errorf("error setting selector: %v", err)
+		return nil, fmt.Errorf("error setting selector: %w", err)
 	}
 
 	// Set template
 	template, found, err := unstructured.NestedMap(spec, "template")
 	if err != nil {
-		return nil, fmt.Errorf("error getting template: %v", err)
+		return nil, fmt.Errorf("error getting template: %w", err)
 	}
 	if !found {
 		return nil, fmt.Errorf("template not found in DeploymentConfig spec")
 	}
 	if err := unstructured.SetNestedMap(deployment.Object, template, "spec", "template"); err != nil {
-		return nil, fmt.Errorf("error setting template: %v", err)
+		return nil, fmt.Errorf("error setting template: %w", err)
 	}
 
 	// Handle strategy
 	strategy, found, err := unstructured.NestedMap(spec, "strategy")
 	if err != nil {
-		return nil, fmt.Errorf("error getting strategy: %v", err)
+		return nil, fmt.Errorf("error getting strategy: %w", err)
 	}
 	if found {
 		deploymentStrategy := map[string]interface{}{}
@@ -306,7 +333,7 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 			deploymentStrategy["type"] = "RollingUpdate"
 		}
 		if err := unstructured.SetNestedMap(deployment.Object, deploymentStrategy, "spec", "strategy"); err != nil {
-			return nil, fmt.Errorf("error setting strategy: %v", err)
+			return nil, fmt.Errorf("error setting strategy: %w", err)
 		}
 	}
 
@@ -321,25 +348,56 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 func saveDeploymentYAML(deployment *unstructured.Unstructured, namespace string) error {
 	data, err := yaml.Marshal(deployment)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling deployment to YAML: %w", err)
 	}
 
 	dir := filepath.Join(outputDir, namespace)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+	if err := os.MkdirAll(dir, 0750); err != nil {
+		return fmt.Errorf("error creating output directory: %w", err)
 	}
 
 	filename := filepath.Join(dir, fmt.Sprintf("%s.yaml", deployment.GetName()))
-	return os.WriteFile(filename, data, 0644)
+	tempFile, err := os.CreateTemp(dir, "temp-deployment-*.yaml")
+	if err != nil {
+		return fmt.Errorf("error creating temporary file: %w", err)
+	}
+	defer func() {
+		tempFile.Close()
+		os.Remove(tempFile.Name())
+	}()
+
+	if _, err := tempFile.Write(data); err != nil {
+		return fmt.Errorf("error writing to temporary file: %w", err)
+	}
+
+	if err := tempFile.Sync(); err != nil {
+		return fmt.Errorf("error syncing temporary file: %w", err)
+	}
+
+	if err := os.Rename(tempFile.Name(), filename); err != nil {
+		return fmt.Errorf("error renaming temporary file: %w", err)
+	}
+
+	return nil
 }
 
 func applyDeployment(client dynamic.Interface, deployment *unstructured.Unstructured) error {
 	deploymentRes := schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 	_, err := client.Resource(deploymentRes).Namespace(deployment.GetNamespace()).Create(context.Background(), deployment, metav1.CreateOptions{})
-	return err
+	if err != nil {
+		return fmt.Errorf("error applying deployment %s in namespace %s: %w", deployment.GetName(), deployment.GetNamespace(), err)
+	}
+	return nil
 }
 
-func logMessage(message string) {
-	fmt.Fprintln(logFile, message)
-	fmt.Println(message)
+func logMessage(message string) error {
+	timestamp := time.Now().Format(time.RFC3339)
+	logEntry := fmt.Sprintf("[%s] %s\n", timestamp, message)
+
+	if _, err := io.WriteString(logFile, logEntry); err != nil {
+		return fmt.Errorf("error writing to log file: %w", err)
+	}
+
+	_, err := fmt.Print(logEntry)
+	return err
 }
