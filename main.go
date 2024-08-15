@@ -225,39 +225,42 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 		return nil, fmt.Errorf("metadata not found in DeploymentConfig")
 	}
 
+	// Create a new metadata map with only necessary fields
+	newMetadata := make(map[string]interface{})
+	newMetadata["name"] = metadata["name"]
+	newMetadata["namespace"] = metadata["namespace"]
+
 	// Handle labels
 	if preserveLabels {
-		labels, _, _ := unstructured.NestedStringMap(metadata, "labels")
-		for _, label := range dcSpecificLabels {
-			delete(labels, label)
+		if labels, ok := metadata["labels"].(map[string]interface{}); ok {
+			newLabels := make(map[string]interface{})
+			for k, v := range labels {
+				if !contains(dcSpecificLabels, k) {
+					newLabels[k] = v
+				}
+			}
+			if len(newLabels) > 0 {
+				newMetadata["labels"] = newLabels
+			}
 		}
-		if err := unstructured.SetNestedStringMap(metadata, labels, "labels"); err != nil {
-			return nil, fmt.Errorf("error setting labels: %w", err)
-		}
-	} else {
-		unstructured.RemoveNestedField(metadata, "labels")
 	}
 
 	// Handle annotations
+	newAnnotations := make(map[string]interface{})
 	if preserveAnnotations {
-		annotations, _, _ := unstructured.NestedStringMap(metadata, "annotations")
-		for _, annotation := range dcSpecificAnnotations {
-			delete(annotations, annotation)
-		}
-		annotations["openshift.io/generated-by"] = "deploymentconfig-to-deployment-migration"
-		annotations["openshift.io/migration-timestamp"] = time.Now().Format(time.RFC3339)
-		if err := unstructured.SetNestedStringMap(metadata, annotations, "annotations"); err != nil {
-			return nil, fmt.Errorf("error setting annotations: %w", err)
-		}
-	} else {
-		unstructured.RemoveNestedField(metadata, "annotations")
-		metadata["annotations"] = map[string]interface{}{
-			"openshift.io/generated-by":        "deploymentconfig-to-deployment-migration",
-			"openshift.io/migration-timestamp": time.Now().Format(time.RFC3339),
+		if annotations, ok := metadata["annotations"].(map[string]interface{}); ok {
+			for k, v := range annotations {
+				if !contains(dcSpecificAnnotations, k) {
+					newAnnotations[k] = v
+				}
+			}
 		}
 	}
+	newAnnotations["openshift.io/generated-by"] = "deploymentconfig-to-deployment-migration"
+	newAnnotations["openshift.io/migration-timestamp"] = time.Now().Format(time.RFC3339)
+	newMetadata["annotations"] = newAnnotations
 
-	if err := unstructured.SetNestedMap(deployment.Object, metadata, "metadata"); err != nil {
+	if err := unstructured.SetNestedMap(deployment.Object, newMetadata, "metadata"); err != nil {
 		return nil, fmt.Errorf("error setting metadata: %w", err)
 	}
 
@@ -290,6 +293,10 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	if !found {
 		return nil, fmt.Errorf("selector not found in DeploymentConfig spec")
 	}
+
+	// Remove 'deploymentconfig' from selector
+	delete(selector, "deploymentconfig")
+
 	if err := unstructured.SetNestedMap(deployment.Object, map[string]interface{}{"matchLabels": selector}, "spec", "selector"); err != nil {
 		return nil, fmt.Errorf("error setting selector: %w", err)
 	}
@@ -302,6 +309,25 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	if !found {
 		return nil, fmt.Errorf("template not found in DeploymentConfig spec")
 	}
+
+	// Remove unnecessary fields from template metadata
+	if templateMetadata, ok := template["metadata"].(map[string]interface{}); ok {
+		newTemplateMetadata := make(map[string]interface{})
+		if labels, ok := templateMetadata["labels"].(map[string]interface{}); ok {
+			newLabels := make(map[string]interface{})
+			for k, v := range labels {
+				if k != "deploymentconfig" {
+					newLabels[k] = v
+				}
+			}
+			newTemplateMetadata["labels"] = newLabels
+		}
+		if annotations, ok := templateMetadata["annotations"].(map[string]interface{}); ok {
+			newTemplateMetadata["annotations"] = annotations
+		}
+		template["metadata"] = newTemplateMetadata
+	}
+
 	if err := unstructured.SetNestedMap(deployment.Object, template, "spec", "template"); err != nil {
 		return nil, fmt.Errorf("error setting template: %w", err)
 	}
@@ -344,6 +370,16 @@ func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstruc
 	unstructured.RemoveNestedField(deployment.Object, "spec", "paused")
 
 	return deployment, nil
+}
+
+// Helper function to check if a string is in a slice
+func contains(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
 }
 
 func saveDeploymentYAML(deployment *unstructured.Unstructured, namespace string) error {
