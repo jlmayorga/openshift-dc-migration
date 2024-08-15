@@ -4,14 +4,14 @@ on:
   push:
     tags:
       - 'v*'
+
 permissions:
-  contents: read
+  contents: write
   packages: write
-  pull-requests: read
 
 jobs:
   build:
-    name: Build and Release
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v2
         with:
           go-version: '1.21'
 
@@ -44,7 +44,7 @@ jobs:
           go build -v -o openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
           name: openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}
           path: openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
@@ -55,10 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
 
       - name: Create Release
         id: create_release
@@ -67,36 +68,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Upload Release Assets
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs').promises;
-            const path = require('path');
-            
-            async function uploadAsset(name, file) {
-              console.log(`Uploading ${name}`);
-              await github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: ${{ steps.create_release.outputs.id }},
-                name: name,
-                data: await fs.readFile(file)
-              });
-            }
-            
-            const artifacts = await fs.readdir('.');
-            for (const artifact of artifacts) {
-              const stats = await fs.lstat(artifact);
-              if (stats.isDirectory()) {
-                const files = await fs.readdir(artifact);
-                for (const file of files) {
-                  await uploadAsset(file, path.join(artifact, file));
-                }
-              }
-            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for artifact in openshift-dc-converter-*; do
+            for file in $artifact/*; do
+              gh release upload ${{ steps.get_version.outputs.VERSION }} "$file" --clobber
+            done
+          done
