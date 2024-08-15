@@ -49,6 +49,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
+          args: "--timeout=2m"
           version: v1.59
 
   security-check:
