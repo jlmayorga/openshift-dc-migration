@@ -50,7 +50,10 @@ func main() {
 	rootCmd.Flags().StringVar(&logFilePath, "log-file", "conversion_log.txt", "Path to the log file")
 	rootCmd.Flags().StringSliceVar(&openShiftProjects, "projects", []string{}, "List of OpenShift projects to scan and convert")
 
-	rootCmd.MarkFlagRequired("projects")
+	if err := rootCmd.MarkFlagRequired("projects"); err != nil {
+		fmt.Fprintf(os.Stderr, "Error marking 'projects' flag as required: %v\n", err)
+		os.Exit(1)
+	}
 
 	dcSpecificAnnotations = []string{
 		"openshift.io/deployment-config.name",
