@@ -53,7 +53,10 @@ func runConverter(cmd *cobra.Command, args []string) error {
 func processProject(client dynamic.Interface, namespace string) error {
 	defer func() {
 		if r := recover(); r != nil {
-			logMessage(fmt.Sprintf("Panic occurred while processing project %s: %v", namespace, r))
+			err := logMessage(fmt.Sprintf("Panic occurred while processing project %s: %v", namespace, r))
+			if err != nil {
+				fmt.Printf("Failed to log message: %v\n", err)
+			}
 		}
 	}()
 
@@ -66,7 +69,10 @@ func processProject(client dynamic.Interface, namespace string) error {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logMessage(fmt.Sprintf("Panic occurred while processing DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, r))
+					err := logMessage(fmt.Sprintf("Panic occurred while processing DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, r))
+					if err != nil {
+						fmt.Printf("Failed to log message: %v\n", err)
+					}
 				}
 			}()
 
@@ -82,18 +88,27 @@ func processProject(client dynamic.Interface, namespace string) error {
 
 			deployment, err := convertDCtoDeployment(&dc)
 			if err != nil {
-				logMessage(fmt.Sprintf("Error converting DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, err))
+				logErr := logMessage(fmt.Sprintf("Error converting DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, err))
+				if logErr != nil {
+					fmt.Printf("Failed to log message: %v\n", logErr)
+				}
 				return
 			}
 
 			if err := saveDeploymentYAML(deployment, namespace); err != nil {
-				logMessage(fmt.Sprintf("Error saving Deployment YAML for %s in project %s: %v", deployment.GetName(), namespace, err))
+				logErr := logMessage(fmt.Sprintf("Error saving Deployment YAML for %s in project %s: %v", deployment.GetName(), namespace, err))
+				if logErr != nil {
+					fmt.Printf("Failed to log message: %v\n", logErr)
+				}
 				return
 			}
 
 			if applyChanges {
 				if err := applyDeployment(client, deployment); err != nil {
-					logMessage(fmt.Sprintf("Error applying Deployment %s in project %s: %v", deployment.GetName(), namespace, err))
+					logErr := logMessage(fmt.Sprintf("Error applying Deployment %s in project %s: %v", deployment.GetName(), namespace, err))
+					if logErr != nil {
+						fmt.Printf("Failed to log message: %v\n", logErr)
+					}
 				}
 			}
 

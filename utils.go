@@ -18,7 +18,7 @@ import (
 )
 
 func logMessage(message string) error {
-	f, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("error opening log file: %w", err)
 	}
@@ -76,12 +76,12 @@ func saveDeploymentYAML(deployment *unstructured.Unstructured, namespace string)
 	}
 
 	dir := filepath.Join(outputDir, namespace)
-	if err := os.MkdirAll(dir, 0750); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("error creating output directory: %w", err)
 	}
 
 	filename := filepath.Join(dir, fmt.Sprintf("%s.yaml", deployment.GetName()))
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(filename, data, 0600)
 }
 
 func applyDeployment(client dynamic.Interface, deployment *unstructured.Unstructured) error {
