@@ -18,7 +18,7 @@ import (
 )
 
 func logMessage(message string) error {
-	f, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return fmt.Errorf("error opening log file: %w", err)
 	}
@@ -34,13 +34,19 @@ func validateProjects(client dynamic.Interface, projects []string) ([]string, er
 	for _, project := range projects {
 
 		if isReservedNamespace(project) {
-			logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project))
+			err := logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project))
+			if err != nil {
+				fmt.Printf("Failed to log message: %v\n", err)
+			}
 			continue
 		}
 
 		_, err := client.Resource(schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}).Get(ctx, project, metav1.GetOptions{})
 		if err != nil {
-			logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible: %v", project, err))
+			err := logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible: %v", project, err))
+			if err != nil {
+				fmt.Printf("Failed to log message: %v\n", err)
+			}
 			continue
 		}
 		validProjects = append(validProjects, project)
@@ -76,12 +82,12 @@ func saveDeploymentYAML(deployment *unstructured.Unstructured, namespace string)
 	}
 
 	dir := filepath.Join(outputDir, namespace)
-	if err := os.MkdirAll(dir, 0750); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("error creating output directory: %w", err)
 	}
 
 	filename := filepath.Join(dir, fmt.Sprintf("%s.yaml", deployment.GetName()))
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(filename, data, 0600)
 }
 
 func applyDeployment(client dynamic.Interface, deployment *unstructured.Unstructured) error {
