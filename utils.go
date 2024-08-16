@@ -34,13 +34,19 @@ func validateProjects(client dynamic.Interface, projects []string) ([]string, er
 	for _, project := range projects {
 
 		if isReservedNamespace(project) {
-			logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project))
+			err := logMessage(fmt.Sprintf("Warning: Project %s is a reserved namespace and will be skipped", project))
+			if err != nil {
+				fmt.Printf("Failed to log message: %v\n", err)
+			}
 			continue
 		}
 
 		_, err := client.Resource(schema.GroupVersionResource{Group: "", Version: "v1", Resource: "namespaces"}).Get(ctx, project, metav1.GetOptions{})
 		if err != nil {
-			logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible: %v", project, err))
+			err := logMessage(fmt.Sprintf("Warning: Project %s not found or not accessible: %v", project, err))
+			if err != nil {
+				fmt.Printf("Failed to log message: %v\n", err)
+			}
 			continue
 		}
 		validProjects = append(validProjects, project)
