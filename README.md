@@ -14,6 +14,8 @@ DeploymentConfigs have been deprecated since OpenShift 4.14. While they continue
 - Optional application of the generated Deployments to the cluster
 - Adds annotations to track the migration process
 - Preserves existing labels and annotations (configurable)
+- Generates a comprehensive PDF report of the conversion process
+- Performs preflight checks to ensure cluster connectivity and permissions
 
 ## Prerequisites
 
@@ -56,19 +58,20 @@ You can download pre-built binaries for various platforms from the [Releases](ht
 - `--reserved-namespaces`: List of reserved namespaces to skip (default is "default,openshift,openshift-infra")
 - `--log-file`: Path to the log file (default is "conversion_log.txt")
 - `--projects`: List of OpenShift projects to scan and convert (required)
+- `--report-path`: Path to save the PDF report (default is "conversion_report.pdf")
 
 ### Example
 
-To convert DeploymentConfigs in projects "project1" and "project2" without applying changes:
+To convert DeploymentConfigs in projects "project1" and "project2" without applying changes and generate a PDF report:
 
 ```
-./openshift-dc-migration --projects=project1,project2 --output-dir=./converted
+./openshift-dc-migration --projects=project1,project2 --output-dir=./converted --report-path=./migration_report.pdf
 ```
 
-To convert and apply changes:
+To convert, apply changes, and generate a PDF report:
 
 ```
-./openshift-dc-migration --projects=project1,project2 --apply-changes=true
+./openshift-dc-migration --projects=project1,project2 --apply-changes=true --report-path=./migration_report.pdf
 ```
 
 ## Output
@@ -87,12 +90,31 @@ The tool will create a directory structure as follows:
 
 Each generated Deployment YAML file will include annotations indicating it was created by this migration process and the timestamp of creation.
 
+## PDF Report
+
+The tool generates a comprehensive PDF report of the conversion process. This report includes:
+
+- A list of all processed DeploymentConfigs
+- The namespace and name of each DeploymentConfig
+- Information about triggers, lifecycle hooks, auto-rollbacks, and custom strategies for each DeploymentConfig
+- Conversion status and any errors encountered
+- A summary of the total number of conversions performed
+
+## Preflight Checks
+
+Before performing any conversions, the tool now conducts preflight checks to ensure:
+
+- Connectivity to the OpenShift cluster
+- Proper permissions to access and modify necessary resources
+- Validity of specified projects
+
 ## Warnings and Considerations
 
 - Always run the tool without the `--apply-changes` flag first and review the generated YAML files before applying changes.
 - Ensure you have backups of your DeploymentConfigs before running this tool with `--apply-changes=true`.
 - This tool performs a basic conversion. You may need to manually adjust the generated Deployments for workloads with complex configurations.
 - Test thoroughly in a non-production environment before using in production.
+- Review the generated PDF report to ensure all conversions were successful and to document the migration process.
 
 ## Contributing
 
