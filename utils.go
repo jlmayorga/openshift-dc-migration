@@ -135,28 +135,55 @@ func preflightCheck(clientset *kubernetes.Clientset) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Check if we can list namespaces
-	_, err := clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{Limit: 1})
-	if err != nil {
-		return fmt.Errorf("failed to connect to the OpenShift cluster: %w", err)
-	}
-
 	// Check if we can access the OpenShift API
-	_, err = clientset.Discovery().ServerVersion()
+	_, err := clientset.Discovery().ServerVersion()
 	if err != nil {
 		return fmt.Errorf("failed to access OpenShift API: %w", err)
 	}
 
-	// Check if we have necessary permissions
-	_, err = clientset.AuthorizationV1().SelfSubjectRulesReviews().Create(ctx, &authorizationv1.SelfSubjectRulesReview{
-		Spec: authorizationv1.SelfSubjectRulesReviewSpec{
-			Namespace: "default",
-		},
-	}, metav1.CreateOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to check permissions: %w", err)
+	// Check if we can list DeploymentConfigs in the specified namespaces
+	for _, project := range openShiftProjects {
+		sar := &authorizationv1.SelfSubjectAccessReview{
+			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+				ResourceAttributes: &authorizationv1.ResourceAttributes{
+					Verb:      "list",
+					Group:     "apps.openshift.io",
+					Resource:  "deploymentconfigs",
+					Namespace: project,
+				},
+			},
+		}
+		result, err := clientset.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, sar, metav1.CreateOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to check DeploymentConfig access permissions: %w", err)
+		}
+		if !result.Status.Allowed {
+			return fmt.Errorf("insufficient permissions to list DeploymentConfigs in namespace %s: %s", project, result.Status.Reason)
+		}
+	}
+
+	// If applyChanges is true, check if we can create Deployments in the specified namespaces
+	if applyChanges {
+		for _, project := range openShiftProjects {
+			sar := &authorizationv1.SelfSubjectAccessReview{
+				Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+					ResourceAttributes: &authorizationv1.ResourceAttributes{
+						Verb:      "create",
+						Group:     "apps",
+						Resource:  "deployments",
+						Namespace: project,
+					},
+				},
+			}
+			result, err := clientset.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, sar, metav1.CreateOptions{})
+			if err != nil {
+				return fmt.Errorf("failed to check Deployment creation permissions: %w", err)
+			}
+			if !result.Status.Allowed {
+				return fmt.Errorf("insufficient permissions to create Deployments in namespace %s: %s", project, result.Status.Reason)
+			}
+		}
 	}
 
 	return nil
-
 }
