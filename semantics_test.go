@@ -143,7 +143,7 @@ func TestMetadataAndDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *c.Deployment.Spec.Replicas != 1 || c.Deployment.Labels["user"] != "" || c.Deployment.Spec.Template.Labels["openshift.io/deployment-config.name"] != "keep" {
+	if *c.Deployment.Spec.Replicas != 0 || c.Deployment.Labels["user"] != "" || c.Deployment.Spec.Template.Labels["openshift.io/deployment-config.name"] != "keep" {
 		t.Fatalf("lost pod labels or default: %+v", c.Deployment)
 	}
 }

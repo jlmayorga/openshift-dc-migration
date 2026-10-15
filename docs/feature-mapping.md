@@ -5,7 +5,7 @@ The baseline is OpenShift 4.14 (Kubernetes 1.27). The embedded field/required-pr
 | DC feature | Output and operator action |
 | --- | --- |
 | Pod labels | Retained independently of metadata flags, including Service-facing `deploymentconfig`; add a stable migration selector label |
-| Replicas | Explicit zero retained; omission defaults to one |
+| Replicas | Explicit zero retained; omitted/null DC replicas default to zero, including offline conversion |
 | Paused, minReadySeconds, revisionHistoryLimit | Retained; omitted readiness/history use Deployment defaults (0 and 10) |
 | Rolling | RollingUpdate; preserve integer/percentage limits; missing limits default to 25% |
 | Recreate | Recreate |

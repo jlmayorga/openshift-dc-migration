@@ -122,9 +122,9 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 		names[ctr.Name] = true
 	}
 	if s.Replicas == nil {
-		v := int32(1)
+		v := int32(0)
 		s.Replicas = &v
-		c.Warnings = append(c.Warnings, "Omitted replicas defaults to 1.")
+		c.Warnings = append(c.Warnings, "Omitted DC replicas defaults to 0; destination remains scaled to zero.")
 	}
 	if *s.Replicas < 0 || s.MinReadySeconds < 0 || (s.RevisionHistoryLimit != nil && *s.RevisionHistoryLimit < 0) {
 		return c, errors.New("replicas, minReadySeconds and revisionHistoryLimit must be nonnegative")
