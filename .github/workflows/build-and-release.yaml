@@ -1,89 +1,65 @@
 name: Build and Release
-
 on:
   push:
-    tags:
-      - 'v*'
-
+    tags: ['v*']
+  workflow_dispatch:
 permissions:
-  contents: write
-  packages: write
-
+  contents: read
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-          - goos: windows
-            goarch: amd64
-          - goos: darwin
-            goarch: amd64
-          - goos: darwin
-            goarch: arm64
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
-          go-version: '1.21'
-
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: |
-          go build -v -o openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          go-version-file: go.mod
+      - run: go mod download && go mod verify
+      - run: go test -mod=readonly -race ./... && go vet -mod=readonly ./...
+      - run: |
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64; do
+            goos=${target%/*}; goarch=${target#*/}; suffix=''
+            if [ "$goos" = windows ]; then suffix=.exe; fi
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -mod=readonly -trimpath \
+              -ldflags="-s -w -X main.version=${GITHUB_REF_NAME} -X main.commit=${GITHUB_SHA} -X main.buildDate=$(git show -s --format=%cI HEAD)" \
+              -o "dist/openshift-dc-converter-$goos-$goarch$suffix" .
+          done
+          (cd dist && sha256sum openshift-dc-converter-* > SHA256SUMS)
+          go version > dist/build-metadata.txt
+          go list -m all >> dist/build-metadata.txt
+          cp compatibility/matrix.json dist/compatibility-matrix.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: openshift-dc-converter-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
-
-  release:
-    name: Create Release
+          name: release-candidates
+          path: dist/
+  qualification:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
-          draft: false
-          prerelease: false
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
-      - name: Upload Release Assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for artifact in openshift-dc-converter-*; do
-            for file in $artifact/*; do
-              gh release upload ${{ steps.get_version.outputs.VERSION }} "$file" --clobber
-            done
-          done
+          name: release-candidates
+          path: dist
+      - run: python3 tools/release_gate.py --artifacts dist
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compatibility-results
+          path: compatibility/results/*.json
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, qualification]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          pattern: '*'
+          merge-multiple: true
+          path: dist
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/* --draft --verify-tag --title "$RELEASE_TAG" --notes 'Qualified binaries, checksums, build metadata and actual OpenShift compatibility results. Review before publishing.'

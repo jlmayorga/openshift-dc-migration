@@ -1,12 +1,22 @@
-# Set update schedule for GitHub Actions
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "weekly"
+      interval: weekly
   - package-ecosystem: gomod
-    directory: "/"
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
+    groups:
+      kubernetes:
+        patterns:
+          - k8s.io/api
+          - k8s.io/apimachinery
+          - k8s.io/client-go
+      go-security:
+        patterns:
+          - golang.org/x/net
+          - golang.org/x/text
+          - golang.org/x/sys
+          - golang.org/x/term

@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "v1",
+  "updatedAt": "2026-10-15",
+  "minimum": "4.14",
+  "newestGA": "4.22",
+  "newestGASource": "https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22",
+  "targets": [
+    {
+      "minor": "4.14",
+      "releaseRequirement": "floor",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.15",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.16",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.17",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.18",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.19",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.20",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.21",
+      "releaseRequirement": "required",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "4.22",
+      "releaseRequirement": "newest",
+      "openshiftPatch": null,
+      "kubernetesVersion": null,
+      "dependencyVersions": null,
+      "testedAt": null,
+      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
+      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "integrationResult": "not-run",
+      "limitations": [
+        "No explicitly authorized test-cluster context supplied"
+      ]
+    },
+    {
+      "minor": "next",
+      "releaseRequirement": "development",
+      "integrationResult": "not-run",
+      "limitations": [
+        "Discover next development release and record metadata before smoke testing"
+      ]
+    }
+  ]
+}

@@ -234,7 +234,7 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 	return nil
 }
 func readDCFile(path string) ([]*unstructured.Unstructured, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304 -- explicit operator-selected offline input; never loaded from a cluster-supplied path.
 	if err != nil {
 		return nil, err
 	}
