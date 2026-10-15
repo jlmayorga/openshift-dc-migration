@@ -117,6 +117,7 @@ def main():
                 json.dumps(
                     {
                         "argv": argv,
+                        "inputObject": input_object,
                         "exit": proc.returncode,
                         "stdout": proc.stdout,
                         "stderr": proc.stderr,
@@ -201,7 +202,9 @@ def main():
             "json",
             expected=None,
         )
-        if existing.returncode or json.loads(existing.stdout).get("items"):
+        if existing.returncode or json.loads(existing.stdout or '{"items": []}').get(
+            "items"
+        ):
             raise RuntimeError("Test resource name web must be unused")
         triggers = [{"type": "ConfigChange"}]
         if image_trigger:
@@ -310,6 +313,19 @@ def main():
                     ],
                 },
             )
+        # Availability can precede the deployer/controller's final status update.
+        # Plans deliberately reject changed source resource versions.
+        last_version = None
+        stable_since = time.monotonic()
+
+        def settled():
+            nonlocal last_version, stable_since
+            current = obj("dc", "web")["metadata"]["resourceVersion"]
+            if current != last_version:
+                last_version, stable_since = current, time.monotonic()
+            return time.monotonic() - stable_since >= 5
+
+        wait(settled)
         host = route["spec"].get("host") or obj("route", "web")["spec"]["host"]
         return "http://" + host + args.health_path
 
@@ -356,6 +372,10 @@ def main():
             proc = subprocess.Popen(argv, stdout=log, stderr=subprocess.STDOUT)
             return proc, log
         command(argv, expected=expected)
+        snapshot = oc(
+            "get", "dc,deploy,rs,rc,pods,svc,endpoints,hpa,imagestream", "-o", "json"
+        )
+        (output / "cluster-after.json").write_text(snapshot.stdout)
         return (
             output / ns / "web.plan.json" if mode == "plan" else output / "report.json"
         )
