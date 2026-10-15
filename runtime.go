@@ -183,11 +183,14 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 		result.Error = err.Error()
 		return err
 	}
-	dep, err := r.convertDCtoDeployment(dc)
+	conversion, err := r.Convert(dc)
 	if err != nil {
 		result.Error = err.Error()
 		return err
 	}
+	result.Warnings = conversion.Warnings
+	result.Unsupported = conversion.Unsupported
+	dep := conversion.Deployment
 	result.Stage = "save"
 	data, err := yaml.Marshal(dep)
 	if err == nil {
@@ -204,6 +207,11 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 	result.Generated = true
 	result.Outcome = "generated"
 	result.Stage = "generation"
+	if len(result.Unsupported) > 0 {
+		result.Outcome = "manual"
+		result.Error = "manual migration required: " + strings.Join(result.Unsupported, "; ")
+		return errors.New(result.Error)
+	}
 	return nil
 }
 func readDCFile(path string) ([]*unstructured.Unstructured, error) {

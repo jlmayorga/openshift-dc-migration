@@ -8,15 +8,15 @@ func hasTriggers(dc *unstructured.Unstructured) bool {
 }
 
 func hasLifecycleHooks(dc *unstructured.Unstructured) bool {
-	_, preHookFound, _ := unstructured.NestedMap(dc.Object, "spec", "strategy", "recreateParams", "pre")
-	_, midHookFound, _ := unstructured.NestedMap(dc.Object, "spec", "strategy", "recreateParams", "mid")
-	_, postHookFound, _ := unstructured.NestedMap(dc.Object, "spec", "strategy", "recreateParams", "post")
-	return preHookFound || midHookFound || postHookFound
-}
-
-func hasAutoRollbacks(dc *unstructured.Unstructured) bool {
-	autoRollback, _, _ := unstructured.NestedBool(dc.Object, "spec", "strategy", "rollingParams", "autoRollbackEnabled")
-	return autoRollback
+	for _, params := range []string{"rollingParams", "recreateParams"} {
+		for _, hook := range []string{"pre", "mid", "post"} {
+			_, found, _ := unstructured.NestedFieldNoCopy(dc.Object, "spec", "strategy", params, hook)
+			if found {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func usesCustomStrategies(dc *unstructured.Unstructured) bool {

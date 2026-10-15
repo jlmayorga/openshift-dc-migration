@@ -76,33 +76,6 @@ func TestHasLifecycleHooks(t *testing.T) {
 	assert.False(t, hasLifecycleHooks(dcWithoutHooks))
 }
 
-func TestHasAutoRollbacks(t *testing.T) {
-	dcWithAutoRollbacks := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"spec": map[string]interface{}{
-				"strategy": map[string]interface{}{
-					"rollingParams": map[string]interface{}{
-						"autoRollbackEnabled": true,
-					},
-				},
-			},
-		},
-	}
-
-	dcWithoutAutoRollbacks := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"spec": map[string]interface{}{
-				"strategy": map[string]interface{}{
-					"rollingParams": map[string]interface{}{},
-				},
-			},
-		},
-	}
-
-	assert.True(t, hasAutoRollbacks(dcWithAutoRollbacks))
-	assert.False(t, hasAutoRollbacks(dcWithoutAutoRollbacks))
-}
-
 func TestUsesCustomStrategies(t *testing.T) {
 	dcWithCustomStrategy := &unstructured.Unstructured{
 		Object: map[string]interface{}{
