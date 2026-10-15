@@ -97,8 +97,13 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 		return c, errors.New("source selector must be nonempty")
 	}
 	for k, v := range s.Selector {
-		if s.Template.Labels[k] != v {
+		if actual, found := s.Template.Labels[k]; !found || actual != v {
 			return c, fmt.Errorf("source selector %s=%s does not match pod labels", k, v)
+		}
+	}
+	for key, value := range s.Template.Labels {
+		if len(validation.IsQualifiedName(key)) > 0 || len(validation.IsValidLabelValue(value)) > 0 {
+			return c, errors.New("invalid pod label")
 		}
 	}
 	if len(s.Template.Spec.Containers) == 0 {
@@ -142,7 +147,7 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	dep.Labels = ensureMap(dep.Labels)
 	dep.Labels[migrationLabel] = id
 	dep.Spec.Template.Labels = ensureMap(dep.Spec.Template.Labels)
-	if old := dep.Spec.Template.Labels[migrationLabel]; old != "" && old != id {
+	if old := dep.Spec.Template.Labels[migrationLabel]; old != "" {
 		return c, errors.New("source uses reserved migration label")
 	}
 	dep.Spec.Template.Labels[migrationLabel] = id
@@ -177,8 +182,8 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 				dep.Spec.Strategy.RollingUpdate.MaxUnavailable = p.MaxUnavailable
 			}
 		}
-		for _, v := range []*intstr.IntOrString{dep.Spec.Strategy.RollingUpdate.MaxSurge, dep.Spec.Strategy.RollingUpdate.MaxUnavailable} {
-			if err := validateLimit(v); err != nil {
+		for index, v := range []*intstr.IntOrString{dep.Spec.Strategy.RollingUpdate.MaxSurge, dep.Spec.Strategy.RollingUpdate.MaxUnavailable} {
+			if err := validateLimit(v, index == 1); err != nil {
 				return c, err
 			}
 		}
@@ -236,11 +241,18 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	for _, tr := range s.Triggers {
 		switch tr.Type {
 		case "ConfigChange":
+			if tr.ImageChangeParams != nil {
+				c.Unsupported = append(c.Unsupported, "ConfigChange cannot carry ImageChange parameters")
+			}
 			configAuto = true
 		case "ImageChange":
 			p := tr.ImageChangeParams
 			if p == nil || p.From.Kind != "ImageStreamTag" || len(p.ContainerNames) == 0 || len(strings.Split(p.From.Name, ":")) != 2 {
 				c.Unsupported = append(c.Unsupported, "ImageChange requires ImageStreamTag name:tag and explicit containers")
+				continue
+			}
+			if p.From.UID != "" || p.From.ResourceVersion != "" || p.From.FieldPath != "" || (p.From.APIVersion != "" && p.From.APIVersion != "image.openshift.io/v1") {
+				c.Unsupported = append(c.Unsupported, "ImageChange has pinned/unsupported source reference fields")
 				continue
 			}
 			if p.From.Namespace != "" && len(validation.IsDNS1123Label(p.From.Namespace)) > 0 {
@@ -309,7 +321,7 @@ func intstrPtr(s string) *intstr.IntOrString { v := intstr.FromString(s); return
 func intstrValueZero(v *intstr.IntOrString) bool {
 	return v != nil && ((v.Type == intstr.Int && v.IntVal == 0) || (v.Type == intstr.String && v.StrVal == "0%"))
 }
-func validateLimit(v *intstr.IntOrString) error {
+func validateLimit(v *intstr.IntOrString, unavailable bool) error {
 	if v.Type == intstr.Int {
 		if v.IntVal < 0 {
 			return errors.New("rolling limits must be nonnegative")
@@ -320,8 +332,8 @@ func validateLimit(v *intstr.IntOrString) error {
 		return errors.New("rolling limit must be an integer or percentage")
 	}
 	n, err := intstr.GetScaledValueFromIntOrPercent(v, 100, false)
-	if err != nil || n < 0 || n > 100 {
-		return errors.New("rolling percentage must be between 0% and 100%")
+	if err != nil || n < 0 || (unavailable && n > 100) {
+		return errors.New("rolling percentage must be nonnegative; maxUnavailable cannot exceed 100%")
 	}
 	return nil
 }

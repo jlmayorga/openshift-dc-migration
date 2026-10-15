@@ -14,6 +14,18 @@ func TestSemanticCases(t *testing.T) {
 		manual  bool
 		invalid bool
 	}{
+		{"surge-above-100-percent", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, "150%", "spec", "strategy", "rollingParams", "maxSurge")
+		}, false, false},
+		{"unavailable-above-100-percent", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, "150%", "spec", "strategy", "rollingParams", "maxUnavailable")
+		}, false, true},
+		{"missing-empty-label", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, "", "spec", "selector", "missing")
+		}, false, true},
+		{"reserved-label", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, migrationID(d), "spec", "template", "metadata", "labels", migrationLabel)
+		}, false, true},
 		{"normal", func(d *unstructured.Unstructured) {}, false, false},
 		{"recreate", func(d *unstructured.Unstructured) {
 			_ = unstructured.SetNestedField(d.Object, "Recreate", "spec", "strategy", "type")
