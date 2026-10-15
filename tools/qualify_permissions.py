@@ -28,6 +28,7 @@ def main():
         p.add_argument("--" + key, required=True)
     p.add_argument("--allow-test-mutations", action="store_true")
     p.add_argument("--timeout", type=int, default=90)
+    p.add_argument("--cases", help="Comma-separated test names; omitted runs all")
     args = p.parse_args()
     if not args.allow_test_mutations or not re.fullmatch(
         r"dcmig-[a-z0-9-]+", args.namespace_prefix
@@ -210,11 +211,61 @@ def main():
         assert live.get("deploy")["spec"] == before["spec"]
         return {"foreignDeploymentUID": before["metadata"]["uid"], "overwritten": False}
 
+    def denied_hpa():
+        live.args.kubeconfig = original
+        health = live.setup("rbac-hpa", lambda s: None)
+        live.create(
+            "HorizontalPodAutoscaler",
+            "autoscaling/v2",
+            {
+                "scaleTargetRef": {
+                    "apiVersion": "apps.openshift.io/v1",
+                    "kind": "DeploymentConfig",
+                    "name": "web",
+                },
+                "minReplicas": 1,
+                "maxReplicas": 1,
+                "metrics": [
+                    {
+                        "type": "Resource",
+                        "resource": {
+                            "name": "cpu",
+                            "target": {"type": "Utilization", "averageUtilization": 80},
+                        },
+                    }
+                ],
+            },
+        )
+        source, hpa = live.get("dc"), live.get("hpa")
+        allowed = rules()
+        allowed[0]["verbs"] = ["get", "list", "update"]
+        allowed[1]["verbs"] = ["get", "list", "create", "update"]
+        allowed[-1]["verbs"] = ["get", "list", "create"]
+        path = credential(allowed)
+        plan = live.tool("plan", health=health)
+        live.tool("stage", plan)
+        live.args.kubeconfig = path
+        report = live.tool("cutover", plan, expected=1)
+        assert "denied delete horizontalpodautoscalers" in report.read_text()
+        assert live.get("dc")["spec"] == source["spec"]
+        assert live.get("hpa")["metadata"]["uid"] == hpa["metadata"]["uid"]
+        assert live.get("deploy")["spec"]["replicas"] == 0
+        live.args.kubeconfig = original
+        return {
+            "HPADeleteDenied": True,
+            "HPAUnchanged": True,
+            "sourceUnchanged": True,
+            "destinationReplicas": 0,
+        }
+
     for name, fn in [
         ("restricted-rbac", rbac),
         ("quota-admission", admission),
         ("foreign-destination", foreign),
+        ("denied-hpa-mutation", denied_hpa),
     ]:
+        if args.cases and name not in args.cases.split(","):
+            continue
         live.run_case(name, fn)
         live.args.kubeconfig = original
     return 0 if live.cases and all(c["result"] == "passed" for c in live.cases) else 1

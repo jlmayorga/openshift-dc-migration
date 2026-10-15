@@ -39,6 +39,11 @@ def main():
     )
     parser.add_argument("--timeout", type=int, default=90)
     parser.add_argument(
+        "--volume-scc",
+        choices=["hostmount-anyuid-v2"],
+        help="Explicit separately authorized SCC for the static-volume test account",
+    )
+    parser.add_argument(
         "--cases", help="Comma-separated variant names; omitted runs image variants"
     )
     args = parser.parse_args()
@@ -48,6 +53,10 @@ def main():
         parser.error("Explicit disposable target and mutation acknowledgement required")
     if any("@sha256:" not in image for image in (args.image, args.second_image)):
         parser.error("Immutable images required")
+    if args.static_volume_test and not args.volume_scc:
+        parser.error(
+            "Static volume execution requires an explicitly authorized --volume-scc"
+        )
     args.binary = str(pathlib.Path(args.binary).resolve())
     args.kubeconfig = str(pathlib.Path(args.kubeconfig).resolve())
     live = Live(args)
@@ -241,7 +250,7 @@ def main():
                 roleRef={
                     "apiGroup": "rbac.authorization.k8s.io",
                     "kind": "ClusterRole",
-                    "name": "system:openshift:scc:hostmount-anyuid",
+                    "name": "system:openshift:scc:" + args.volume_scc,
                 },
                 subjects=[
                     {
@@ -288,7 +297,7 @@ def main():
             pod.update(
                 serviceAccountName="volume-test",
                 nodeSelector={"kubernetes.io/hostname": nodes[0]["metadata"]["name"]},
-                securityContext={"runAsUser": 0},
+                securityContext={"runAsUser": 0, "seLinuxOptions": {"type": "spc_t"}},
                 volumes=[
                     {"name": "data", "persistentVolumeClaim": {"claimName": "web"}}
                 ],
@@ -299,7 +308,7 @@ def main():
                 command=[
                     "/bin/sh",
                     "-c",
-                    "test -f /data/marker || echo "
+                    "set -eu; test -f /data/marker || echo "
                     + marker
                     + " > /data/marker; export RESPONSE=$(cat /data/marker); exec /hello_openshift",
                 ],
@@ -308,6 +317,12 @@ def main():
         health = live.setup("persistent-volume", mutate)
         source = live.get("dc")
         live.wait(lambda: live.get("pvc").get("status", {}).get("phase") == "Bound")
+        initial_response = live.command(
+            ["curl", "-fsS", "--retry", "5", "--retry-delay", "1", health]
+        ).stdout
+        assert (
+            marker in initial_response
+        ), "Source marker precondition failed before migration"
         plan = live.tool("plan", health=health)
         live.tool("stage", plan)
         samples, stop = [], threading.Event()
