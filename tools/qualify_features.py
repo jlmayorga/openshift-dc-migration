@@ -88,7 +88,7 @@ def main():
                 {
                     "type": "ImageChange",
                     "imageChangeParams": {
-                        "automatic": not disabled,
+                        "automatic": True,
                         "containerNames": ["web"],
                         "from": {
                             "kind": "ImageStreamTag",
@@ -98,12 +98,6 @@ def main():
                     },
                 }
             )
-            if disabled:
-                # Model an existing manually resolved image, rather than a DC
-                # that has never had an image trigger resolved or rolled out.
-                spec["triggers"][-1]["imageChangeParams"][
-                    "lastTriggeredImage"
-                ] = args.image
             if multi:
                 sidecar = copy.deepcopy(spec["template"]["spec"]["containers"][0])
                 sidecar.update(
@@ -128,6 +122,26 @@ def main():
                 )
 
         health = live.setup(name, mutate)
+        if disabled:
+            # The API clears lastTriggeredImage on create. Resolve the initial
+            # image/rollout first, then disable updates on the existing source.
+            live.oc(
+                "patch",
+                "dc",
+                "web",
+                "--type=json",
+                "-p",
+                json.dumps(
+                    [
+                        {
+                            "op": "replace",
+                            "path": "/spec/triggers/1/imageChangeParams/automatic",
+                            "value": False,
+                        }
+                    ]
+                ),
+            )
+            time.sleep(5)
         source = live.get("dc")
         plan = live.tool("plan", health=health)
         live.tool("stage", plan)
