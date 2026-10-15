@@ -217,7 +217,7 @@ def main():
     ]:
         live.run_case(name, fn)
         live.args.kubeconfig = original
-    return 0 if all(c["result"] == "passed" for c in live.cases) else 1
+    return 0 if live.cases and all(c["result"] == "passed" for c in live.cases) else 1
 
 
 if __name__ == "__main__":

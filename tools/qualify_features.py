@@ -397,7 +397,7 @@ def main():
         live.run_case(name, lambda name=name, options=options: images(name, **options))
     if args.static_volume_test:
         live.run_case("persistent-volume", volume)
-    return 0 if all(c["result"] == "passed" for c in live.cases) else 1
+    return 0 if live.cases and all(c["result"] == "passed" for c in live.cases) else 1
 
 
 if __name__ == "__main__":

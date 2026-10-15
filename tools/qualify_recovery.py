@@ -239,7 +239,9 @@ def main():
         for number in range(1, 7):
             live.run_case(f"write-{number}", lambda number=number: recover(number))
             proxy.after, proxy.lost = 0, False
-        return 0 if all(c["result"] == "passed" for c in live.cases) else 1
+        return (
+            0 if live.cases and all(c["result"] == "passed" for c in live.cases) else 1
+        )
     finally:
         if proxy:
             proxy.shutdown()
