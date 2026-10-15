@@ -16,15 +16,28 @@ jobs:
       - run: go mod download && go mod verify
       - run: go test -mod=readonly -race ./... && go vet -mod=readonly ./...
       - run: |
+          mkdir -p dist /tmp/security-tools
+          go -C tools/security build -mod=readonly -o /tmp/security-tools/govulncheck golang.org/x/vuln/cmd/govulncheck
+          go -C tools/security build -mod=readonly -o /tmp/security-tools/gosec github.com/securego/gosec/v2/cmd/gosec
+          /tmp/security-tools/govulncheck -json ./... > dist/govulncheck.json
+          python3 tools/check-vulnerabilities.py dist/govulncheck.json
+          /tmp/security-tools/gosec -fmt=json -out=dist/gosec.json ./...
+      - run: |
           mkdir -p dist
           for target in linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64; do
             goos=${target%/*}; goarch=${target#*/}; suffix=''
             if [ "$goos" = windows ]; then suffix=.exe; fi
-            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -mod=readonly -trimpath \
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -mod=readonly -buildvcs=false -trimpath \
               -ldflags="-s -w -X main.version=${GITHUB_REF_NAME} -X main.commit=${GITHUB_SHA} -X main.buildDate=$(git show -s --format=%cI HEAD)" \
               -o "dist/openshift-dc-converter-$goos-$goarch$suffix" .
           done
           (cd dist && sha256sum openshift-dc-converter-* > SHA256SUMS)
+          python3 - <<'PYMETA'
+          import json,os,sys
+          sys.path.insert(0,'tools')
+          from release_gate import tree_digest,dependency_digest
+          with open('dist/build-provenance.json','w') as f:json.dump({'revision':os.environ['GITHUB_SHA'],'fixtureSHA256':tree_digest('testdata'),'dependencySHA256':dependency_digest()},f)
+          PYMETA
           go version > dist/build-metadata.txt
           go list -m all >> dist/build-metadata.txt
           cp compatibility/matrix.json dist/compatibility-matrix.json
@@ -33,6 +46,9 @@ jobs:
           name: release-candidates
           path: dist/
   qualification:
+    permissions:
+      contents: read
+      actions: read
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -41,11 +57,18 @@ jobs:
         with:
           name: release-candidates
           path: dist
-      - run: python3 tools/release_gate.py --artifacts dist
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          pattern: actual-openshift-*
+          merge-multiple: true
+          path: evidence
+          github-token: ${{ github.token }}
+          run-id: ${{ vars.OPENSHIFT_QUALIFICATION_RUN_ID }}
+      - run: python3 tools/release_gate.py --artifacts dist --evidence evidence
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: compatibility-results
-          path: compatibility/results/*.json
+          path: evidence/*.json
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [build, qualification]
