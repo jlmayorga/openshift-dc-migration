@@ -172,3 +172,21 @@ func TestArtifactFailuresAndTotals(t *testing.T) {
 		t.Fatal("JSON write error swallowed")
 	}
 }
+
+func TestLogFailureAppearsInCanonicalReport(t *testing.T) {
+	o := testOptions(t)
+	o.Inputs = []string{"testdata/ocp-4.14-dc.yaml"}
+	o.LogPath = o.OutputDir
+	r := NewRunner(o)
+	if r.Run(context.Background()) == nil {
+		t.Fatal("log error swallowed")
+	}
+	var report Report
+	b, err := os.ReadFile(o.ReportPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(b, &report); err != nil || report.Totals.Failed != 1 || report.Totals.Generated != 1 {
+		t.Fatalf("%v %+v", err, report)
+	}
+}

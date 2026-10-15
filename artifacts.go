@@ -73,12 +73,24 @@ func (r *Report) summarize() {
 }
 func (r *Runner) saveReports() error {
 	var failures []error
+	recordFailure := func(stage string, err error) {
+		failures = append(failures, fmt.Errorf("%s: %w", stage, err))
+		r.Report.Results = append(r.Report.Results, Result{Stage: stage, Outcome: "failed", Error: err.Error()})
+		r.Report.summarize()
+	}
 	r.Report.summarize()
+	if r.Options.LogPath != "" {
+		data, err := json.MarshalIndent(r.Report, "", "  ")
+		if err == nil {
+			err = atomicWrite(r.Options.LogPath, data)
+		}
+		if err != nil {
+			recordFailure("log", err)
+		}
+	}
 	if r.Options.PDFPath != "" {
 		if err := renderPDF(r.Options.PDFPath, r.Report); err != nil {
-			failures = append(failures, fmt.Errorf("PDF report: %w", err))
-			r.Report.Results = append(r.Report.Results, Result{Stage: "report", Outcome: "failed", Error: err.Error()})
-			r.Report.summarize()
+			recordFailure("PDF report", err)
 		}
 	}
 	data, err := json.MarshalIndent(r.Report, "", "  ")
@@ -86,15 +98,15 @@ func (r *Runner) saveReports() error {
 		err = atomicWrite(r.Options.ReportPath, append(data, '\n'))
 	}
 	if err != nil {
-		failures = append(failures, fmt.Errorf("JSON report: %w", err))
-	}
-	if _, err := fmt.Fprintf(r.Out, "Generated: %d; staged: %d; ready: %d; manual: %d; failed: %d; skipped: %d\n", r.Report.Totals.Generated, r.Report.Totals.Applied, r.Report.Totals.Ready, r.Report.Totals.Manual, r.Report.Totals.Failed, r.Report.Totals.Skipped); err != nil {
-		failures = append(failures, err)
-	}
-	if r.Options.LogPath != "" {
-		if err := atomicWrite(r.Options.LogPath, data); err != nil {
-			failures = append(failures, fmt.Errorf("log: %w", err))
+		recordFailure("JSON report", err)
+		if r.Options.PDFPath != "" {
+			if pdfErr := renderPDF(r.Options.PDFPath, r.Report); pdfErr != nil {
+				failures = append(failures, pdfErr)
+			}
 		}
+	}
+	if _, err := fmt.Fprintf(r.Out, "Generated: %d; applied: %d; ready: %d; manual: %d; failed: %d; skipped: %d\n", r.Report.Totals.Generated, r.Report.Totals.Applied, r.Report.Totals.Ready, r.Report.Totals.Manual, r.Report.Totals.Failed, r.Report.Totals.Skipped); err != nil {
+		failures = append(failures, err)
 	}
 	return errors.Join(failures...)
 }

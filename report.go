@@ -40,7 +40,7 @@ func renderPDF(path string, report Report) error {
 	})
 	pdf.AddPage()
 	pdf.SetFont("Arial", "", 10)
-	pdf.MultiCell(180, 6, fmt.Sprintf("Generated %d | Staged %d | Ready %d | Failed %d | Manual %d | Skipped %d", report.Totals.Generated, report.Totals.Applied, report.Totals.Ready, report.Totals.Failed, report.Totals.Manual, report.Totals.Skipped), "", "L", false)
+	pdf.MultiCell(180, 6, fmt.Sprintf("Generated %d | Applied %d | Ready %d | Failed %d | Manual %d | Skipped %d", report.Totals.Generated, report.Totals.Applied, report.Totals.Ready, report.Totals.Failed, report.Totals.Manual, report.Totals.Skipped), "", "L", false)
 	pdf.Ln(4)
 	for _, res := range report.Results {
 		pdf.SetFont("Arial", "B", 10)
