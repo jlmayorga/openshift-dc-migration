@@ -1,0 +1,34 @@
+# Synthetic exported DeploymentConfig shaped for the 4.14 API. No cluster provenance.
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: web
+  namespace: example
+  uid: 9b4fe844-9710-42d0-98de-7d2c3231d811
+  resourceVersion: "42"
+spec:
+  replicas: 1
+  selector:
+    deploymentconfig: web
+  strategy:
+    type: Rolling
+    rollingParams:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  triggers:
+    - type: ConfigChange
+  template:
+    metadata:
+      labels:
+        deploymentconfig: web
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: registry.example/web:v1
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080

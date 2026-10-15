@@ -42,7 +42,8 @@ func TestConvertDCtoDeployment(t *testing.T) {
 	}
 
 	// Convert DC to Deployment
-	deployment, err := convertDCtoDeployment(dc)
+	r := NewRunner(DefaultOptions())
+	deployment, err := r.convertDCtoDeployment(dc)
 
 	// Assert no error occurred
 	assert.NoError(t, err)
@@ -94,11 +95,10 @@ func TestCopyMetadata(t *testing.T) {
 	}
 
 	// Set global variables for this test
-	preserveLabels = true
-	preserveAnnotations = true
+	r := NewRunner(DefaultOptions())
 
 	// Copy metadata
-	err := copyMetadata(dc, deployment)
+	err := r.copyMetadata(dc, deployment)
 
 	// Assert no error occurred
 	assert.NoError(t, err)

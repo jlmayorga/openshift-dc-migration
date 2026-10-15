@@ -7,7 +7,7 @@ import (
 	"github.com/jung-kurt/gofpdf"
 )
 
-func generatePDFReport(reportPath string) error {
+func generatePDFReport(reportPath string, conversionInfos []ConversionInfo) error {
 	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.AddPage()
 

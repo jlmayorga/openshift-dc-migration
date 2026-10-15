@@ -22,7 +22,7 @@ func TestIsReservedNamespace(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isReservedNamespace(tt.namespace)
+			result := NewRunner(DefaultOptions()).isReservedNamespace(tt.namespace)
 			assert.Equal(t, tt.expected, result, "Namespace: %s", tt.namespace)
 		})
 	}

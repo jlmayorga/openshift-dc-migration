@@ -10,8 +10,6 @@ type ConversionInfo struct {
 	UsesCustomStrategies bool
 }
 
-var conversionInfos []ConversionInfo
-
 var (
 	dcSpecificLabels = []string{
 		"openshift.io/deployment-config.name",

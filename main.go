@@ -1,51 +1,55 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"path/filepath"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/util/homedir"
 )
 
-var (
-	kubeconfig          string
-	outputDir           string
-	applyChanges        bool
-	preserveAnnotations bool
-	preserveLabels      bool
-	reservedNamespaces  []string
-	logFilePath         string
-	openShiftProjects   []string
-	reportPath          string
-)
+var version = "dev"
+var commit = "unknown"
+var buildDate = "unknown"
+
+func NewCommand() *cobra.Command {
+	o := DefaultOptions()
+	cmd := &cobra.Command{Use: "openshift-dc-converter", Short: "Plan migration of DeploymentConfigs to Deployments", Version: fmt.Sprintf("%s (%s, %s)", version, commit, buildDate), SilenceUsage: true}
+	cmd.RunE = func(cmd *cobra.Command, _ []string) error {
+		if err := o.Validate(); err != nil {
+			return err
+		}
+		ctx, cancel := context.WithTimeout(cmd.Context(), o.OperationTimeout)
+		defer cancel()
+		r := NewRunner(o)
+		r.Out = cmd.OutOrStdout()
+		return r.Run(ctx)
+	}
+	f := cmd.Flags()
+	f.StringVar(&o.Kubeconfig, "kubeconfig", "", "Explicit kubeconfig; otherwise standard loading rules")
+	f.StringVar(&o.Context, "context", "", "Kubeconfig context")
+	f.StringSliceVar(&o.Projects, "projects", nil, "Namespaces to convert")
+	f.StringSliceVar(&o.Inputs, "input", nil, "Offline exported DeploymentConfig YAML/JSON files")
+	f.StringVar(&o.OutputDir, "output-dir", o.OutputDir, "Manifest and plan directory")
+	f.StringVar(&o.ReportPath, "json-report", o.ReportPath, "Canonical JSON report")
+	f.StringVar(&o.PDFPath, "report-path", o.PDFPath, "Optional PDF report (empty disables)")
+	f.StringVar(&o.LogPath, "log-file", "", "Optional log file")
+	f.BoolVar(&o.PreserveLabels, "preserve-labels", true, "Preserve workload metadata labels; pod labels always retained")
+	f.BoolVar(&o.PreserveAnnotations, "preserve-annotations", true, "Preserve workload metadata annotations")
+	f.StringSliceVar(&o.Reserved, "reserved-namespaces", o.Reserved, "Reserved namespaces to skip")
+	f.DurationVar(&o.RequestTimeout, "request-timeout", o.RequestTimeout, "Per-request deadline")
+	f.DurationVar(&o.OperationTimeout, "operation-timeout", o.OperationTimeout, "Overall operation deadline")
+	f.BoolVar(&o.ApplyChanges, "apply-changes", false, "Stage zero-replica destination after validation")
+	return cmd
+}
 
 func main() {
-	rootCmd := &cobra.Command{
-		Use:   "openshift-dc-converter",
-		Short: "Convert OpenShift DeploymentConfigs to Kubernetes Deployments",
-		Long:  `A CLI tool to convert OpenShift DeploymentConfigs to Kubernetes Deployments across specified projects and generate a PDF report.`,
-		RunE:  runConverter,
-	}
-
-	rootCmd.Flags().StringVar(&kubeconfig, "kubeconfig", filepath.Join(homedir.HomeDir(), ".kube", "config"), "Path to the kubeconfig file")
-	rootCmd.Flags().StringVar(&outputDir, "output-dir", "./converted_deployments", "Directory to store converted Deployment YAML files")
-	rootCmd.Flags().BoolVar(&applyChanges, "apply-changes", false, "Apply the converted Deployments to the cluster")
-	rootCmd.Flags().BoolVar(&preserveAnnotations, "preserve-annotations", true, "Preserve existing annotations in the converted Deployments")
-	rootCmd.Flags().BoolVar(&preserveLabels, "preserve-labels", true, "Preserve existing labels in the converted Deployments")
-	rootCmd.Flags().StringSliceVar(&reservedNamespaces, "reserved-namespaces", []string{"default", "openshift", "openshift-infra"}, "List of reserved namespaces to skip")
-	rootCmd.Flags().StringVar(&logFilePath, "log-file", "conversion_log.txt", "Path to the log file")
-	rootCmd.Flags().StringSliceVar(&openShiftProjects, "projects", []string{}, "List of OpenShift projects to scan and convert")
-	rootCmd.Flags().StringVar(&reportPath, "report-path", "conversion_report.pdf", "Path to save the PDF report")
-
-	if err := rootCmd.MarkFlagRequired("projects"); err != nil {
-		fmt.Println("Error marking 'projects' flag as required:", err)
-		os.Exit(1)
-	}
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println("Error executing command:", err)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+	if err := NewCommand().ExecuteContext(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

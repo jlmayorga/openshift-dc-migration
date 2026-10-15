@@ -9,7 +9,7 @@ import (
 
 func TestGeneratePDFReport(t *testing.T) {
 	// Set up test data
-	conversionInfos = []ConversionInfo{
+	conversionInfos := []ConversionInfo{
 		{
 			Timestamp:            "2024-08-16T08:47:03-05:00",
 			Namespace:            "test-namespace",
@@ -22,8 +22,8 @@ func TestGeneratePDFReport(t *testing.T) {
 	}
 
 	// Generate the report
-	reportPath := "test_report.pdf"
-	err := generatePDFReport(reportPath)
+	reportPath := t.TempDir() + "/test_report.pdf"
+	err := generatePDFReport(reportPath, conversionInfos)
 
 	// Assert no error occurred
 	assert.NoError(t, err)
