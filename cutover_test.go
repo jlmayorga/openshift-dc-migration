@@ -172,3 +172,20 @@ func TestLostRecoveryNeverClaimsSuccess(t *testing.T) {
 		t.Fatal("unverified recovery reported success")
 	}
 }
+
+func TestOrphanedDestinationBlocksSourceRestore(t *testing.T) {
+	r, c, _ := cutoverTest(t, "exclusive", false)
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	c.orphanLabels = c.destination.Spec.Template.Labels
+	c.destination = nil
+	r.Options.Mode = "rollback"
+	if err := r.Run(context.Background()); err == nil {
+		t.Fatal("orphan pods ignored during recovery")
+	}
+	n, _, _ := unstructured.NestedInt64(c.source.Object, "spec", "replicas")
+	if n != 0 {
+		t.Fatal("source restored while destination pods still exist")
+	}
+}

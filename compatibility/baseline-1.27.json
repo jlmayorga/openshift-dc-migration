@@ -145,6 +145,247 @@
       },
       "type": "object"
     },
+    "io.k8s.api.autoscaling.v2.ContainerResourceMetricSource": {
+      "properties": {
+        "container": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricTarget"
+        }
+      },
+      "required": [
+        "name",
+        "target",
+        "container"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.CrossVersionObjectReference": {
+      "properties": {
+        "apiVersion": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.ExternalMetricSource": {
+      "properties": {
+        "metric": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricIdentifier"
+        },
+        "target": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricTarget"
+        }
+      },
+      "required": [
+        "metric",
+        "target"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.HPAScalingPolicy": {
+      "properties": {
+        "periodSeconds": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "value",
+        "periodSeconds"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.HPAScalingRules": {
+      "properties": {
+        "policies": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.autoscaling.v2.HPAScalingPolicy"
+          },
+          "type": "array"
+        },
+        "selectPolicy": {
+          "type": "string"
+        },
+        "stabilizationWindowSeconds": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerBehavior": {
+      "properties": {
+        "scaleDown": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.HPAScalingRules"
+        },
+        "scaleUp": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.HPAScalingRules"
+        }
+      },
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec": {
+      "properties": {
+        "behavior": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerBehavior"
+        },
+        "maxReplicas": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "metrics": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricSpec"
+          },
+          "type": "array"
+        },
+        "minReplicas": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "scaleTargetRef": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.CrossVersionObjectReference"
+        }
+      },
+      "required": [
+        "scaleTargetRef",
+        "maxReplicas"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.MetricIdentifier": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "selector": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.MetricSpec": {
+      "properties": {
+        "containerResource": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.ContainerResourceMetricSource"
+        },
+        "external": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.ExternalMetricSource"
+        },
+        "object": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.ObjectMetricSource"
+        },
+        "pods": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.PodsMetricSource"
+        },
+        "resource": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.ResourceMetricSource"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.MetricTarget": {
+      "properties": {
+        "averageUtilization": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "averageValue": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.api.resource.Quantity"
+        },
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.api.resource.Quantity"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.ObjectMetricSource": {
+      "properties": {
+        "describedObject": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.CrossVersionObjectReference"
+        },
+        "metric": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricIdentifier"
+        },
+        "target": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricTarget"
+        }
+      },
+      "required": [
+        "describedObject",
+        "target",
+        "metric"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.PodsMetricSource": {
+      "properties": {
+        "metric": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricIdentifier"
+        },
+        "target": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricTarget"
+        }
+      },
+      "required": [
+        "metric",
+        "target"
+      ],
+      "type": "object"
+    },
+    "io.k8s.api.autoscaling.v2.ResourceMetricSource": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/io.k8s.api.autoscaling.v2.MetricTarget"
+        }
+      },
+      "required": [
+        "name",
+        "target"
+      ],
+      "type": "object"
+    },
     "io.k8s.api.core.v1.AWSElasticBlockStoreVolumeSource": {
       "properties": {
         "fsType": {

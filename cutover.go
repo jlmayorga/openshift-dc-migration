@@ -86,6 +86,9 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 		if err := r.waitSourceStopped(ctx, p); err != nil {
 			return err
 		}
+		if err := r.parkSource(ctx, p); err != nil {
+			return err
+		}
 	}
 	if err := r.changeDestination(ctx, p, true); err != nil {
 		return err
@@ -107,6 +110,9 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 		if err := r.waitSourceStopped(ctx, p); err != nil {
 			return err
 		}
+		if err := r.parkSource(ctx, p); err != nil {
+			return err
+		}
 	}
 	for _, h := range p.HPAs {
 		if err := r.createHPA(ctx, p, h, false); err != nil {
@@ -126,7 +132,7 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 func sourceSpec(p *MigrationPlan, stop, restore bool) map[string]interface{} {
 	obj := p.Source.DeepCopy()
 	if !restore {
-		_ = unstructured.SetNestedField(obj.Object, true, "spec", "paused")
+		unstructured.RemoveNestedField(obj.Object, "spec", "paused")
 		_ = unstructured.SetNestedSlice(obj.Object, []interface{}{}, "spec", "triggers")
 		if stop {
 			_ = unstructured.SetNestedField(obj.Object, int64(0), "spec", "replicas")
@@ -135,7 +141,25 @@ func sourceSpec(p *MigrationPlan, stop, restore bool) map[string]interface{} {
 	spec, _, _ := unstructured.NestedMap(obj.Object, "spec")
 	return spec
 }
+func parkedSourceSpec(p *MigrationPlan) map[string]interface{} {
+	spec := sourceSpec(p, true, false)
+	spec["paused"] = true
+	return spec
+}
+func (r *Runner) parkSource(ctx context.Context, p *MigrationPlan) error {
+	return r.setSourceSpec(ctx, p, parkedSourceSpec(p), "pause retired source after replica reconciliation")
+}
 func (r *Runner) changeSource(ctx context.Context, p *MigrationPlan, stop, restore bool) error {
+	event := "quiesce source triggers while allowing replica reconciliation"
+	if stop {
+		event = "retire source at zero replicas"
+	}
+	if restore {
+		event = "restore source snapshot"
+	}
+	return r.setSourceSpec(ctx, p, sourceSpec(p, stop, restore), event)
+}
+func (r *Runner) setSourceSpec(ctx context.Context, p *MigrationPlan, desired map[string]interface{}, event string) error {
 	api := r.Dynamic.Resource(dcResource).Namespace(p.Source.GetNamespace())
 	current, err := api.Get(ctx, p.Source.GetName(), metav1.GetOptions{})
 	if err != nil {
@@ -148,20 +172,12 @@ func (r *Runner) changeSource(ctx context.Context, p *MigrationPlan, stop, resto
 	if err != nil {
 		return err
 	}
-	if !reflect.DeepEqual(spec, sourceSpec(p, false, true)) && !reflect.DeepEqual(spec, sourceSpec(p, false, false)) && !reflect.DeepEqual(spec, sourceSpec(p, true, false)) {
+	if !reflect.DeepEqual(spec, sourceSpec(p, false, true)) && !reflect.DeepEqual(spec, sourceSpec(p, false, false)) && !reflect.DeepEqual(spec, sourceSpec(p, true, false)) && !reflect.DeepEqual(spec, parkedSourceSpec(p)) {
 		return errors.New("source semantics changed outside migration; manual recovery required")
 	}
-	desired := sourceSpec(p, stop, restore)
 	if reflect.DeepEqual(spec, desired) {
 		p.Progress.SourceVersion = current.GetResourceVersion()
 		return nil
-	}
-	event := "quiesce source triggers"
-	if stop {
-		event = "retire source at zero replicas"
-	}
-	if restore {
-		event = "restore source snapshot"
 	}
 	if err = r.checkpoint(p, "source-intent", "intent: "+event); err != nil {
 		return err
@@ -225,7 +241,7 @@ func (r *Runner) changeDestination(ctx context.Context, p *MigrationPlan, activa
 		if e != nil {
 			return e
 		}
-		if source.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(source.Object["spec"], sourceSpec(p, true, false)) {
+		if source.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(source.Object["spec"], parkedSourceSpec(p)) {
 			return errors.New("source not retired; refusing activation")
 		}
 	}
@@ -356,7 +372,7 @@ func (r *Runner) sourceStopped(ctx context.Context, p *MigrationPlan) (bool, err
 	if err != nil {
 		return false, err
 	}
-	if source.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(source.Object["spec"], sourceSpec(p, true, false)) {
+	if source.GetUID() != p.Source.GetUID() || (!reflect.DeepEqual(source.Object["spec"], sourceSpec(p, true, false)) && !reflect.DeepEqual(source.Object["spec"], parkedSourceSpec(p))) {
 		return false, errors.New("source retirement changed unexpectedly")
 	}
 	rcs, err := r.Kube.CoreV1().ReplicationControllers(p.Source.GetNamespace()).List(ctx, metav1.ListOptions{})
@@ -534,12 +550,13 @@ func (r *Runner) rollback(ctx context.Context, p *MigrationPlan, result *Result)
 		if err = api.Delete(ctx, h.Name, metav1.DeleteOptions{Preconditions: &metav1.Preconditions{UID: &uid, ResourceVersion: &rv}}); err != nil {
 			return err
 		}
+
 		if err = r.poll(ctx, func(ctx context.Context) (bool, error) {
-			_, err := api.Get(ctx, h.Name, metav1.GetOptions{})
-			if apierrors.IsNotFound(err) {
+			_, e := api.Get(ctx, h.Name, metav1.GetOptions{})
+			if apierrors.IsNotFound(e) {
 				return true, nil
 			}
-			return false, err
+			return false, e
 		}); err != nil {
 			return err
 		}
@@ -552,28 +569,9 @@ func (r *Runner) rollback(ctx context.Context, p *MigrationPlan, result *Result)
 		if err = r.changeDestination(ctx, p, false); err != nil {
 			return err
 		}
-		if err = r.poll(ctx, func(ctx context.Context) (bool, error) {
-			d, e := r.destination(ctx, p)
-			if e != nil {
-				return false, e
-			}
-			pods, e := r.Kube.CoreV1().Pods(d.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.Set{migrationLabel: p.ID}.String()})
-			if e != nil {
-				return false, e
-			}
-			sets, e := r.Kube.AppsV1().ReplicaSets(d.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.Set{migrationLabel: p.ID}.String()})
-			if e != nil {
-				return false, e
-			}
-			for _, rs := range sets.Items {
-				if rs.Spec.Replicas != nil && *rs.Spec.Replicas != 0 {
-					return false, nil
-				}
-			}
-			return d.Spec.Replicas != nil && *d.Spec.Replicas == 0 && d.Status.Replicas == 0 && d.Status.ObservedGeneration >= d.Generation && len(pods.Items) == 0, nil
-		}); err != nil {
-			return err
-		}
+	}
+	if err = r.waitDestinationStopped(ctx, p); err != nil {
+		return err
 	}
 	if err = r.changeSource(ctx, p, false, true); err != nil {
 		return err
@@ -659,6 +657,35 @@ func (r *Runner) waitSourceReady(ctx context.Context, p *MigrationPlan) error {
 				}
 			}
 			if !found {
+				return false, nil
+			}
+		}
+		return true, nil
+	})
+}
+
+func (r *Runner) waitDestinationStopped(ctx context.Context, p *MigrationPlan) error {
+	return r.poll(ctx, func(ctx context.Context) (bool, error) {
+		d, err := r.destination(ctx, p)
+		if err != nil && !apierrors.IsNotFound(err) {
+			return false, err
+		}
+		if err == nil && (d.Spec.Replicas == nil || *d.Spec.Replicas != 0 || d.Status.Replicas != 0 || d.Status.ObservedGeneration < d.Generation) {
+			return false, nil
+		}
+		pods, e := r.Kube.CoreV1().Pods(p.Desired.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.Set{migrationLabel: p.ID}.String()})
+		if e != nil {
+			return false, e
+		}
+		if len(pods.Items) > 0 {
+			return false, nil
+		}
+		sets, e := r.Kube.AppsV1().ReplicaSets(p.Desired.Namespace).List(ctx, metav1.ListOptions{LabelSelector: labels.Set{migrationLabel: p.ID}.String()})
+		if e != nil {
+			return false, e
+		}
+		for _, rs := range sets.Items {
+			if (rs.Spec.Replicas != nil && *rs.Spec.Replicas != 0) || rs.Status.Replicas != 0 {
 				return false, nil
 			}
 		}

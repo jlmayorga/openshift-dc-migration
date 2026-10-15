@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -163,6 +164,10 @@ func (r *Runner) connect() error {
 	r.Report.Context = r.Options.Context
 	if r.Report.Context == "" {
 		r.Report.Context = raw.CurrentContext
+	}
+	serverURL, urlErr := url.Parse(cfg.Host)
+	if urlErr != nil || serverURL.User != nil || serverURL.RawQuery != "" || serverURL.Fragment != "" {
+		return errors.New("kubeconfig API endpoint must not contain URL credentials, query or fragment")
 	}
 	r.SelectedContext = r.Report.Context
 	r.Target = endpointIdentity(cfg.Host)

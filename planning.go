@@ -88,7 +88,7 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 		return nil, errors.New("planning needs Kubernetes interfaces")
 	}
 	ns := dc.GetNamespace()
-	for _, permission := range [][3]string{{"", "services", "list"}, {"autoscaling", "horizontalpodautoscalers", "list"}, {"apps", "deployments", "list"}, {"apps", "replicasets", "list"}, {"apps", "statefulsets", "list"}, {"apps", "daemonsets", "list"}, {"", "replicationcontrollers", "list"}, {"apps.openshift.io", "deploymentconfigs", "list"}} {
+	for _, permission := range [][3]string{{"", "services", "list"}, {"autoscaling", "horizontalpodautoscalers", "list"}, {"apps", "deployments", "list"}, {"apps", "replicasets", "list"}, {"apps", "statefulsets", "list"}, {"apps", "daemonsets", "list"}, {"batch", "jobs", "list"}, {"", "replicationcontrollers", "list"}, {"apps.openshift.io", "deploymentconfigs", "list"}} {
 		if err := r.access(ctx, ns, permission[0], permission[1], permission[2]); err != nil {
 			return nil, err
 		}
@@ -110,6 +110,23 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 			p.Services = append(p.Services, svc)
 		}
 	}
+	rawHPAs, e := r.Dynamic.Resource(schema.GroupVersionResource{Group: "autoscaling", Version: "v2", Resource: "horizontalpodautoscalers"}).Namespace(ns).List(ctx, metav1.ListOptions{})
+	if e != nil {
+		return nil, e
+	}
+	for _, h := range rawHPAs.Items {
+		kind, _, _ := unstructured.NestedString(h.Object, "spec", "scaleTargetRef", "kind")
+		name, _, _ := unstructured.NestedString(h.Object, "spec", "scaleTargetRef", "name")
+		if kind == "DeploymentConfig" && name == dc.GetName() {
+			spec, _, e := unstructured.NestedMap(h.Object, "spec")
+			if e != nil {
+				return nil, e
+			}
+			if e = validateBaseline(spec, "io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec"); e != nil {
+				p.Blockers = append(p.Blockers, "HPA "+h.GetName()+": "+e.Error()+"; freeze and retarget manually to retain newer features")
+			}
+		}
+	}
 	hpas, err := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -117,6 +134,9 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	for _, h := range hpas.Items {
 		if h.Spec.ScaleTargetRef.Kind == "DeploymentConfig" && h.Spec.ScaleTargetRef.Name == dc.GetName() {
 			p.HPAs = append(p.HPAs, h)
+			if h.Spec.ScaleTargetRef.APIVersion != "apps.openshift.io/v1" {
+				p.Blockers = append(p.Blockers, "HPA source API version is ambiguous; set an explicit apps.openshift.io/v1 target before planning")
+			}
 			if len(h.OwnerReferences) > 0 || len(h.Finalizers) > 0 {
 				p.Blockers = append(p.Blockers, "HPA has owners/finalizers; coordinate controller manually")
 			}
@@ -128,7 +148,7 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	if len(p.HPAs) > 1 {
 		p.Blockers = append(p.Blockers, "multiple HPAs target source; manual consolidation required")
 	}
-	resources := []schema.GroupVersionResource{dcResource, deploymentResource, {Group: "apps", Version: "v1", Resource: "replicasets"}, {Group: "apps", Version: "v1", Resource: "statefulsets"}, {Group: "apps", Version: "v1", Resource: "daemonsets"}, {Version: "v1", Resource: "replicationcontrollers"}}
+	resources := []schema.GroupVersionResource{dcResource, deploymentResource, {Group: "apps", Version: "v1", Resource: "replicasets"}, {Group: "apps", Version: "v1", Resource: "statefulsets"}, {Group: "apps", Version: "v1", Resource: "daemonsets"}, {Group: "batch", Version: "v1", Resource: "jobs"}, {Version: "v1", Resource: "replicationcontrollers"}}
 	for _, resource := range resources {
 		controllers, e := r.Dynamic.Resource(resource).Namespace(ns).List(ctx, metav1.ListOptions{})
 		if e != nil {
@@ -150,6 +170,10 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 				continue
 			}
 			if resource.Resource == "replicationcontrollers" && sourceController(obj, dc) {
+				phase := obj.GetAnnotations()["openshift.io/deployment.phase"]
+				if phase != "" && phase != "Complete" && phase != "Failed" {
+					p.Blockers = append(p.Blockers, "source rollout "+obj.GetName()+" is "+phase+"; let it finish or cancel it before planning")
+				}
 				continue
 			}
 			var selector labels.Selector

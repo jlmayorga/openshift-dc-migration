@@ -22,4 +22,5 @@ def visit(name):
             for x in v:refs(x)
     refs(result[name])
 visit('io.k8s.api.apps.v1.Deployment')
+visit('io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec')
 json.dump({'source':'https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/api/openapi-spec/swagger.json','sha256':hashlib.sha256(raw).hexdigest(),'definitions':result},open('compatibility/baseline-1.27.json','w'),sort_keys=True,indent=2)

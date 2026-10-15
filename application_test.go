@@ -25,6 +25,8 @@ import (
 )
 
 type contractCluster struct {
+	sourceReplicas                                                                    int64
+	orphanLabels                                                                      map[string]string
 	mu                                                                                sync.Mutex
 	services                                                                          []corev1.Service
 	hpas                                                                              []autoscalingv2.HorizontalPodAutoscaler
@@ -78,7 +80,11 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 			version, _ := strconv.Atoi(c.source.GetResourceVersion())
 			source.SetResourceVersion(strconv.Itoa(version + 1))
 			n, _, _ := unstructured.NestedInt64(source.Object, "spec", "replicas")
-			_ = unstructured.SetNestedField(source.Object, n, "status", "availableReplicas")
+			paused, _, _ := unstructured.NestedBool(source.Object, "spec", "paused")
+			if !paused {
+				c.sourceReplicas = n
+			}
+			_ = unstructured.SetNestedField(source.Object, c.sourceReplicas, "status", "availableReplicas")
 			c.source = &source
 			c.mutations = append(c.mutations, fmt.Sprintf("source:%d", n))
 		}
@@ -100,7 +106,7 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 				return
 			}
 			n := *d.Spec.Replicas
-			sourceN, _, _ := unstructured.NestedInt64(c.source.Object, "spec", "replicas")
+			sourceN := c.sourceReplicas
 			if n > 0 && !c.expectOverlap && sourceN != 0 {
 				t.Error("exclusive overlap occurred")
 			}
@@ -234,10 +240,13 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		if strings.HasSuffix(req.URL.Path, "/pods") {
 			kind = "PodList"
 			selector, _ := labels.Parse(req.URL.Query().Get("labelSelector"))
-			sourceN, _, _ := unstructured.NestedInt64(c.source.Object, "spec", "replicas")
+			sourceN := c.sourceReplicas
 			pods := []corev1.Pod{}
 			if sourceN > 0 || c.blockRetirement {
 				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "source-pod", Namespace: "example", UID: "source-pod", Labels: map[string]string{"deploymentconfig": "web", "app": "web"}}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
+			}
+			if c.orphanLabels != nil {
+				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "orphan", UID: "orphan", Labels: c.orphanLabels}})
 			}
 			if c.destination != nil && *c.destination.Spec.Replicas > 0 {
 				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "destination-pod", Namespace: "example", UID: "destination-pod", Labels: c.destination.Spec.Template.Labels}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
@@ -266,7 +275,7 @@ func typesUID(s string) types.UID { return types.UID(s) }
 
 func stageTest(t *testing.T) (*Runner, *contractCluster, string) {
 	t.Helper()
-	cluster := &contractCluster{source: fixture(t)}
+	cluster := &contractCluster{source: fixture(t), sourceReplicas: 1}
 	r := liveTestRunner(t, func(w http.ResponseWriter, req *http.Request) { cluster.serve(t, w, req) })
 	if err := r.connect(); err != nil {
 		t.Fatal(err)
