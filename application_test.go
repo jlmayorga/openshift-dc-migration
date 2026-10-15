@@ -11,22 +11,40 @@ import (
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"strconv"
+	"time"
 )
 
 type contractCluster struct {
-	mu                                    sync.Mutex
-	source                                *unstructured.Unstructured
-	destination                           *appsv1.Deployment
-	creates, dryRuns                      int
-	denyCreate, mutateAdmission, conflict bool
+	mu                                                                                sync.Mutex
+	services                                                                          []corev1.Service
+	hpas                                                                              []autoscalingv2.HorizontalPodAutoscaler
+	failRollout, pendingRollout, loseConnection, lost, blockRetirement, expectOverlap bool
+	cancelOnActivate                                                                  context.CancelFunc
+	mutations                                                                         []string
+	source                                                                            *unstructured.Unstructured
+	destination                                                                       *appsv1.Deployment
+	creates, dryRuns                                                                  int
+	denyCreate, mutateAdmission, conflict                                             bool
 }
 
 func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.Request) {
 	t.Helper()
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.lost {
+		http.Error(w, "connection lost", 503)
+		return
+	}
 	if req.Header.Get("Accept") != "application/json" {
 		t.Errorf("non JSON negotiation: %s", req.Header.Get("Accept"))
 	}
@@ -44,10 +62,72 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/deploymentconfigs/web") {
+		if req.Method == http.MethodPut {
+			var source unstructured.Unstructured
+			if err := json.NewDecoder(req.Body).Decode(&source); err != nil {
+				t.Error(err)
+			}
+			if source.GetResourceVersion() != c.source.GetResourceVersion() {
+				http.Error(w, "conflict", 409)
+				return
+			}
+			if req.URL.Query().Get("dryRun") == "All" {
+				jsonResponse(w, source.Object)
+				return
+			}
+			version, _ := strconv.Atoi(c.source.GetResourceVersion())
+			source.SetResourceVersion(strconv.Itoa(version + 1))
+			n, _, _ := unstructured.NestedInt64(source.Object, "spec", "replicas")
+			_ = unstructured.SetNestedField(source.Object, n, "status", "availableReplicas")
+			c.source = &source
+			c.mutations = append(c.mutations, fmt.Sprintf("source:%d", n))
+		}
 		jsonResponse(w, c.source.Object)
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/deployments/web") {
+		if req.Method == http.MethodPut && c.destination != nil {
+			var d appsv1.Deployment
+			if err := json.NewDecoder(req.Body).Decode(&d); err != nil {
+				t.Error(err)
+			}
+			if d.ResourceVersion != c.destination.ResourceVersion {
+				http.Error(w, "conflict", 409)
+				return
+			}
+			if req.URL.Query().Get("dryRun") == "All" {
+				jsonResponse(w, &d)
+				return
+			}
+			n := *d.Spec.Replicas
+			sourceN, _, _ := unstructured.NestedInt64(c.source.Object, "spec", "replicas")
+			if n > 0 && !c.expectOverlap && sourceN != 0 {
+				t.Error("exclusive overlap occurred")
+			}
+			d.Generation++
+			v, _ := strconv.Atoi(d.ResourceVersion)
+			d.ResourceVersion = strconv.Itoa(v + 1)
+			d.Status = appsv1.DeploymentStatus{ObservedGeneration: d.Generation, Replicas: n, UpdatedReplicas: n, ReadyReplicas: n, AvailableReplicas: n}
+			if c.failRollout && n > 0 {
+				d.Status.AvailableReplicas = 0
+				d.Status.ReadyReplicas = 0
+				d.Status.Conditions = []appsv1.DeploymentCondition{{Type: appsv1.DeploymentProgressing, Reason: "ProgressDeadlineExceeded"}}
+			}
+			if c.pendingRollout && n > 0 {
+				d.Status.ReadyReplicas = 0
+				d.Status.AvailableReplicas = 0
+			}
+			c.destination = &d
+			c.mutations = append(c.mutations, fmt.Sprintf("destination:%d", n))
+			jsonResponse(w, &d)
+			if n > 0 && c.cancelOnActivate != nil {
+				c.cancelOnActivate()
+			}
+			if n > 0 && c.loseConnection {
+				c.lost = true
+			}
+			return
+		}
 		if c.destination == nil {
 			http.Error(w, "not found", 404)
 		} else {
@@ -87,10 +167,87 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		jsonResponse(w, &d)
 		return
 	}
+	if strings.Contains(req.URL.Path, "/horizontalpodautoscalers/") {
+		name := req.URL.Path[strings.LastIndex(req.URL.Path, "/")+1:]
+		for i, h := range c.hpas {
+			if h.Name == name {
+				if req.Method == http.MethodDelete {
+					c.hpas = append(c.hpas[:i], c.hpas[i+1:]...)
+					c.mutations = append(c.mutations, "hpa:delete")
+					jsonResponse(w, map[string]interface{}{"kind": "Status", "apiVersion": "v1", "status": "Success"})
+					return
+				}
+				jsonResponse(w, &h)
+				return
+			}
+		}
+		http.Error(w, "not found", 404)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/horizontalpodautoscalers") && req.Method == http.MethodPost {
+		var h autoscalingv2.HorizontalPodAutoscaler
+		_ = json.NewDecoder(req.Body).Decode(&h)
+		if req.URL.Query().Get("dryRun") == "All" {
+			jsonResponse(w, &h)
+			return
+		}
+		h.UID = "new-hpa"
+		h.ResourceVersion = "2"
+		c.hpas = append(c.hpas, h)
+		c.mutations = append(c.mutations, "hpa:"+h.Spec.ScaleTargetRef.Kind)
+		jsonResponse(w, &h)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/services/web") {
+		for _, svc := range c.services {
+			jsonResponse(w, svc)
+			return
+		}
+		http.NotFound(w, req)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/endpoints/web") {
+		uid := typesUID("source-pod")
+		if c.destination != nil && *c.destination.Spec.Replicas > 0 {
+			uid = typesUID("destination-pod")
+		}
+		jsonResponse(w, &corev1.Endpoints{TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Endpoints"}, ObjectMeta: metav1.ObjectMeta{Name: "web", Namespace: "example"}, Subsets: []corev1.EndpointSubset{{Addresses: []corev1.EndpointAddress{{IP: "10.0.0.1", TargetRef: &corev1.ObjectReference{UID: uid}}}}}})
+		return
+	}
 	if req.Method == http.MethodGet {
 		kind := "List"
 		version := "v1"
 		items := []interface{}{}
+		if strings.HasSuffix(req.URL.Path, "/services") {
+			kind = "ServiceList"
+			for _, svc := range c.services {
+				items = append(items, svc)
+			}
+		}
+		if strings.HasSuffix(req.URL.Path, "/horizontalpodautoscalers") {
+			kind = "HorizontalPodAutoscalerList"
+			version = "autoscaling/v2"
+			for _, h := range c.hpas {
+				items = append(items, h)
+			}
+		}
+		if strings.HasSuffix(req.URL.Path, "/pods") {
+			kind = "PodList"
+			selector, _ := labels.Parse(req.URL.Query().Get("labelSelector"))
+			sourceN, _, _ := unstructured.NestedInt64(c.source.Object, "spec", "replicas")
+			pods := []corev1.Pod{}
+			if sourceN > 0 || c.blockRetirement {
+				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "source-pod", Namespace: "example", UID: "source-pod", Labels: map[string]string{"deploymentconfig": "web", "app": "web"}}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
+			}
+			if c.destination != nil && *c.destination.Spec.Replicas > 0 {
+				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "destination-pod", Namespace: "example", UID: "destination-pod", Labels: c.destination.Spec.Template.Labels}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
+			}
+			for _, pod := range pods {
+				if selector.Matches(labels.Set(pod.Labels)) {
+					items = append(items, pod)
+				}
+			}
+		}
 		if strings.HasSuffix(req.URL.Path, "/deploymentconfigs") {
 			kind = "DeploymentConfigList"
 			version = "apps.openshift.io/v1"
@@ -105,11 +262,29 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 	t.Errorf("unexpected mutation %s %s", req.Method, req.URL.Path)
 	http.Error(w, "unexpected", 500)
 }
+func typesUID(s string) types.UID { return types.UID(s) }
+
 func stageTest(t *testing.T) (*Runner, *contractCluster, string) {
 	t.Helper()
 	cluster := &contractCluster{source: fixture(t)}
 	r := liveTestRunner(t, func(w http.ResponseWriter, req *http.Request) { cluster.serve(t, w, req) })
 	if err := r.connect(); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := clientcmd.BuildConfigFromFlags("", r.Options.Kubeconfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.QPS = 1000
+	cfg.Burst = 1000
+	cfg.ContentType = "application/json"
+	cfg.AcceptContentTypes = "application/json"
+	r.Dynamic, err = dynamic.NewForConfig(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.Kube, err = kubernetes.NewForConfig(cfg)
+	if err != nil {
 		t.Fatal(err)
 	}
 	c, err := r.Convert(cluster.source)
@@ -124,6 +299,7 @@ func stageTest(t *testing.T) (*Runner, *contractCluster, string) {
 	if err = savePlan(path, p); err != nil {
 		t.Fatal(err)
 	}
+	r.PollInterval = time.Millisecond
 	r.Options.Projects = nil
 	r.Options.PlanFile = path
 	r.Options.Mode = "stage"

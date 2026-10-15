@@ -60,3 +60,24 @@ func TestIndependentCLIOptions(t *testing.T) {
 		t.Fatal(v)
 	}
 }
+
+func TestArtifactPathsProtectInputsAndPlans(t *testing.T) {
+	o := testOptions(t)
+	o.Inputs = []string{"testdata/ocp-4.14-dc.yaml"}
+	o.ReportPath = o.Inputs[0]
+	if o.Validate() == nil {
+		t.Fatal("input/report collision accepted")
+	}
+	o = testOptions(t)
+	o.Mode = "stage"
+	o.PlanFile = o.ReportPath
+	if o.Validate() == nil {
+		t.Fatal("plan/report collision accepted")
+	}
+	o = testOptions(t)
+	o.Inputs = []string{"testdata/ocp-4.14-dc.yaml"}
+	r := NewRunner(o)
+	if r.checkOutputPath(o.Inputs[0]) == nil {
+		t.Fatal("generated output can overwrite input")
+	}
+}

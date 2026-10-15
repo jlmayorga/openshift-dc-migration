@@ -117,6 +117,9 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	for _, h := range hpas.Items {
 		if h.Spec.ScaleTargetRef.Kind == "DeploymentConfig" && h.Spec.ScaleTargetRef.Name == dc.GetName() {
 			p.HPAs = append(p.HPAs, h)
+			if len(h.OwnerReferences) > 0 || len(h.Finalizers) > 0 {
+				p.Blockers = append(p.Blockers, "HPA has owners/finalizers; coordinate controller manually")
+			}
 		}
 		if h.Spec.ScaleTargetRef.Kind == "Deployment" && h.Spec.ScaleTargetRef.Name == dc.GetName() {
 			p.Blockers = append(p.Blockers, "HPA "+h.Name+" already targets destination")
@@ -206,7 +209,10 @@ func savePlan(path string, p *MigrationPlan) error {
 	}
 	return atomicWrite(path, append(b, '\n'))
 }
-func (r *Runner) revalidatePlan(ctx context.Context, p *MigrationPlan) error {
+func (r *Runner) validateStoredPlan(p *MigrationPlan) error {
+	if p == nil || p.Source == nil || p.Desired == nil {
+		return errors.New("incomplete plan")
+	}
 	if !contains([]string{"exclusive", "overlap"}, p.CutoverMode) {
 		return errors.New("invalid cutover procedure")
 	}
@@ -228,6 +234,17 @@ func (r *Runner) revalidatePlan(ctx context.Context, p *MigrationPlan) error {
 	}
 	if c.Deployment.Name != p.Desired.Name || c.Deployment.Namespace != p.Desired.Namespace || c.Deployment.APIVersion != p.Desired.APIVersion || c.Deployment.Kind != p.Desired.Kind || !reflect.DeepEqual(c.Deployment.Spec, p.Desired.Spec) || !reflect.DeepEqual(c.Deployment.Labels, p.Desired.Labels) || !reflect.DeepEqual(c.Deployment.Annotations, p.Desired.Annotations) {
 		return errors.New("plan deployment was changed; regenerate plan")
+	}
+	return nil
+}
+
+func (r *Runner) revalidatePlan(ctx context.Context, p *MigrationPlan) error {
+	if err := r.validateStoredPlan(p); err != nil {
+		return err
+	}
+	c, err := r.Convert(p.Source)
+	if err != nil {
+		return err
 	}
 	source, err := r.Dynamic.Resource(dcResource).Namespace(p.Source.GetNamespace()).Get(ctx, p.Source.GetName(), metav1.GetOptions{})
 	if err != nil {

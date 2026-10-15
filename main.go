@@ -16,7 +16,7 @@ var buildDate = "unknown"
 
 func NewCommand() *cobra.Command {
 	o := DefaultOptions()
-	cmd := &cobra.Command{Use: "openshift-dc-converter", Short: "Plan migration of DeploymentConfigs to Deployments", Version: fmt.Sprintf("%s (%s, %s)", version, commit, buildDate), SilenceUsage: true}
+	cmd := &cobra.Command{Use: "openshift-dc-converter", Args: cobra.NoArgs, Short: "Plan migration of DeploymentConfigs to Deployments", Version: fmt.Sprintf("%s (%s, %s)", version, commit, buildDate), SilenceUsage: true}
 	cmd.RunE = func(cmd *cobra.Command, _ []string) error {
 		if o.ApplyChanges {
 			o.Mode = "stage"
@@ -31,7 +31,8 @@ func NewCommand() *cobra.Command {
 		return r.Run(ctx)
 	}
 	f := cmd.Flags()
-	f.StringVar(&o.Mode, "mode", o.Mode, "generate, plan, dry-run or stage")
+	f.StringVar(&o.Mode, "mode", o.Mode, "generate, plan, dry-run, stage, cutover or rollback")
+	f.BoolVar(&o.AutomationQuiesced, "automation-quiesced", false, "Acknowledge external reconcilers/scalers paused before cutover")
 	f.StringVar(&o.PlanFile, "plan-file", "", "Reviewed live migration plan")
 	f.StringVar(&o.CutoverMode, "cutover-mode", o.CutoverMode, "exclusive or overlap (recorded in plan)")
 	f.StringVar(&o.OverlapJustification, "overlap-justification", "", "Operator reason the workload permits overlap")

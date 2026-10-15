@@ -39,10 +39,37 @@ func DefaultOptions() Options {
 	return Options{Mode: "generate", CutoverMode: "exclusive", ReadinessTimeout: 5 * time.Minute, OutputDir: "converted_deployments", ReportPath: "conversion_report.json", PDFPath: "conversion_report.pdf", PreserveLabels: true, PreserveAnnotations: true, Reserved: []string{"default", "openshift", "openshift-infra"}, RequestTimeout: 30 * time.Second, OperationTimeout: 15 * time.Minute}
 }
 func (o Options) Validate() error {
-	if !contains([]string{"generate", "plan", "dry-run", "stage"}, o.Mode) {
+	if o.ReportPath == "" {
+		return errors.New("--json-report must not be empty")
+	}
+	seenPaths := map[string]bool{}
+	for _, path := range []string{o.ReportPath, o.PDFPath, o.LogPath, o.PlanFile} {
+		if path == "" {
+			continue
+		}
+		abs, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		if seenPaths[abs] {
+			return errors.New("report, log and plan paths must be distinct")
+		}
+		seenPaths[abs] = true
+	}
+	for _, path := range o.Inputs {
+		abs, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		if seenPaths[abs] {
+			return errors.New("input paths must differ from report, log and plan paths")
+		}
+	}
+
+	if !contains([]string{"generate", "plan", "dry-run", "stage", "cutover", "rollback"}, o.Mode) {
 		return fmt.Errorf("unsupported mode %q", o.Mode)
 	}
-	if o.Mode == "dry-run" || o.Mode == "stage" {
+	if o.Mode == "dry-run" || o.Mode == "stage" || o.Mode == "cutover" || o.Mode == "rollback" {
 		if o.PlanFile == "" || len(o.Inputs) > 0 || len(o.Projects) > 0 {
 			return errors.New("execution requires --plan-file and no --input or --projects")
 		}
@@ -52,7 +79,7 @@ func (o Options) Validate() error {
 	if len(o.Inputs) > 0 && len(o.Projects) > 0 {
 		return errors.New("--input and --projects are mutually exclusive")
 	}
-	if o.RequestTimeout <= 0 || o.OperationTimeout <= 0 {
+	if o.RequestTimeout <= 0 || o.OperationTimeout <= 0 || o.ReadinessTimeout <= 0 {
 		return errors.New("timeouts must be positive")
 	}
 	if o.ApplyChanges && o.PlanFile == "" {
@@ -98,6 +125,8 @@ type Report struct {
 	Totals        Totals   `json:"totals"`
 }
 type Runner struct {
+	PollInterval    time.Duration
+	HealthCheck     func(context.Context, string) error
 	Options         Options
 	Dynamic         dynamic.Interface
 	Kube            kubernetes.Interface
@@ -111,7 +140,7 @@ type Runner struct {
 }
 
 func NewRunner(o Options) *Runner {
-	return &Runner{Options: o, Logger: log.New(io.Discard, "", 0), Out: io.Discard, Now: time.Now}
+	return &Runner{PollInterval: time.Second, Options: o, Logger: log.New(io.Discard, "", 0), Out: io.Discard, Now: time.Now}
 }
 func (r *Runner) isReservedNamespace(ns string) bool {
 	if strings.HasPrefix(ns, "openshift-") || strings.HasPrefix(ns, "kube-") {
@@ -148,6 +177,12 @@ func (r *Runner) connect() error {
 	return err
 }
 func (r *Runner) Run(ctx context.Context) (runErr error) {
+	if r.Options.ApplyChanges {
+		r.Options.Mode = "stage"
+	}
+	if err := r.Options.Validate(); err != nil {
+		return err
+	}
 	ctx, cancel := context.WithTimeout(ctx, r.Options.OperationTimeout)
 	defer cancel()
 	r.Report = Report{SchemaVersion: "v1", Timestamp: r.Now().UTC().Format(time.RFC3339), Context: r.SelectedContext, Results: []Result{}}
@@ -157,12 +192,6 @@ func (r *Runner) Run(ctx context.Context) (runErr error) {
 		}
 		runErr = errors.Join(runErr, r.saveReports())
 	}()
-	if r.Options.ApplyChanges {
-		r.Options.Mode = "stage"
-	}
-	if err := r.Options.Validate(); err != nil {
-		return err
-	}
 	if r.Options.PlanFile != "" {
 		return r.executePlan(ctx)
 	}
@@ -243,7 +272,11 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 	result.Stage = "save"
 	data, err := yaml.Marshal(dep)
 	if err == nil {
-		err = atomicWrite(filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".yaml"), data)
+		manifestPath := filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".yaml")
+		err = r.checkOutputPath(manifestPath)
+		if err == nil {
+			err = atomicWrite(manifestPath, data)
+		}
 	}
 	if err != nil {
 		result.Error = err.Error()
@@ -252,7 +285,11 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 	result.Generated = true
 	p, e := r.buildPlan(ctx, dc, conversion, r.Options.Mode == "plan")
 	if e == nil {
-		e = savePlan(filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".plan.json"), p)
+		planPath := filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".plan.json")
+		e = r.checkOutputPath(planPath)
+		if e == nil {
+			e = savePlan(planPath, p)
+		}
 	}
 	if e != nil {
 		result.Error = e.Error()
@@ -324,4 +361,25 @@ func (r *Runner) listDCs(ctx context.Context, ns string) (*unstructured.Unstruct
 			return result, nil
 		}
 	}
+}
+
+func (r *Runner) checkOutputPath(path string) error {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+	protected := append([]string{r.Options.ReportPath, r.Options.PDFPath, r.Options.LogPath}, r.Options.Inputs...)
+	for _, p := range protected {
+		if p == "" {
+			continue
+		}
+		other, e := filepath.Abs(p)
+		if e != nil {
+			return e
+		}
+		if abs == other {
+			return fmt.Errorf("output %s overlaps an input or report path", path)
+		}
+	}
+	return nil
 }

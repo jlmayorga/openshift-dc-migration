@@ -51,6 +51,9 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 	if err = r.preflight(ctx); err != nil {
 		return err
 	}
+	if r.Options.Mode == "cutover" || r.Options.Mode == "rollback" {
+		return r.runMigration(ctx, p, &result)
+	}
 	if err = r.revalidatePlan(ctx, p); err != nil {
 		return err
 	}
