@@ -1,84 +1,74 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"time"
-
 	"github.com/jung-kurt/gofpdf"
+	"strings"
 )
 
-func generatePDFReport(reportPath string, conversionInfos []ConversionInfo) error {
-	pdf := gofpdf.New("L", "mm", "A4", "")
+func renderPDF(path string, report Report) error {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetCompression(false)
+	pdf.SetMargins(15, 15, 15)
+	pdf.SetAutoPageBreak(true, 18)
+	safe := func(s string) string {
+		var b strings.Builder
+		for _, r := range s {
+			if r >= 32 && r <= 126 {
+				b.WriteRune(r)
+			} else if r == '\n' {
+				b.WriteRune(r)
+			} else {
+				b.WriteByte('?')
+			}
+		}
+		return b.String()
+	}
+	pdf.SetHeaderFunc(func() {
+		pdf.SetFont("Arial", "B", 13)
+		pdf.Cell(0, 8, "DeploymentConfig migration report")
+		pdf.Ln(9)
+		pdf.SetFont("Arial", "", 8)
+		pdf.MultiCell(180, 4, safe("Context: "+report.Context+" | "+report.Timestamp), "", "L", false)
+		pdf.Ln(3)
+	})
+	pdf.SetFooterFunc(func() {
+		pdf.SetY(-12)
+		pdf.SetFont("Arial", "", 8)
+		pdf.CellFormat(0, 5, fmt.Sprintf("Page %d", pdf.PageNo()), "", 0, "C", false, 0, "")
+	})
 	pdf.AddPage()
-
-	// Set up fonts
-	pdf.SetFont("Arial", "B", 16)
-	pdf.Cell(0, 10, "DeploymentConfig to Deployment Conversion Report")
-	pdf.Ln(15)
-
-	// Define column widths
-	colWidths := []float64{25, 30, 50, 25, 35, 30, 35}
-	pageWidth, _ := pdf.GetPageSize()
-	tableWidth := 0.0
-	for _, w := range colWidths {
-		tableWidth += w
-	}
-
-	// Center the table
-	leftMargin := (pageWidth - tableWidth) / 2
-	pdf.SetLeftMargin(leftMargin)
-
-	// Table headers
-	pdf.SetFont("Arial", "B", 10)
-	pdf.SetFillColor(200, 200, 200)
-	headers := []string{"Date", "Namespace", "DeploymentConfig Name", "Triggers", "Lifecycle Hooks", "Auto Rollbacks", "Custom Strategies"}
-	for i, header := range headers {
-		pdf.CellFormat(colWidths[i], 7, header, "1", 0, "C", true, 0, "")
-	}
-	pdf.Ln(-1)
-
-	// Table content
-	pdf.SetFont("Arial", "", 9)
-	pdf.SetFillColor(255, 255, 255)
-	for i, info := range conversionInfos {
-		fillColor := false
-		if i%2 == 0 {
-			fillColor = true
-			pdf.SetFillColor(240, 240, 240)
-		} else {
-			pdf.SetFillColor(255, 255, 255)
+	pdf.SetFont("Arial", "", 10)
+	pdf.MultiCell(180, 6, fmt.Sprintf("Generated %d | Staged %d | Ready %d | Failed %d | Manual %d | Skipped %d", report.Totals.Generated, report.Totals.Applied, report.Totals.Ready, report.Totals.Failed, report.Totals.Manual, report.Totals.Skipped), "", "L", false)
+	pdf.Ln(4)
+	for _, res := range report.Results {
+		pdf.SetFont("Arial", "B", 10)
+		height := float64(len(pdf.SplitLines([]byte(safe(res.Source.Namespace+"/"+res.Source.Name)), 180)))*5 + 10
+		pdf.SetFont("Arial", "", 9)
+		for _, line := range append(append(append([]string{}, res.Warnings...), res.Unsupported...), res.Error) {
+			if line != "" {
+				height += float64(len(pdf.SplitLines([]byte(safe(line)), 180))) * 4
+			}
+		}
+		if height < 230 && pdf.GetY()+height > 279 {
+			pdf.AddPage()
 		}
 
-		date := parseAndFormatDate(info.Timestamp)
-		pdf.CellFormat(colWidths[0], 6, date, "1", 0, "C", fillColor, 0, "")
-		pdf.CellFormat(colWidths[1], 6, info.Namespace, "1", 0, "L", fillColor, 0, "")
-		pdf.CellFormat(colWidths[2], 6, info.DeploymentConfigName, "1", 0, "L", fillColor, 0, "")
-		pdf.CellFormat(colWidths[3], 6, boolToString(info.HasTriggers), "1", 0, "C", fillColor, 0, "")
-		pdf.CellFormat(colWidths[4], 6, boolToString(info.HasLifecycleHooks), "1", 0, "C", fillColor, 0, "")
-		pdf.CellFormat(colWidths[5], 6, boolToString(info.HasAutoRollbacks), "1", 0, "C", fillColor, 0, "")
-		pdf.CellFormat(colWidths[6], 6, boolToString(info.UsesCustomStrategies), "1", 0, "C", fillColor, 0, "")
-		pdf.Ln(-1)
+		pdf.SetFont("Arial", "B", 10)
+		pdf.MultiCell(180, 5, safe(res.Source.Namespace+"/"+res.Source.Name), "", "L", false)
+		pdf.SetFont("Arial", "", 9)
+		pdf.MultiCell(180, 5, safe("Stage: "+res.Stage+" | Outcome: "+res.Outcome), "", "L", false)
+		for _, line := range append(append(append([]string{}, res.Warnings...), res.Unsupported...), res.Error) {
+			if line != "" {
+				pdf.MultiCell(180, 4, safe(line), "", "L", false)
+			}
+		}
+		pdf.Ln(5)
 	}
-
-	// Add summary
-	pdf.Ln(10)
-	pdf.SetFont("Arial", "B", 12)
-	pdf.CellFormat(0, 10, fmt.Sprintf("Total Conversions: %d", len(conversionInfos)), "", 0, "L", false, 0, "")
-
-	return pdf.OutputFileAndClose(reportPath)
-}
-
-func boolToString(b bool) string {
-	if b {
-		return "Yes"
+	var b bytes.Buffer
+	if err := pdf.Output(&b); err != nil {
+		return err
 	}
-	return "No"
-}
-
-func parseAndFormatDate(timestamp string) string {
-	t, err := time.Parse(time.RFC3339, timestamp)
-	if err != nil {
-		return "Invalid Date"
-	}
-	return t.Format("2006-01-02")
+	return atomicWrite(path, b.Bytes())
 }

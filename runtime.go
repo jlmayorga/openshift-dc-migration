@@ -79,15 +79,17 @@ type Report struct {
 	Timestamp     string   `json:"timestamp"`
 	Context       string   `json:"context,omitempty"`
 	Results       []Result `json:"results"`
+	Totals        Totals   `json:"totals"`
 }
 type Runner struct {
-	Options Options
-	Dynamic dynamic.Interface
-	Kube    kubernetes.Interface
-	Logger  *log.Logger
-	Out     io.Writer
-	Now     func() time.Time
-	Report  Report
+	Options  Options
+	Dynamic  dynamic.Interface
+	Kube     kubernetes.Interface
+	Logger   *log.Logger
+	Out      io.Writer
+	Now      func() time.Time
+	Report   Report
+	Discover func(context.Context, string) (*metav1.APIResourceList, error)
 }
 
 func NewRunner(o Options) *Runner {
@@ -125,8 +127,19 @@ func (r *Runner) connect() error {
 	r.Kube, err = kubernetes.NewForConfig(cfg)
 	return err
 }
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run(ctx context.Context) (runErr error) {
+	ctx, cancel := context.WithTimeout(ctx, r.Options.OperationTimeout)
+	defer cancel()
 	r.Report = Report{SchemaVersion: "v1", Timestamp: r.Now().UTC().Format(time.RFC3339), Results: []Result{}}
+	defer func() {
+		if runErr != nil && len(r.Report.Results) == 0 {
+			r.Report.Results = append(r.Report.Results, Result{Stage: "preflight", Outcome: "failed", Error: runErr.Error()})
+		}
+		runErr = errors.Join(runErr, r.saveReports())
+	}()
+	if err := r.Options.Validate(); err != nil {
+		return err
+	}
 	var failures []error
 	if len(r.Options.Inputs) > 0 {
 		for _, path := range r.Options.Inputs {
@@ -143,22 +156,32 @@ func (r *Runner) Run(ctx context.Context) error {
 			}
 		}
 	} else {
-		if r.Dynamic == nil {
-			if err := r.connect(); err != nil {
-				return err
-			}
-		}
-		seen := map[string]bool{}
-		for _, ns := range r.Options.Projects {
-			if seen[ns] {
-				continue
-			}
-			seen[ns] = true
+		preflightErr := error(nil)
+		checked := false
+		for _, ns := range normalizeProjects(r.Options.Projects) {
 			if r.isReservedNamespace(ns) {
 				r.Report.Results = append(r.Report.Results, Result{Source: Identity{Namespace: ns}, Stage: "project", Outcome: "skipped"})
 				continue
 			}
-			list, err := r.Dynamic.Resource(dcResource).Namespace(ns).List(ctx, metav1.ListOptions{})
+			if !checked {
+				if r.Dynamic == nil {
+					preflightErr = r.connect()
+				}
+				if preflightErr == nil {
+					preflightErr = r.preflight(ctx)
+				}
+				checked = true
+			}
+			err := preflightErr
+			if err == nil {
+				err = r.access(ctx, ns, "apps.openshift.io", "deploymentconfigs", "list")
+			}
+			if err != nil {
+				r.Report.Results = append(r.Report.Results, Result{Source: Identity{Namespace: ns}, Stage: "preflight", Outcome: "failed", Error: actionableError(err)})
+				failures = append(failures, err)
+				continue
+			}
+			list, err := r.listDCs(ctx, ns)
 			if err != nil {
 				r.Report.Results = append(r.Report.Results, Result{Source: Identity{Namespace: ns}, Stage: "discovery", Outcome: "failed", Error: err.Error()})
 				failures = append(failures, err)
@@ -194,11 +217,7 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 	result.Stage = "save"
 	data, err := yaml.Marshal(dep)
 	if err == nil {
-		dir := filepath.Join(r.Options.OutputDir, dc.GetNamespace())
-		err = os.MkdirAll(dir, 0700)
-		if err == nil {
-			err = os.WriteFile(filepath.Join(dir, dc.GetName()+".yaml"), data, 0600)
-		}
+		err = atomicWrite(filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".yaml"), data)
 	}
 	if err != nil {
 		result.Error = err.Error()
@@ -250,4 +269,22 @@ func readDCFile(path string) ([]*unstructured.Unstructured, error) {
 		return nil, errors.New("input contains no DeploymentConfigs")
 	}
 	return objects, nil
+}
+
+func (r *Runner) listDCs(ctx context.Context, ns string) (*unstructured.UnstructuredList, error) {
+	result := &unstructured.UnstructuredList{}
+	token := ""
+	for {
+		requestCtx, cancel := context.WithTimeout(ctx, r.Options.RequestTimeout)
+		page, err := r.Dynamic.Resource(dcResource).Namespace(ns).List(requestCtx, metav1.ListOptions{Limit: 500, Continue: token})
+		cancel()
+		if err != nil {
+			return nil, err
+		}
+		result.Items = append(result.Items, page.Items...)
+		token = page.GetContinue()
+		if token == "" {
+			return result, nil
+		}
+	}
 }

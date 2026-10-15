@@ -5,3 +5,5 @@ Construct commands with `NewCommand()` and test work through a `Runner`. Options
 `testdata/ocp-4.14-dc.yaml` is synthetic API-shaped data, not evidence from a cluster. Unit tests and HTTP simulations do not qualify OpenShift integration. Never run integration against the current kubeconfig implicitly.
 
 Local checks: `go test -race ./...`, `go vet ./...`. Use a writable `GOCACHE` and `GOMODCACHE` when running in a filesystem sandbox.
+
+The HTTP contract suite uses temporary kubeconfigs pointing exclusively at loopback test servers. It exercises baseline discovery URLs, JSON serialization, access reviews, missing APIs versus permission/authentication failures, deprecation warnings, empty namespaces and cancellation. Generated manifests, canonical JSON and optional PDF are written through restrictive atomic replacements. Report failures return errors even when workload conversion succeeded. Counts describe distinct stages: generated, staged, ready, manual, failed and skipped; generation alone does not imply application or readiness.

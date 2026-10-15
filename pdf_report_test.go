@@ -2,59 +2,32 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestGeneratePDFReport(t *testing.T) {
-	// Set up test data
-	conversionInfos := []ConversionInfo{
-		{
-			Timestamp:            "2024-08-16T08:47:03-05:00",
-			Namespace:            "test-namespace",
-			DeploymentConfigName: "test-dc",
-			HasTriggers:          true,
-			HasLifecycleHooks:    false,
-			HasAutoRollbacks:     false,
-			UsesCustomStrategies: false,
-		},
+func TestPDFLongNamesAndFailures(t *testing.T) {
+	report := Report{SchemaVersion: "v1", Timestamp: "2026-10-15T00:00:00Z", Context: strings.Repeat("context-", 30)}
+	for i := 0; i < 100; i++ {
+		report.Results = append(report.Results, Result{Source: Identity{Namespace: strings.Repeat("n", 63), Name: strings.Repeat("d", 253)}, Stage: "admission", Outcome: "failed", Error: strings.Repeat("Admission rejected for quota. ", 10)})
 	}
-
-	// Generate the report
-	reportPath := t.TempDir() + "/test_report.pdf"
-	err := generatePDFReport(reportPath, conversionInfos)
-
-	// Assert no error occurred
-	assert.NoError(t, err)
-
-	// Check if the file was created
-	_, err = os.Stat(reportPath)
-	assert.NoError(t, err)
-
-	// Clean up the test file
-	os.Remove(reportPath)
-}
-
-func TestBoolToString(t *testing.T) {
-	assert.Equal(t, "Yes", boolToString(true))
-	assert.Equal(t, "No", boolToString(false))
-}
-
-func TestParseAndFormatDate(t *testing.T) {
-	tests := []struct {
-		name      string
-		timestamp string
-		expected  string
-	}{
-		{"Valid timestamp", "2024-08-16T08:47:03-05:00", "2024-08-16"},
-		{"Invalid timestamp", "invalid", "Invalid Date"},
+	report.summarize()
+	path := t.TempDir() + "/report.pdf"
+	if dir := os.Getenv("PDF_QA_DIR"); dir != "" {
+		path = dir + "/report.pdf"
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := parseAndFormatDate(tt.timestamp)
-			assert.Equal(t, tt.expected, result)
-		})
+	if err := renderPDF(path, report); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(b), "Admission rejected") || !strings.Contains(string(b), "Page 2") || !strings.Contains(string(b), "Failed 100") {
+		t.Fatal("report missing content, repeated headers or totals")
+	}
+	info, _ := os.Stat(path)
+	if info.Mode().Perm() != 0600 {
+		t.Fatal(info.Mode())
 	}
 }

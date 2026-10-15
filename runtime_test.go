@@ -15,6 +15,8 @@ func TestOfflineRunnerIsIsolated(t *testing.T) {
 			o := DefaultOptions()
 			o.Inputs = []string{"testdata/ocp-4.14-dc.yaml"}
 			o.OutputDir = t.TempDir()
+			o.ReportPath = filepath.Join(o.OutputDir, "report.json")
+			o.PDFPath = ""
 			o.PDFPath = ""
 			r := NewRunner(o)
 			r.Now = func() time.Time { return time.Unix(0, 0) }
@@ -34,6 +36,8 @@ func TestOfflineMalformedAndCanceled(t *testing.T) {
 	o := DefaultOptions()
 	o.Inputs = []string{"missing"}
 	o.OutputDir = t.TempDir()
+	o.ReportPath = filepath.Join(o.OutputDir, "report.json")
+	o.PDFPath = ""
 	r := NewRunner(o)
 	if r.Run(context.Background()) == nil || len(r.Report.Results) != 1 {
 		t.Fatal("input failure swallowed")
