@@ -25,6 +25,7 @@ import (
 )
 
 type contractCluster struct {
+	extraReplicaSet                                                                   *unstructured.Unstructured
 	sourceReplicas                                                                    int64
 	orphanLabels                                                                      map[string]string
 	mu                                                                                sync.Mutex
@@ -261,6 +262,9 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 			kind = "DeploymentConfigList"
 			version = "apps.openshift.io/v1"
 			items = append(items, c.source.Object)
+		}
+		if strings.HasSuffix(req.URL.Path, "/replicasets") && c.extraReplicaSet != nil {
+			items = append(items, c.extraReplicaSet.Object)
 		}
 		if strings.HasSuffix(req.URL.Path, "/deployments") && c.destination != nil {
 			items = append(items, c.destination)

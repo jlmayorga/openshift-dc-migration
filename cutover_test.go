@@ -189,3 +189,35 @@ func TestOrphanedDestinationBlocksSourceRestore(t *testing.T) {
 		t.Fatal("source restored while destination pods still exist")
 	}
 }
+
+func TestTargetRevalidatedBeforeSourceMutation(t *testing.T) {
+	for _, scenario := range []string{"changed-spec", "changed-uid", "deleting"} {
+		t.Run(scenario, func(t *testing.T) {
+			r, c, _ := cutoverTest(t, "exclusive", false)
+			switch scenario {
+			case "changed-spec":
+				c.destination.Spec.Template.Spec.Containers[0].Image = "unrelated:image"
+			case "changed-uid":
+				c.destination.UID = "replacement"
+			case "deleting":
+				now := metav1.Now()
+				c.destination.DeletionTimestamp = &now
+			}
+			if err := r.Run(context.Background()); err == nil {
+				t.Fatal("changed target accepted")
+			}
+			if len(c.mutations) != 0 || c.sourceReplicas != 1 {
+				t.Fatal("source changed before target revalidation")
+			}
+		})
+	}
+}
+func TestDeletingHPACannotBeReportedRestored(t *testing.T) {
+	r, c, path := cutoverTest(t, "exclusive", true)
+	now := metav1.Now()
+	c.hpas[0].DeletionTimestamp = &now
+	p, _ := loadPlan(path)
+	if r.createHPA(context.Background(), p, p.HPAs[0], true) == nil {
+		t.Fatal("deleting HPA reported restored")
+	}
+}

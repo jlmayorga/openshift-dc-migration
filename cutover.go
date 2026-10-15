@@ -67,6 +67,14 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 	if err := r.revalidatePlan(ctx, p); err != nil {
 		return err
 	}
+
+	staged, err := r.destination(ctx, p)
+	if err != nil {
+		return err
+	}
+	if p.Progress.AdmittedSpec == nil || !reflect.DeepEqual(staged.Spec, *p.Progress.AdmittedSpec) || staged.Spec.Replicas == nil || *staged.Spec.Replicas != 0 || !staged.Spec.Paused || staged.Annotations[imageTriggerAnnotation] != "" {
+		return errors.New("staged destination changed; refusing source retirement")
+	}
 	if err := r.checkpoint(p, "cutover-started", "begin cutover; failures require explicit rollback"); err != nil {
 		return err
 	}
@@ -165,6 +173,9 @@ func (r *Runner) setSourceSpec(ctx context.Context, p *MigrationPlan, desired ma
 	if err != nil {
 		return err
 	}
+	if current.GetDeletionTimestamp() != nil {
+		return errors.New("source is deleting; refusing mutation")
+	}
 	if current.GetUID() != p.Source.GetUID() {
 		return errors.New("source replaced; refusing mutation")
 	}
@@ -204,6 +215,9 @@ func (r *Runner) destination(ctx context.Context, p *MigrationPlan) (*appsv1.Dep
 	d, err := r.Kube.AppsV1().Deployments(p.Desired.Namespace).Get(ctx, p.Desired.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
+	}
+	if d.DeletionTimestamp != nil {
+		return nil, errors.New("destination is deleting; manual inspection required")
 	}
 	if d.Annotations[sourceAnnotation] != string(p.Source.GetUID()) || d.Annotations[planAnnotation] != planDigest(p) || d.Labels[migrationLabel] != p.ID {
 		return nil, errors.New("destination ownership/UID changed; refusing mutation")
@@ -323,6 +337,9 @@ func (r *Runner) createHPA(ctx context.Context, p *MigrationPlan, h autoscalingv
 	desired.Annotations[planAnnotation] = planDigest(p)
 	current, err := api.Get(ctx, h.Name, metav1.GetOptions{})
 	if err == nil {
+		if current.DeletionTimestamp != nil {
+			return errors.New("HPA is deleting; cannot claim a restored/retargeted autoscaler")
+		}
 		if reflect.DeepEqual(current.Spec, desired.Spec) && ((restore && current.UID == h.UID) || (current.Labels[migrationLabel] == p.ID && current.Annotations[planAnnotation] == planDigest(p))) {
 			return nil
 		}
@@ -371,6 +388,9 @@ func (r *Runner) sourceStopped(ctx context.Context, p *MigrationPlan) (bool, err
 	source, err := r.Dynamic.Resource(dcResource).Namespace(p.Source.GetNamespace()).Get(ctx, p.Source.GetName(), metav1.GetOptions{})
 	if err != nil {
 		return false, err
+	}
+	if source.GetDeletionTimestamp() != nil {
+		return false, errors.New("source is deleting; retirement/recovery cannot be assumed")
 	}
 	if source.GetUID() != p.Source.GetUID() || (!reflect.DeepEqual(source.Object["spec"], sourceSpec(p, true, false)) && !reflect.DeepEqual(source.Object["spec"], parkedSourceSpec(p))) {
 		return false, errors.New("source retirement changed unexpectedly")

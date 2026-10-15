@@ -71,6 +71,9 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 	desired := stagedDeployment(p)
 	existing, err := r.Kube.AppsV1().Deployments(ns).Get(ctx, desired.Name, metav1.GetOptions{})
 	if err == nil {
+		if existing.DeletionTimestamp != nil {
+			return errors.New("destination is deleting; cannot stage it")
+		}
 		if existing.Annotations[sourceAnnotation] != string(p.Source.GetUID()) || existing.Annotations[planAnnotation] != planDigest(p) || existing.Labels[migrationLabel] != p.ID {
 			return errors.New("destination already exists; foreign or different migration ownership")
 		}

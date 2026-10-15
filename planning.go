@@ -75,6 +75,9 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 			}
 		}
 	}
+	if dc.GetDeletionTimestamp() != nil {
+		p.Blockers = append(p.Blockers, "source is deleting; resolve its lifecycle before migration")
+	}
 	if len(dc.GetOwnerReferences()) > 0 {
 		p.Blockers = append(p.Blockers, "source has owner references; coordinate its owning controller manually")
 	}
@@ -149,6 +152,7 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 		p.Blockers = append(p.Blockers, "multiple HPAs target source; manual consolidation required")
 	}
 	resources := []schema.GroupVersionResource{dcResource, deploymentResource, {Group: "apps", Version: "v1", Resource: "replicasets"}, {Group: "apps", Version: "v1", Resource: "statefulsets"}, {Group: "apps", Version: "v1", Resource: "daemonsets"}, {Group: "batch", Version: "v1", Resource: "jobs"}, {Version: "v1", Resource: "replicationcontrollers"}}
+	ownedDeploymentUID := ""
 	for _, resource := range resources {
 		controllers, e := r.Dynamic.Resource(resource).Namespace(ns).List(ctx, metav1.ListOptions{})
 		if e != nil {
@@ -161,12 +165,22 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 			}
 			if resource == deploymentResource && obj.GetName() == dc.GetName() {
 				if ownedDestination(obj, dc) {
+					ownedDeploymentUID = string(obj.GetUID())
 					continue
 				}
 				p.Blockers = append(p.Blockers, "destination Deployment already exists with foreign ownership")
 				continue
 			}
-			if resource.Resource == "replicasets" && ownedController(obj, dc) {
+			if resource.Resource == "replicasets" && obj.GetLabels()[migrationLabel] == p.ID {
+				controlled := false
+				for _, owner := range obj.GetOwnerReferences() {
+					if owner.Controller != nil && *owner.Controller && owner.Kind == "Deployment" && string(owner.UID) == ownedDeploymentUID && ownedDeploymentUID != "" {
+						controlled = true
+					}
+				}
+				if !controlled {
+					p.Blockers = append(p.Blockers, "orphan or foreign migration ReplicaSet "+obj.GetName()+"; inspect and stop it before staging")
+				}
 				continue
 			}
 			if resource.Resource == "replicationcontrollers" && sourceController(obj, dc) {
@@ -213,15 +227,12 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	return p, nil
 }
 func sourceController(obj, dc *unstructured.Unstructured) bool {
-	for _, o := range obj.GetOwnerReferences() {
-		if o.UID == dc.GetUID() {
-			return true
+	for _, owner := range obj.GetOwnerReferences() {
+		if owner.Controller != nil && *owner.Controller {
+			return owner.UID == dc.GetUID() && owner.Kind == "DeploymentConfig"
 		}
 	}
 	return obj.GetAnnotations()["openshift.io/deployment-config.name"] == dc.GetName() || obj.GetLabels()["openshift.io/deployment-config.name"] == dc.GetName()
-}
-func ownedController(obj, dc *unstructured.Unstructured) bool {
-	return obj.GetLabels()[migrationLabel] == migrationID(dc)
 }
 func ownedDestination(obj, dc *unstructured.Unstructured) bool {
 	return obj.GetAnnotations()[sourceAnnotation] == string(dc.GetUID()) && obj.GetLabels()[migrationLabel] == migrationID(dc) && dc.GetUID() != ""
