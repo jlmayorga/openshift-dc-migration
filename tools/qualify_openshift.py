@@ -239,6 +239,10 @@ def main():
                             {
                                 "name": "web",
                                 "image": args.image,
+                                "env": [
+                                    {"name": "PORT", "value": "8080"},
+                                    {"name": "SECOND_PORT", "value": "8888"},
+                                ],
                                 "ports": [{"name": "web", "containerPort": 8080}],
                                 "resources": {
                                     "requests": {"cpu": "10m", "memory": "32Mi"}
