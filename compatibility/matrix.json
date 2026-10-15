@@ -120,18 +120,29 @@
     {
       "minor": "4.21",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.31.3",
+        "k8s.io/apimachinery": "v0.31.3",
+        "k8s.io/client-go": "v0.31.3"
+      },
+      "testedAt": "2026-10-15T23:29:40.914580+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
+      "integrationResult": "partial (actual cluster; see linked session evidence)",
       "limitations": [
-        "No explicitly authorized test-cluster context supplied"
+        "One actual cluster patch and native binary tested; OpenShift 4.14 and other minors/artifact hashes remain unqualified.",
+        "Static hostPath storage is not evidence of cloud CSI attach/detach behavior.",
+        "Unavailable-image and all admission/SCC rejection policy combinations are not fully exercised.",
+        "Baseline record remains partial and no full release-matrix qualification is claimed.",
+        "Static-volume marker/setup remains unqualified; the namespace-only hostmount-anyuid-v2 binding awaits explicit approval."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "evidence": "compatibility/evidence/2026-10-15-4.21.36.json",
+      "artifactSHA256": "774404f71bc4434afcb40216cc0aa74bbf5bbc6903879818682c6851a5bd0505",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61"
     },
     {
       "minor": "4.22",

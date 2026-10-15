@@ -1,0 +1,636 @@
+{
+  "schemaVersion": "v1",
+  "kind": "actual-openshift-test-session",
+  "result": "partial",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "testedAt": "2026-10-15T23:29:40.914580+00:00",
+  "platform": "darwin/arm64",
+  "artifactSHA256": "774404f71bc4434afcb40216cc0aa74bbf5bbc6903879818682c6851a5bd0505",
+  "goSourceRevision": "ccdd9fff809214b80ea7e1ea6866d5da07be342b",
+  "baselineDriverRevision": "93dc2747333b47f756020623dc0e868478088fab",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.31.3",
+    "k8s.io/apimachinery": "v0.31.3",
+    "k8s.io/client-go": "v0.31.3"
+  },
+  "automaticBaseline": {
+    "result": "partial",
+    "passedScenarios": [
+      "admission-scc",
+      "cutover-exclusive",
+      "cutover-overlap",
+      "dry-run",
+      "failed-rollout",
+      "hpa-retarget",
+      "image-triggers",
+      "interruption",
+      "rollback",
+      "safe-rerun",
+      "schema",
+      "service-routing",
+      "stale-plan"
+    ],
+    "record": "qualification-final-binary.json"
+  },
+  "testCases": [
+    {
+      "case": "rolling-integer",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:08.220249+00:00",
+      "observations": {
+        "plan": "rolling-integer-plan-0022/dcmig-final-config-20261015-rolling-integer/web.plan.json",
+        "replicas": 2,
+        "sourceUID": "e5eca5b9-22b1-4309-92d3-add5c72dc704",
+        "destinationUID": "d522a1ce-1c66-4507-be4c-e2a376fe6d94"
+      },
+      "namespace": "dcmig-final-config-20261015-rolling-integer",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "rolling-percent",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:52.301522+00:00",
+      "observations": {
+        "plan": "rolling-percent-plan-0064/dcmig-final-config-20261015-rolling-percent/web.plan.json",
+        "replicas": 1,
+        "sourceUID": "6c0c3355-2ff6-4c63-86bf-e957c215da85",
+        "destinationUID": "97eda827-7736-4c6f-bba4-5651f5110730"
+      },
+      "namespace": "dcmig-final-config-20261015-rolling-percent",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "recreate",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:30:36.576961+00:00",
+      "observations": {
+        "plan": "recreate-plan-0105/dcmig-final-config-20261015-recreate/web.plan.json",
+        "replicas": 1,
+        "sourceUID": "07bf1681-e042-49a8-8e41-b9db716de3c3",
+        "destinationUID": "9aad657d-0250-4b05-b443-239f096bf71c"
+      },
+      "namespace": "dcmig-final-config-20261015-recreate",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "zero",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:31:41.342372+00:00",
+      "observations": {
+        "plan": "zero-plan-0145/dcmig-final-config-20261015-zero/web.plan.json",
+        "replicas": 0,
+        "sourceUID": "b5ab5a97-4619-41bd-98fd-f23f148ee132",
+        "destinationUID": "2938d727-1828-4251-ad74-2c9a4bd15ac1"
+      },
+      "namespace": "dcmig-final-config-20261015-zero",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "env-volume",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:32:11.958141+00:00",
+      "observations": {
+        "plan": "env-volume-plan-0186/dcmig-final-config-20261015-env-volume/web.plan.json",
+        "replicas": 1,
+        "sourceUID": "1b101b3a-4216-465e-8a06-f542ac7656ca",
+        "destinationUID": "9a567d40-e5f9-4e9d-a858-d536b783e2dd"
+      },
+      "namespace": "dcmig-final-config-20261015-env-volume",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "multi-container",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:32:54.732066+00:00",
+      "observations": {
+        "plan": "multi-container-plan-0229/dcmig-final-config-20261015-multi-container/web.plan.json",
+        "replicas": 1,
+        "sourceUID": "645cef8d-d82e-456f-9cf0-d10bb2b4e619",
+        "destinationUID": "2a44cf4c-47dc-462e-9acb-73f18a68d0a2"
+      },
+      "namespace": "dcmig-final-config-20261015-multi-container",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "api-defaults",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:33:41.520480+00:00",
+      "observations": {
+        "plan": "api-defaults-plan-0270/dcmig-final-config-20261015-api-defaults/web.plan.json",
+        "replicas": 0,
+        "sourceUID": "41ee93da-1787-4ac4-b193-ab28761ca6d2",
+        "destinationUID": "c37ddb2f-03b2-45de-b60d-0845e0ad8a89"
+      },
+      "namespace": "dcmig-final-config-20261015-api-defaults",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "paused",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:34:12.082026+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-paused",
+            "name": "web",
+            "uid": "979ea6b6-555c-4587-ab68-d264b6e06aaf"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-paused",
+            "name": "web"
+          },
+          "stage": "cutover",
+          "outcome": "failed",
+          "error": "paused source requires a reviewed activation procedure; automatic cutover blocked",
+          "generated": false,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-paused",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "manual-triggers",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:34:26.373486+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-manual-triggers",
+            "name": "web",
+            "uid": "5c4807ff-46ba-44c8-a6fb-d34596f7108c",
+            "resourceVersion": "42082"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-manual-triggers",
+            "name": "web"
+          },
+          "stage": "generation",
+          "outcome": "manual",
+          "warnings": [
+            "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.",
+            "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline."
+          ],
+          "unsupported": [
+            "ConfigChange is disabled: Deployment template edits roll out automatically; keep paused and design a manual rollout procedure"
+          ],
+          "error": "manual migration required: ConfigChange is disabled: Deployment template edits roll out automatically; keep paused and design a manual rollout procedure",
+          "generated": true,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-manual-triggers",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "test-dc",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:34:35.242849+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-test-dc",
+            "name": "web",
+            "uid": "5e1a371b-0aa3-45d5-95b5-0ee1cecc3552",
+            "resourceVersion": "42261"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-test-dc",
+            "name": "web"
+          },
+          "stage": "generation",
+          "outcome": "manual",
+          "warnings": [
+            "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.",
+            "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline."
+          ],
+          "unsupported": [
+            "test DeploymentConfig: use a separately reviewed Job"
+          ],
+          "error": "manual migration required: test DeploymentConfig: use a separately reviewed Job",
+          "generated": true,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-test-dc",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "custom",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:34:49.721833+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-custom",
+            "name": "web",
+            "uid": "2e480054-e997-48b4-9a41-faa27295494c",
+            "resourceVersion": "42489"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-custom",
+            "name": "web"
+          },
+          "stage": "generation",
+          "outcome": "manual",
+          "warnings": [
+            "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.",
+            "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline."
+          ],
+          "unsupported": [
+            "strategy.customParams needs manual migration",
+            "strategy Custom: replace custom deployer with an explicit supported strategy"
+          ],
+          "error": "manual migration required: strategy.customParams needs manual migration; strategy Custom: replace custom deployer with an explicit supported strategy",
+          "generated": true,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-custom",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "rolling-hook",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:35:03.098927+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-rolling-hook",
+            "name": "web",
+            "uid": "7cd33134-a861-4bae-85d4-4231deed29f8",
+            "resourceVersion": "42756"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-rolling-hook",
+            "name": "web"
+          },
+          "stage": "generation",
+          "outcome": "manual",
+          "warnings": [
+            "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.",
+            "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline."
+          ],
+          "unsupported": [
+            "deployment hooks: migrate hooks to reviewed Jobs or application lifecycle handling"
+          ],
+          "error": "manual migration required: deployment hooks: migrate hooks to reviewed Jobs or application lifecycle handling",
+          "generated": true,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-rolling-hook",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "recreate-hook",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:35:20.061509+00:00",
+      "observations": {
+        "diagnostic": {
+          "source": {
+            "namespace": "dcmig-final-config-20261015-recreate-hook",
+            "name": "web",
+            "uid": "7964e9eb-97f1-4e75-a197-b32d0856bcbb",
+            "resourceVersion": "42892"
+          },
+          "destination": {
+            "namespace": "dcmig-final-config-20261015-recreate-hook",
+            "name": "web"
+          },
+          "stage": "generation",
+          "outcome": "manual",
+          "warnings": [
+            "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.",
+            "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline."
+          ],
+          "unsupported": [
+            "deployment hooks: migrate hooks to reviewed Jobs or application lifecycle handling"
+          ],
+          "error": "manual migration required: deployment hooks: migrate hooks to reviewed Jobs or application lifecycle handling",
+          "generated": true,
+          "applied": false,
+          "ready": false
+        },
+        "sourceUnmodified": true
+      },
+      "namespace": "dcmig-final-config-20261015-recreate-hook",
+      "evidence": "final-configurations/cases.json"
+    },
+    {
+      "case": "write-1",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:11.933426+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 1,
+        "mutation": {
+          "method": "DELETE",
+          "path": "/apis/autoscaling/v2/namespaces/dcmig-final-recover-20261015-write-1/horizontalpodautoscalers/web?timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 1
+        },
+        "interruptedPhase": "hpa-freeze-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-1",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "write-2",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:38.859648+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 2,
+        "mutation": {
+          "method": "PUT",
+          "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-final-recover-20261015-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 2
+        },
+        "interruptedPhase": "source-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-2",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "write-3",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:30:04.617680+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 3,
+        "mutation": {
+          "method": "PUT",
+          "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-final-recover-20261015-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 3
+        },
+        "interruptedPhase": "source-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-3",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "write-4",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:30:37.348131+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 4,
+        "mutation": {
+          "method": "PUT",
+          "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-final-recover-20261015-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 4
+        },
+        "interruptedPhase": "source-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-4",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "write-5",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:31:07.876025+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 5,
+        "mutation": {
+          "method": "PUT",
+          "path": "/apis/apps/v1/namespaces/dcmig-final-recover-20261015-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 5
+        },
+        "interruptedPhase": "destination-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-5",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "write-6",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:31:42.215256+00:00",
+      "observations": {
+        "lostResponseAfterMutation": 6,
+        "mutation": {
+          "method": "POST",
+          "path": "/apis/autoscaling/v2/namespaces/dcmig-final-recover-20261015-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+          "status": 201,
+          "mutation": true,
+          "mutationNumber": 6
+        },
+        "interruptedPhase": "hpa-create-intent",
+        "recovery": "verified and rerun"
+      },
+      "namespace": "dcmig-final-recover-20261015-write-6",
+      "evidence": "final-recovery/cases.json"
+    },
+    {
+      "case": "cross-namespace-image",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:14.894809+00:00",
+      "observations": {
+        "crossNamespace": true,
+        "multiContainer": false,
+        "disabled": false,
+        "triggerUpdatesVerified": true,
+        "rollback": "verified"
+      },
+      "namespace": "dcmig-final-feature-20261015-cross-namespace-image",
+      "evidence": "final-features/cases.json"
+    },
+    {
+      "case": "multi-image",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:59.648157+00:00",
+      "observations": {
+        "crossNamespace": false,
+        "multiContainer": true,
+        "disabled": false,
+        "triggerUpdatesVerified": true,
+        "rollback": "verified"
+      },
+      "namespace": "dcmig-final-feature-20261015-multi-image",
+      "evidence": "final-features/cases.json"
+    },
+    {
+      "case": "disabled-image",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:33:11.033851+00:00",
+      "observations": {
+        "crossNamespace": false,
+        "multiContainer": false,
+        "disabled": true,
+        "triggerUpdatesVerified": true,
+        "rollback": "verified"
+      },
+      "namespace": "dcmig-disabled-retry-20261015-disabled-image",
+      "evidence": "final-disabled-image-retry/cases.json"
+    },
+    {
+      "case": "restricted-rbac",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:29:37.738436+00:00",
+      "observations": {
+        "generationWithoutNamespaceRead": "passed",
+        "deniedDCList": "visible failure",
+        "deniedDeploymentCreate": "no persistence",
+        "deniedCutoverUpdate": "source unchanged"
+      },
+      "namespace": "dcmig-final-permission-20261015-rbac",
+      "evidence": "final-permissions/cases.json"
+    },
+    {
+      "case": "quota-admission",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:30:01.778856+00:00",
+      "observations": {
+        "dryRunQuotaDenied": true,
+        "stageQuotaDenied": true,
+        "destinationPersisted": false,
+        "sourceUnchanged": true
+      },
+      "namespace": "dcmig-final-permission-20261015-quota-admission",
+      "evidence": "final-permissions/cases.json"
+    },
+    {
+      "case": "foreign-destination",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:30:22.210248+00:00",
+      "observations": {
+        "foreignDeploymentUID": "6778b13c-14a3-408c-a7b7-45f27cad6d13",
+        "overwritten": false
+      },
+      "namespace": "dcmig-final-permission-20261015-foreign",
+      "evidence": "final-permissions/cases.json"
+    },
+    {
+      "case": "singleton-worker",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:34:19.719780+00:00",
+      "observations": {
+        "sourceHeartbeat": "active-owner:web-1-thkb2\nserving on 8888\nserving on 8080\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\nServicing request.\nactive-owner:web-1-thkb2\n",
+        "destinationHeartbeat": "active-owner:web-6fd5d56bd4-szhhw\nserving on 8888\nserving on 8080\nServicing request.\nactive-owner:web-6fd5d56bd4-szhhw\nServicing request.\nactive-owner:web-6fd5d56bd4-szhhw\nServicing request.\nServicing request.\nactive-owner:web-6fd5d56bd4-szhhw\nServicing request.\nServicing request.\nServicing request.\nactive-owner:web-6fd5d56bd4-szhhw\n",
+        "samples": 45,
+        "maximumObservedWorkers": 1,
+        "simultaneousSourceAndDestination": 0,
+        "rollback": "verified"
+      },
+      "namespace": "dcmig-final-singleton-20261015-worker",
+      "evidence": "final-singleton/cases.json"
+    },
+    {
+      "case": "expired-credentials",
+      "result": "passed",
+      "observations": {
+        "expiredAt": "2026-10-15T23:41:06+00:00",
+        "testedAt": "2026-10-15T23:43:31.680346+00:00",
+        "exit": 1,
+        "diagnostic": "visible API authentication failure; no mutation"
+      },
+      "evidence": "final-expired-auth/cases.json"
+    },
+    {
+      "case": "denied-hpa-mutation",
+      "result": "passed",
+      "startedAt": "2026-10-15T23:46:17.774898+00:00",
+      "observations": {
+        "HPADeleteDenied": true,
+        "HPAUnchanged": true,
+        "sourceUnchanged": true,
+        "destinationReplicas": 0
+      },
+      "namespace": "dcmig-final-hpa-denied-20261015-rbac-hpa",
+      "evidence": "final-denied-hpa/cases.json"
+    },
+    {
+      "case": "persistent-volume",
+      "result": "failed",
+      "startedAt": "2026-10-15T23:43:27.686993+00:00",
+      "error": "Unexpected exit 1: ['-n', 'dcmig-final-volume-20261015-persistent-volume', 'rollout', 'status', 'dc/web', '--timeout=90s']; command-0009.json",
+      "namespace": "dcmig-final-volume-20261015-persistent-volume",
+      "evidence": "final-volume-retry/cases.json"
+    }
+  ],
+  "targetedCases": 29,
+  "passedTargetedCases": 28,
+  "sccEvidence": [
+    {
+      "uid": "d6a3eec1-b414-4843-8406-7bfcc3e793b1",
+      "scc": "restricted-v2",
+      "securityContext": {
+        "fsGroup": 1001100000,
+        "seLinuxOptions": {
+          "level": "s0:c33,c22"
+        },
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      }
+    }
+  ],
+  "localValidation": {
+    "goRaceCases": 113,
+    "statementCoveragePercent": 77.6,
+    "goVet": "passed",
+    "pythonTests": 6,
+    "gofmt": "passed",
+    "black": "passed",
+    "actionlint": "passed",
+    "govulnSymbolFindings": 0,
+    "gosecIssues": 0,
+    "gosecCompilerErrors": 0,
+    "crossBuilds": [
+      "linux/amd64",
+      "linux/arm64",
+      "darwin/amd64",
+      "darwin/arm64",
+      "windows/amd64"
+    ]
+  },
+  "limitations": [
+    "One actual cluster patch and native binary tested; OpenShift 4.14 and other minors/artifact hashes remain unqualified.",
+    "Static hostPath storage is not evidence of cloud CSI attach/detach behavior.",
+    "Unavailable-image and all admission/SCC rejection policy combinations are not fully exercised.",
+    "Baseline record remains partial and no full release-matrix qualification is claimed.",
+    "Static-volume marker/setup remains unqualified; the namespace-only hostmount-anyuid-v2 binding awaits explicit approval."
+  ],
+  "fixes": [
+    {
+      "commit": "d3481d5",
+      "behavior": "Retry application health to allow routing convergence; retain failure at deadline."
+    },
+    {
+      "commit": "ccdd9ff",
+      "behavior": "Omitted/null DC replicas become zero in offline conversion, matching the live API."
+    }
+  ],
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/openshift-4.21.36-live-evidence.tar.gz",
+    "archiveSHA256": "7de43538a0d025bd987dc76fefc87a2a14c5849cd3303be03e4dc2e0d330741e",
+    "manifestSHA256": "8f40cf4d6662efb8e5d08ba385e8adb4d1d52381fa80e66793a1ed42399279d0",
+    "files": 2877,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "generatedAt": "2026-10-15T23:54:55.994541+00:00"
+  }
+}

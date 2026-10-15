@@ -2,7 +2,7 @@
 
 Convert exported or live `apps.openshift.io/v1` DeploymentConfigs into baseline `apps/v1` Deployments, review migration plans, and stage or explicitly cut over supported workloads.
 
-The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. Newer clusters are accepted through API discovery without an arbitrary maximum version. **No actual OpenShift version has yet been qualified by this maintenance branch.** Local fixtures and HTTP simulations pass; they do not establish SCC, admission, ImageStream-controller or cutover compatibility. See the [qualification matrix](compatibility/matrix.json) and [release requirements](docs/qualification.md). Tool compatibility is separate from Red Hat's support lifecycle for a cluster.
+The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. Newer clusters are accepted through API discovery without an arbitrary maximum version. **Full release qualification remains incomplete.** Actual live tests on **OpenShift 4.21.36 / Kubernetes v1.34.9** cover migration, routing, SCC defaults, triggers, failures and recovery; see the [live evidence](docs/live-tests-2026-10-15.md) for exact results and limits. Fixtures and HTTP simulations remain separate from these cluster observations. See the [qualification matrix](compatibility/matrix.json) and [release requirements](docs/qualification.md). Tool compatibility is separate from Red Hat's support lifecycle for a cluster.
 
 Use Go **1.27.2**:
 
