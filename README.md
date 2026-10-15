@@ -1,121 +1,60 @@
-# OpenShift DeploymentConfig to Deployment Converter
+# OpenShift DeploymentConfig migration
 
-## Overview
+Convert exported or live `apps.openshift.io/v1` DeploymentConfigs into baseline `apps/v1` Deployments, review migration plans, and stage or explicitly cut over supported workloads.
 
-This tool automates the process of converting OpenShift DeploymentConfigs to Kubernetes Deployments. It addresses the critical need to migrate workloads from the deprecated DeploymentConfig resource to the standard Kubernetes Deployment resource.
+The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. Newer clusters are accepted through API discovery without an arbitrary maximum version. **No actual OpenShift version has yet been qualified by this maintenance branch.** Local fixtures and HTTP simulations pass; they do not establish SCC, admission, ImageStream-controller or cutover compatibility. See the [qualification matrix](compatibility/matrix.json) and [release requirements](docs/qualification.md). Tool compatibility is separate from Red Hat's support lifecycle for a cluster.
 
-DeploymentConfigs have been deprecated since OpenShift 4.14. While they continue to function in current versions, they could be removed in a future release of OpenShift. This tool facilitates a smooth and efficient transition by automating the conversion process.
+Use Go **1.27.2**:
 
-## Features
-
-- Automatically identifies and skips reserved OpenShift namespaces
-- Converts DeploymentConfigs to Deployments across multiple specified projects
-- Generates YAML files for the new Deployments
-- Optional application of the generated Deployments to the cluster
-- Adds annotations to track the migration process
-- Preserves existing labels and annotations (configurable)
-- Generates a comprehensive PDF report of the conversion process
-- Performs preflight checks to ensure cluster connectivity and permissions
-
-## Prerequisites
-
-- Go 1.21 or higher
-- Access to an OpenShift cluster (via kubeconfig)
-- Proper permissions in the OpenShift cluster to read DeploymentConfigs and create Deployments
-
-## Installation
-
-### From Source
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/jlmayorga/openshift-dc-migration.git
-   cd openshift-dc-migration
-   ```
-
-2. Build the binary:
-   ```
-   go build -o openshift-dc-migration
-   ```
-
-### Using Pre-built Binaries
-
-You can download pre-built binaries for various platforms from the [Releases](https://github.com/jlmayorga/openshift-dc-migration/releases) page.
-
-## Usage
-
-```
-./openshift-dc-migration [flags]
+```sh
+go mod download
+go mod verify
+go build -mod=readonly -trimpath -o /tmp/openshift-dc-converter .
 ```
 
-### Flags
+Generation is read-only against the cluster and is the default:
 
-- `--kubeconfig`: Path to the kubeconfig file (default is `$HOME/.kube/config`)
-- `--output-dir`: Directory to store converted Deployment YAML files (default is `./converted_deployments`)
-- `--apply-changes`: Apply the converted Deployments to the cluster (default is false)
-- `--preserve-annotations`: Preserve existing annotations in the converted Deployments (default is true)
-- `--preserve-labels`: Preserve existing labels in the converted Deployments (default is true)
-- `--reserved-namespaces`: List of reserved namespaces to skip (default is "default,openshift,openshift-infra")
-- `--log-file`: Path to the log file (default is "conversion_log.txt")
-- `--projects`: List of OpenShift projects to scan and convert (required)
-- `--report-path`: Path to save the PDF report (default is "conversion_report.pdf")
+```sh
+# Exported YAML, JSON, lists or multiple YAML documents; no kubeconfig is loaded.
+/tmp/openshift-dc-converter --input exported-dc.yaml --output-dir ./review
 
-### Example
-
-To convert DeploymentConfigs in projects "project1" and "project2" without applying changes and generate a PDF report:
-
-```
-./openshift-dc-migration --projects=project1,project2 --output-dir=./converted --report-path=./migration_report.pdf
+# Live generation with namespace-scoped permissions and an explicitly selected context.
+/tmp/openshift-dc-converter --projects example --context TEST_CONTEXT --output-dir ./review
 ```
 
-To convert, apply changes, and generate a PDF report:
+Offline objects require an explicit namespace. `--projects` deduplicates names and skips reserved namespaces before access checks. `--kubeconfig` and `--context` override standard loading rules; otherwise `KUBECONFIG` and the normal default file apply. Basic conversion never needs namespace-object or cluster-version access. If the DC API is absent or disabled, live discovery fails clearly; exported-file conversion remains available.
 
+Every workload gets a YAML manifest and JSON review plan. Pod labels, including Service-facing `deploymentconfig`, are retained. A separate migration label identifies the destination selector. Explicit zero replicas, pause, readiness/history settings, Rolling/Recreate behavior and supported image triggers are mapped. Unsupported hooks, custom/test behavior, disabled ConfigChange rollouts and ambiguous triggers produce manual diagnostics and block application. Read the [feature mapping](docs/feature-mapping.md).
+
+A generated manifest describes intended replicas. Review it through the staged procedure below before applying it while the DC is active.
+
+```sh
+# Inspect dependencies and produce a live plan without cluster writes.
+/tmp/openshift-dc-converter --mode plan --projects example --context TEST_CONTEXT \
+  --health-url https://APPLICATION/health --output-dir ./review
+
+# Validate admission, then stage a paused destination with zero replicas.
+/tmp/openshift-dc-converter --mode dry-run --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
+/tmp/openshift-dc-converter --mode stage --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
+
+# After pausing other reconcilers/scalers and reviewing the plan:
+/tmp/openshift-dc-converter --mode cutover --plan-file ./review/example/web.plan.json \
+  --context TEST_CONTEXT --automation-quiesced
+
+# Explicit recovery after inspecting a failed/interrupted migration:
+/tmp/openshift-dc-converter --mode rollback --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
 ```
-./openshift-dc-migration --projects=project1,project2 --apply-changes=true --report-path=./migration_report.pdf
+
+The legacy `--apply-changes` now aliases **zero-replica staging** and requires a reviewed `--plan-file`. It cannot create an active duplicate. Exclusive cutover stops and verifies source pods before starting the destination. Overlap requires an explicit planning choice and justification and is blocked for volume/host-bound workloads. The DC is retained for recovery. See the [migration and recovery procedure](docs/migration.md) and [RBAC reference](docs/rbac.md).
+
+The canonical report is `conversion_report.json`; the optional PDF defaults to `conversion_report.pdf` (`--report-path ''` disables it). `--json-report` selects the canonical path; report, log, input and plan paths must be distinct. Reports contain per-source identities, destination, stage, outcome, warnings, unsupported features and errors. Generation, application, readiness, manual cases, failures and skips have separate totals. Exit status is **0** for completed requested operations (including explicit skips/empty namespaces) and **1** for validation, manual migration, conversion, save, admission, apply, readiness, cancellation or report failures. Partial runs retain reports where storage is writable.
+
+Files use atomic replacement with restrictive permissions. Plans contain original manifests and may contain environment values; keep them private. `--request-timeout`, `--operation-timeout` and `--readiness-timeout` bound work. SIGINT/SIGTERM cancel API requests and preserve the journal/report where possible. Lost connectivity or unverified recovery is a failure, never a success.
+
+```sh
+go test -mod=readonly -race ./...
+go vet -mod=readonly ./...
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
-## Output
-
-The tool will create a directory structure as follows:
-
-```
-./converted_deployments/
-  ├── project1/
-  │   ├── deployment1.yaml
-  │   └── deployment2.yaml
-  └── project2/
-      ├── deployment3.yaml
-      └── deployment4.yaml
-```
-
-Each generated Deployment YAML file will include annotations indicating it was created by this migration process and the timestamp of creation.
-
-## PDF Report
-
-The tool generates a comprehensive PDF report of the conversion process. This report includes:
-
-- A list of all processed DeploymentConfigs
-- The namespace and name of each DeploymentConfig
-- Information about triggers, lifecycle hooks, auto-rollbacks, and custom strategies for each DeploymentConfig
-- Conversion status and any errors encountered
-- A summary of the total number of conversions performed
-
-## Preflight Checks
-
-Before performing any conversions, the tool now conducts preflight checks to ensure:
-
-- Connectivity to the OpenShift cluster
-- Proper permissions to access and modify necessary resources
-- Validity of specified projects
-
-## Warnings and Considerations
-
-- Always run the tool without the `--apply-changes` flag first and review the generated YAML files before applying changes.
-- Ensure you have backups of your DeploymentConfigs before running this tool with `--apply-changes=true`.
-- This tool performs a basic conversion. You may need to manually adjust the generated Deployments for workloads with complex configurations.
-- Test thoroughly in a non-production environment before using in production.
-- Review the generated PDF report to ensure all conversions were successful and to document the migration process.
-
-## Contributing
-
-Contributions to improve the tool are welcome. Please submit issues and pull requests through the project's repository.
+Development details, dependency decisions, vulnerability remediation and actual-cluster setup are in [docs/development.md](docs/development.md), [docs/dependencies.md](docs/dependencies.md), [docs/security.md](docs/security.md) and [docs/qualification.md](docs/qualification.md). Release automation builds checksums and version/provenance metadata, requires actual-cluster evidence for the exact artifacts, and creates a draft for maintainer review. No release is published by this maintenance work.
