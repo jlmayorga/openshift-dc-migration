@@ -18,6 +18,9 @@ func NewCommand() *cobra.Command {
 	o := DefaultOptions()
 	cmd := &cobra.Command{Use: "openshift-dc-converter", Short: "Plan migration of DeploymentConfigs to Deployments", Version: fmt.Sprintf("%s (%s, %s)", version, commit, buildDate), SilenceUsage: true}
 	cmd.RunE = func(cmd *cobra.Command, _ []string) error {
+		if o.ApplyChanges {
+			o.Mode = "stage"
+		}
 		if err := o.Validate(); err != nil {
 			return err
 		}
@@ -28,6 +31,12 @@ func NewCommand() *cobra.Command {
 		return r.Run(ctx)
 	}
 	f := cmd.Flags()
+	f.StringVar(&o.Mode, "mode", o.Mode, "generate, plan, dry-run or stage")
+	f.StringVar(&o.PlanFile, "plan-file", "", "Reviewed live migration plan")
+	f.StringVar(&o.CutoverMode, "cutover-mode", o.CutoverMode, "exclusive or overlap (recorded in plan)")
+	f.StringVar(&o.OverlapJustification, "overlap-justification", "", "Operator reason the workload permits overlap")
+	f.StringVar(&o.HealthURL, "health-url", "", "Operator-specified application health URL for cutover")
+	f.DurationVar(&o.ReadinessTimeout, "readiness-timeout", o.ReadinessTimeout, "Readiness and retirement timeout")
 	f.StringVar(&o.Kubeconfig, "kubeconfig", "", "Explicit kubeconfig; otherwise standard loading rules")
 	f.StringVar(&o.Context, "context", "", "Kubeconfig context")
 	f.StringSliceVar(&o.Projects, "projects", nil, "Namespaces to convert")

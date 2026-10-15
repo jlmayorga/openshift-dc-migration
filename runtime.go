@@ -26,6 +26,9 @@ var dcResource = schema.GroupVersionResource{Group: "apps.openshift.io", Version
 var deploymentResource = schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "deployments"}
 
 type Options struct {
+	Mode, PlanFile, CutoverMode, OverlapJustification, HealthURL string
+	AutomationQuiesced                                           bool
+	ReadinessTimeout                                             time.Duration
 	Kubeconfig, Context, OutputDir, ReportPath, PDFPath, LogPath string
 	Projects, Inputs, Reserved                                   []string
 	PreserveLabels, PreserveAnnotations, ApplyChanges            bool
@@ -33,10 +36,17 @@ type Options struct {
 }
 
 func DefaultOptions() Options {
-	return Options{OutputDir: "converted_deployments", ReportPath: "conversion_report.json", PDFPath: "conversion_report.pdf", PreserveLabels: true, PreserveAnnotations: true, Reserved: []string{"default", "openshift", "openshift-infra"}, RequestTimeout: 30 * time.Second, OperationTimeout: 15 * time.Minute}
+	return Options{Mode: "generate", CutoverMode: "exclusive", ReadinessTimeout: 5 * time.Minute, OutputDir: "converted_deployments", ReportPath: "conversion_report.json", PDFPath: "conversion_report.pdf", PreserveLabels: true, PreserveAnnotations: true, Reserved: []string{"default", "openshift", "openshift-infra"}, RequestTimeout: 30 * time.Second, OperationTimeout: 15 * time.Minute}
 }
 func (o Options) Validate() error {
-	if len(o.Inputs) == 0 && len(o.Projects) == 0 {
+	if !contains([]string{"generate", "plan", "dry-run", "stage"}, o.Mode) {
+		return fmt.Errorf("unsupported mode %q", o.Mode)
+	}
+	if o.Mode == "dry-run" || o.Mode == "stage" {
+		if o.PlanFile == "" || len(o.Inputs) > 0 || len(o.Projects) > 0 {
+			return errors.New("execution requires --plan-file and no --input or --projects")
+		}
+	} else if len(o.Inputs) == 0 && len(o.Projects) == 0 {
 		return errors.New("specify --input or --projects")
 	}
 	if len(o.Inputs) > 0 && len(o.Projects) > 0 {
@@ -45,8 +55,14 @@ func (o Options) Validate() error {
 	if o.RequestTimeout <= 0 || o.OperationTimeout <= 0 {
 		return errors.New("timeouts must be positive")
 	}
-	if o.ApplyChanges {
-		return errors.New("application is disabled until controlled staging is available")
+	if o.ApplyChanges && o.PlanFile == "" {
+		return errors.New("--apply-changes now requires a reviewed --plan-file and only stages zero replicas")
+	}
+	if o.Mode == "plan" && len(o.Inputs) > 0 {
+		return errors.New("live inventory requires --projects; offline generation writes an incomplete review plan")
+	}
+	if !contains([]string{"exclusive", "overlap"}, o.CutoverMode) {
+		return errors.New("cutover mode must be exclusive or overlap")
 	}
 	for _, p := range o.Projects {
 		if len(validation.IsDNS1123Label(p)) > 0 {
@@ -82,14 +98,16 @@ type Report struct {
 	Totals        Totals   `json:"totals"`
 }
 type Runner struct {
-	Options  Options
-	Dynamic  dynamic.Interface
-	Kube     kubernetes.Interface
-	Logger   *log.Logger
-	Out      io.Writer
-	Now      func() time.Time
-	Report   Report
-	Discover func(context.Context, string) (*metav1.APIResourceList, error)
+	Options         Options
+	Dynamic         dynamic.Interface
+	Kube            kubernetes.Interface
+	Logger          *log.Logger
+	Out             io.Writer
+	Now             func() time.Time
+	Target          string
+	SelectedContext string
+	Report          Report
+	Discover        func(context.Context, string) (*metav1.APIResourceList, error)
 }
 
 func NewRunner(o Options) *Runner {
@@ -117,6 +135,8 @@ func (r *Runner) connect() error {
 	if r.Report.Context == "" {
 		r.Report.Context = raw.CurrentContext
 	}
+	r.SelectedContext = r.Report.Context
+	r.Target = endpointIdentity(cfg.Host)
 	cfg.Timeout = r.Options.RequestTimeout
 	cfg.ContentType = "application/json"
 	cfg.AcceptContentTypes = "application/json"
@@ -130,15 +150,21 @@ func (r *Runner) connect() error {
 func (r *Runner) Run(ctx context.Context) (runErr error) {
 	ctx, cancel := context.WithTimeout(ctx, r.Options.OperationTimeout)
 	defer cancel()
-	r.Report = Report{SchemaVersion: "v1", Timestamp: r.Now().UTC().Format(time.RFC3339), Results: []Result{}}
+	r.Report = Report{SchemaVersion: "v1", Timestamp: r.Now().UTC().Format(time.RFC3339), Context: r.SelectedContext, Results: []Result{}}
 	defer func() {
 		if runErr != nil && len(r.Report.Results) == 0 {
 			r.Report.Results = append(r.Report.Results, Result{Stage: "preflight", Outcome: "failed", Error: runErr.Error()})
 		}
 		runErr = errors.Join(runErr, r.saveReports())
 	}()
+	if r.Options.ApplyChanges {
+		r.Options.Mode = "stage"
+	}
 	if err := r.Options.Validate(); err != nil {
 		return err
+	}
+	if r.Options.PlanFile != "" {
+		return r.executePlan(ctx)
 	}
 	var failures []error
 	if len(r.Options.Inputs) > 0 {
@@ -224,6 +250,17 @@ func (r *Runner) process(ctx context.Context, dc *unstructured.Unstructured) err
 		return err
 	}
 	result.Generated = true
+	p, e := r.buildPlan(ctx, dc, conversion, r.Options.Mode == "plan")
+	if e == nil {
+		e = savePlan(filepath.Join(r.Options.OutputDir, dc.GetNamespace(), dc.GetName()+".plan.json"), p)
+	}
+	if e != nil {
+		result.Error = e.Error()
+		return e
+	}
+	if len(p.Blockers) > 0 {
+		result.Unsupported = p.Blockers
+	}
 	result.Outcome = "generated"
 	result.Stage = "generation"
 	if len(result.Unsupported) > 0 {
