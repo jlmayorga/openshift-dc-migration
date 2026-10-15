@@ -12,12 +12,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.14-dc.yaml",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.15",
@@ -26,12 +28,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.15-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.16",
@@ -40,12 +44,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.16-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.17",
@@ -54,12 +60,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.17-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.18",
@@ -68,12 +76,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.18-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.19",
@@ -82,12 +92,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.19-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.20",
@@ -96,12 +108,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.20-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.21",
@@ -110,12 +124,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.21-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "4.22",
@@ -124,12 +140,14 @@
       "kubernetesVersion": null,
       "dependencyVersions": null,
       "testedAt": null,
-      "fixtureResult": "baseline-suite-passed (synthetic shared fixture only; release-specific fixtures pending)",
-      "simulatedAPIResult": "baseline-JSON-contracts-passed (not per-server evidence)",
+      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
+      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
         "No explicitly authorized test-cluster context supplied"
-      ]
+      ],
+      "fixture": "testdata/ocp-4.22-dc.json",
+      "fixtureTestDate": "2026-10-15"
     },
     {
       "minor": "next",
@@ -139,5 +157,9 @@
         "Discover next development release and record metadata before smoke testing"
       ]
     }
-  ]
+  ],
+  "inventorySource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.22&arch=amd64",
+  "nextChannelSource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.23&arch=amd64",
+  "latestAvailablePatch": "4.22.18",
+  "inventoryNote": "2026-10-15: public stable-4.22 graph includes 4.22.18; stable-4.23 graph has no nodes. Metadata observation only; no cluster qualification."
 }
