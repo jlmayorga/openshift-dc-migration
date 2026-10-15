@@ -500,13 +500,25 @@ func (r *Runner) checkHealth(ctx context.Context, p *MigrationPlan) error {
 	if err := validateHealthURL(p.HealthURL); err != nil {
 		return err
 	}
+	var lastError error
+	err := r.poll(ctx, func(ctx context.Context) (bool, error) {
+		lastError = r.healthAttempt(ctx, p.HealthURL)
+		return lastError == nil, nil
+	})
+	if err != nil {
+		return errors.Join(err, lastError)
+	}
+	return nil
+}
+
+func (r *Runner) healthAttempt(ctx context.Context, healthURL string) error {
 	if r.HealthCheck != nil {
-		return r.HealthCheck(ctx, p.HealthURL)
+		return r.HealthCheck(ctx, healthURL)
 	}
 	client := &http.Client{Timeout: r.Options.RequestTimeout, CheckRedirect: func(*http.Request, []*http.Request) error {
 		return errors.New("health redirects require an explicit final URL")
 	}}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, p.HealthURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, healthURL, nil)
 	if err != nil {
 		return err
 	}

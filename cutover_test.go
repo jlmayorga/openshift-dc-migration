@@ -3,15 +3,51 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
+
+func TestHealthWaitsForRouterConvergence(t *testing.T) {
+	for _, recovering := range []bool{true, false} {
+		t.Run(fmt.Sprint(recovering), func(t *testing.T) {
+			var requests atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				if requests.Add(1) < 3 || !recovering {
+					w.WriteHeader(http.StatusServiceUnavailable)
+				}
+			}))
+			defer server.Close()
+			r := NewRunner(DefaultOptions())
+			r.PollInterval = time.Millisecond
+			r.Options.ReadinessTimeout = 50 * time.Millisecond
+			p := &MigrationPlan{HealthURL: server.URL, Desired: &appsv1.Deployment{}}
+			one := int32(1)
+			p.Desired.Spec.Replicas = &one
+			err := r.checkHealth(context.Background(), p)
+			if recovering && err != nil {
+				t.Fatal(err)
+			}
+			if !recovering && (err == nil || !strings.Contains(err.Error(), "HTTP 503")) {
+				t.Fatalf("persistent failure lost: %v", err)
+			}
+			if requests.Load() < 3 {
+				t.Fatal("health was not retried")
+			}
+		})
+	}
+}
 
 func cutoverTest(t *testing.T, mode string, dependencies bool) (*Runner, *contractCluster, string) {
 	t.Helper()
