@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"math"
+	"regexp"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -106,6 +108,9 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 			return c, errors.New("invalid pod label")
 		}
 	}
+	if s.Template.Spec.ActiveDeadlineSeconds != nil || len(s.Template.Spec.EphemeralContainers) > 0 {
+		return c, errors.New("Deployment templates cannot contain activeDeadlineSeconds or ephemeralContainers")
+	}
 	if len(s.Template.Spec.Containers) == 0 {
 		return c, errors.New("source requires at least one container")
 	}
@@ -127,8 +132,16 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	if s.Template.Spec.RestartPolicy != "" && s.Template.Spec.RestartPolicy != corev1.RestartPolicyAlways {
 		return c, errors.New("Deployment pods require restartPolicy Always")
 	}
+	deadline := int32(600)
+	if s.MinReadySeconds >= deadline {
+		if s.MinReadySeconds == math.MaxInt32 {
+			return c, errors.New("minReadySeconds leaves no valid Deployment progress deadline; manual migration required")
+		}
+		deadline = s.MinReadySeconds + 1
+		c.Warnings = append(c.Warnings, "Deployment progress deadline raised above preserved minReadySeconds.")
+	}
 	id := migrationID(dc)
-	dep := &appsv1.Deployment{TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"}, ObjectMeta: metav1.ObjectMeta{Name: dc.GetName(), Namespace: dc.GetNamespace(), Annotations: map[string]string{sourceAnnotation: string(dc.GetUID())}}, Spec: appsv1.DeploymentSpec{Replicas: s.Replicas, Paused: s.Paused, MinReadySeconds: s.MinReadySeconds, RevisionHistoryLimit: s.RevisionHistoryLimit, Selector: &metav1.LabelSelector{MatchLabels: map[string]string{migrationLabel: id}}, Template: *s.Template.DeepCopy()}}
+	dep := &appsv1.Deployment{TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"}, ObjectMeta: metav1.ObjectMeta{Name: dc.GetName(), Namespace: dc.GetNamespace(), Annotations: map[string]string{sourceAnnotation: string(dc.GetUID())}}, Spec: appsv1.DeploymentSpec{Replicas: s.Replicas, Paused: s.Paused, MinReadySeconds: s.MinReadySeconds, ProgressDeadlineSeconds: &deadline, RevisionHistoryLimit: s.RevisionHistoryLimit, Selector: &metav1.LabelSelector{MatchLabels: map[string]string{migrationLabel: id}}, Template: *s.Template.DeepCopy()}}
 	if r.Options.PreserveLabels {
 		dep.Labels = maps.Clone(dc.GetLabels())
 		for _, k := range dcSpecificLabels {
@@ -155,6 +168,13 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	for _, key := range dcSpecificAnnotations {
 		delete(dep.Spec.Template.Annotations, key)
 	}
+	if _, found := s.Template.Labels["pod-template-hash"]; found {
+		c.Unsupported = append(c.Unsupported, "pod-template-hash is replaced by Deployment controllers; review dependent selectors manually")
+	}
+	if len(s.Template.OwnerReferences) > 0 || len(s.Template.Finalizers) > 0 {
+		c.Unsupported = append(c.Unsupported, "pod template owner references/finalizers require a manual lifecycle review")
+	}
+	dep.Spec.Template.ObjectMeta = metav1.ObjectMeta{Labels: dep.Spec.Template.Labels, Annotations: dep.Spec.Template.Annotations}
 	c.Deployment = dep
 	for key := range raw {
 		if !contains([]string{"replicas", "selector", "template", "paused", "test", "minReadySeconds", "revisionHistoryLimit", "strategy", "triggers"}, key) {
@@ -247,7 +267,7 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 			configAuto = true
 		case "ImageChange":
 			p := tr.ImageChangeParams
-			if p == nil || p.From.Kind != "ImageStreamTag" || len(p.ContainerNames) == 0 || len(strings.Split(p.From.Name, ":")) != 2 {
+			if p == nil || p.From.Kind != "ImageStreamTag" || len(p.ContainerNames) == 0 || !validImageStreamTag(p.From.Name) {
 				c.Unsupported = append(c.Unsupported, "ImageChange requires ImageStreamTag name:tag and explicit containers")
 				continue
 			}
@@ -336,4 +356,9 @@ func validateLimit(v *intstr.IntOrString, unavailable bool) error {
 		return errors.New("rolling percentage must be nonnegative; maxUnavailable cannot exceed 100%")
 	}
 	return nil
+}
+
+func validImageStreamTag(name string) bool {
+	stream, tag, found := strings.Cut(name, ":")
+	return found && len(validation.IsDNS1123Subdomain(stream)) == 0 && regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$`).MatchString(tag)
 }

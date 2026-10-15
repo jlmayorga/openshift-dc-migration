@@ -20,3 +20,7 @@ The baseline is OpenShift 4.14 (Kubernetes 1.27). The embedded field/required-pr
 | Unknown DC semantics/newer pod fields | Manual classification or validation error; never silently dropped |
 
 Migration identifiers derive from source namespace, name and UID. Output contains no source owner references, resource version or server status. Conversion never modifies the source object. Hook Jobs, custom deployers and dependent-resource transitions require operator design; the tool does not invent substitutes.
+
+The Deployment progress deadline defaults to 600 seconds and is raised above preserved `minReadySeconds` when necessary, so long readiness settings do not produce an invalid Deployment. Configure the operation/readiness timeout accordingly. Deployment templates reject active deadlines and ephemeral containers. HPA specs are checked as raw JSON against the 1.27 baseline before typed decoding; newer fields that an older client could drop require manual freeze/retargeting. Owner-managed/finalizer-bearing HPAs and active DC deployers are also blocked from automatic migration.
+
+A source `pod-template-hash` label requires manual selector review because Deployment controllers replace it on ReplicaSets/pods. Pod-template owner references and finalizers require manual lifecycle review. Server-managed pod-template identity metadata is not copied to the destination; Service-facing labels and annotations remain independent.

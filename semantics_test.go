@@ -26,6 +26,15 @@ func TestSemanticCases(t *testing.T) {
 		{"reserved-label", func(d *unstructured.Unstructured) {
 			_ = unstructured.SetNestedField(d.Object, migrationID(d), "spec", "template", "metadata", "labels", migrationLabel)
 		}, false, true},
+		{"long-min-ready", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, int64(900), "spec", "minReadySeconds")
+		}, false, false},
+		{"reserved-controller-hash", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedField(d.Object, "old-hash", "spec", "template", "metadata", "labels", "pod-template-hash")
+		}, true, false},
+		{"pod-finalizer", func(d *unstructured.Unstructured) {
+			_ = unstructured.SetNestedSlice(d.Object, []interface{}{"test.example/cleanup"}, "spec", "template", "metadata", "finalizers")
+		}, true, false},
 		{"normal", func(d *unstructured.Unstructured) {}, false, false},
 		{"recreate", func(d *unstructured.Unstructured) {
 			_ = unstructured.SetNestedField(d.Object, "Recreate", "spec", "strategy", "type")
@@ -136,5 +145,17 @@ func TestMetadataAndDefaults(t *testing.T) {
 	}
 	if *c.Deployment.Spec.Replicas != 1 || c.Deployment.Labels["user"] != "" || c.Deployment.Spec.Template.Labels["openshift.io/deployment-config.name"] != "keep" {
 		t.Fatalf("lost pod labels or default: %+v", c.Deployment)
+	}
+}
+
+func TestLongMinReadyHasValidDeadline(t *testing.T) {
+	d := fixture(t)
+	_ = unstructured.SetNestedField(d.Object, int64(900), "spec", "minReadySeconds")
+	c, err := NewRunner(DefaultOptions()).Convert(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Deployment.Spec.ProgressDeadlineSeconds == nil || *c.Deployment.Spec.ProgressDeadlineSeconds <= c.Deployment.Spec.MinReadySeconds {
+		t.Fatal("default progress deadline invalidates preserved readiness")
 	}
 }
