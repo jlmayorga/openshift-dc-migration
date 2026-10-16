@@ -205,6 +205,33 @@ class WorkerAuthorization(unittest.TestCase):
             self.assertEqual(proc.returncode, 2)
 
 
+class StorageAuthorization(unittest.TestCase):
+    def test_missing_ack_or_unsafe_target_fails_before_access(self):
+        script = pathlib.Path(__file__).with_name("qualify_storage.py")
+        for prefix, acknowledge in [("dcmig-test", False), ("production", True)]:
+            command = [
+                sys.executable,
+                str(script),
+                "--context",
+                "test",
+                "--kubeconfig",
+                "/nonexistent",
+                "--binary",
+                "/nonexistent",
+                "--image",
+                "example@sha256:00",
+                "--namespace-prefix",
+                prefix,
+                "--output",
+                "/nonexistent",
+            ]
+            if acknowledge:
+                command.append("--allow-test-mutations")
+            proc = subprocess.run(command, capture_output=True, text=True, timeout=10)
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("Explicit disposable target", proc.stderr)
+
+
 class ConstraintAuthorization(unittest.TestCase):
     def invoke(self, output, cases, acknowledge):
         script = pathlib.Path(__file__).with_name("qualify_constraints.py")
