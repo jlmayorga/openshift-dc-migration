@@ -257,3 +257,35 @@ func TestDeletingHPACannotBeReportedRestored(t *testing.T) {
 		t.Fatal("deleting HPA reported restored")
 	}
 }
+
+func TestOlderCompletedPlanWithUnresolvedImageCannotReportReady(t *testing.T) {
+	r, cluster, path := cutoverTest(t, "exclusive", false)
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := loadPlan(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	triggers := []interface{}{map[string]interface{}{"type": "ConfigChange"}, map[string]interface{}{"type": "ImageChange", "imageChangeParams": map[string]interface{}{"automatic": true, "containerNames": []interface{}{"web"}, "from": map[string]interface{}{"kind": "ImageStreamTag", "name": "web:latest"}}}}
+	if err := unstructured.SetNestedSlice(plan.Source.Object, triggers, "spec", "triggers"); err != nil {
+		t.Fatal(err)
+	}
+	conversion, err := r.Convert(plan.Source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan.Desired, plan.Blockers = conversion.Deployment, nil
+	cluster.destination.Annotations[planAnnotation] = planDigest(plan)
+	cluster.destination.Annotations[imageTriggerAnnotation] = plan.Desired.Annotations[imageTriggerAnnotation]
+	if err := savePlan(path, plan); err != nil {
+		t.Fatal(err)
+	}
+	before := len(cluster.mutations)
+	if err := r.Run(context.Background()); err == nil || !strings.Contains(err.Error(), "unresolved") {
+		t.Fatalf("unresolved older plan accepted: %v", err)
+	}
+	if len(cluster.mutations) != before || r.Report.Results[0].Ready {
+		t.Fatal("unresolved plan mutated cluster or reported ready")
+	}
+}

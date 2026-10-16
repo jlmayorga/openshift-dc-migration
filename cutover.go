@@ -41,6 +41,9 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 	if r.Options.Mode == "rollback" {
 		return r.rollback(ctx, p, result)
 	}
+	if blockers := unresolvedImageTriggers(p.Source); len(blockers) > 0 {
+		return fmt.Errorf("cutover blocked: %v", blockers)
+	}
 	if !r.Options.AutomationQuiesced {
 		return errors.New("cutover requires --automation-quiesced after pausing external reconcilers and scaling automation")
 	}

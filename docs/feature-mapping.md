@@ -11,6 +11,7 @@ The baseline is OpenShift 4.14 (Kubernetes 1.27). The embedded field/required-pr
 | Recreate | Recreate |
 | Custom/unknown, test DC, hooks | Paused review manifest, actionable manual classification, nonzero exit, no automatic application |
 | Automatic ImageChange | `image.openshift.io/triggers` per container, preserving source namespace and paused/disabled state |
+| Unresolved automatic ImageChange | Read-only review allowed; live plan/staging/cutover blocked until initial build/import resolves the DC image |
 | Unsupported/ambiguous ImageChange | Manual classification, no automatic application |
 | ConfigChange | Deployment template changes cause rollouts |
 | Omitted/null triggers | DC API ConfigChange default; warning recorded |

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
@@ -84,6 +85,7 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	if !live {
 		return p, nil
 	}
+	p.Blockers = append(p.Blockers, unresolvedImageTriggers(dc)...)
 	if dc.GetUID() == "" || dc.GetResourceVersion() == "" {
 		return nil, errors.New("live plan requires source UID and resourceVersion")
 	}
@@ -225,6 +227,24 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	sort.Strings(p.Blockers)
 	p.InventoryComplete = true
 	return p, nil
+}
+
+func unresolvedImageTriggers(dc *unstructured.Unstructured) []string {
+	triggers, _, _ := unstructured.NestedSlice(dc.Object, "spec", "triggers")
+	var blockers []string
+	for _, item := range triggers {
+		trigger, ok := item.(map[string]interface{})
+		if !ok || trigger["type"] != "ImageChange" {
+			continue
+		}
+		automatic, _, _ := unstructured.NestedBool(trigger, "imageChangeParams", "automatic")
+		image, _, _ := unstructured.NestedString(trigger, "imageChangeParams", "lastTriggeredImage")
+		if automatic && strings.TrimSpace(image) == "" {
+			name, _, _ := unstructured.NestedString(trigger, "imageChangeParams", "from", "name")
+			blockers = append(blockers, "ImageChange trigger "+name+" is unresolved; finish the initial build/import, wait for the DC image controller, then regenerate the live plan")
+		}
+	}
+	return blockers
 }
 func sourceController(obj, dc *unstructured.Unstructured) bool {
 	for _, owner := range obj.GetOwnerReferences() {
