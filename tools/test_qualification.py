@@ -2,7 +2,53 @@ import unittest
 import pathlib
 import subprocess
 import sys
+import tempfile
 from qualify_openshift import validate_target
+
+
+class NewAppAuthorization(unittest.TestCase):
+    def invoke(self, output, cases):
+        script = pathlib.Path(__file__).with_name("qualify_new_app.py")
+        return subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--context",
+                "test",
+                "--kubeconfig",
+                "/nonexistent",
+                "--binary",
+                "/nonexistent",
+                "--image",
+                "test@sha256:00",
+                "--second-image",
+                "test@sha256:01",
+                "--sidecar-image",
+                "test@sha256:02",
+                "--namespace-prefix",
+                "dcmig-test",
+                "--output",
+                output,
+                "--cases",
+                cases,
+                "--allow-test-mutations",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+    def test_regular_volume_requires_explicit_authorization_before_access(self):
+        with tempfile.TemporaryDirectory() as output:
+            proc = self.invoke(output, "regular-pvc")
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("explicit --allow-regular-pvc", proc.stderr)
+
+    def test_empty_case_selection_fails_before_access(self):
+        with tempfile.TemporaryDirectory() as output:
+            proc = self.invoke(output, "")
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("Unknown or empty", proc.stderr)
 
 
 class StaticVolumeAuthorization(unittest.TestCase):

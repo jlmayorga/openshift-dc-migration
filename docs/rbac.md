@@ -15,3 +15,5 @@ Create/update dry runs require the same create/update permission as a real reque
 The core v1 Endpoints API is used as the 4.14 routing baseline. Later optional APIs are never assumed from a version number. If a required capability is absent, execution stops with a diagnostic. Deprecation warnings remain informational; permission, schema and admission errors are retained.
 
 Do not grant namespace deletion, privileged SCCs or cluster-admin to the converter. Pause external reconcilers and scalers before cutover. The local plan lock coordinates one process only; it is not a cluster-wide lease.
+
+The new-app integration runner additionally creates test namespaces, BuildConfigs/Builds, ImageStream imports and template-generated resources. The explicitly authorized regular-PVC case creates a 1Gi claim through an existing StorageClass and reads only its resulting PV metadata. These test-only permissions are not required by ordinary conversion; the regular-volume test uses default restricted pod admission without an extra SCC binding.

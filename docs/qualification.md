@@ -68,3 +68,22 @@ Before creating/publishing a release:
 The recovery driver uses a loopback-only authenticated oc proxy and a credential-free fault proxy to lose a success response after each of six real cluster mutations. It then restores connectivity and verifies explicit rollback and reruns. The permission driver saves short-lived account tokens privately; never publish its `*-credentials.json` files or kubeconfigs.
 
 The optional feature `--static-volume-test --cases persistent-volume --volume-scc SCC_NAME` needs separate explicit approval for the node directory and exact existing SCC binding. It requires the explicitly approved existing `hostmount-anyuid-v2` SCC and creates a static hostPath PV/PVC with an empty StorageClass and uses an explicitly selected test SELinux context; it provisions no cloud volume. The test must first prove the source can write/read its marker. A namespace SCC grant does not imply that an admin-created Pod dry run reproduces service-account/controller admission. Inspect actual Pod admission and source readiness before migration. This single-node test cannot qualify cloud CSI attach/detach behavior.
+
+## Apps created with oc new-app
+
+`tools/qualify_new_app.py` creates actual applications with `oc new-app --as-deployment-config`, including existing/cross-namespace ImageStreams, grouped containers, processed templates, and binary Docker/S2I build workflows. It verifies that rebuild output continues updating the Deployment after cutover, and retains BuildConfigs, ImageStreams, Services, UIDs and per-stage observations. Both Service ports are exercised where the runtime exposes 8080 and 8888. The default builder input is `openshift/httpd:2.4-ubi9`; choose `--builder-image-stream` for another installed, approved S2I builder. Build evidence records resolved images.
+
+Supply the usual explicit context/kubeconfig/binary and new `dcmig-*` namespace prefix, plus immutable `--image`, `--second-image` (HTTP 8080), and `--sidecar-image` (HTTP 8081). Select `--cases all` or comma-separated case names. Full runs include a regular 1Gi PVC and require explicit `--allow-regular-pvc`; it uses the existing default StorageClass and the default workload SCC, without granting a new SCC. The suite creates test PVCs only when that case is selected and authorized. It does not create nodes or StorageClasses. Keep regular test storage only as long as needed for inspection.
+
+For example, with approved disposable targets and images:
+
+```sh
+python3 tools/qualify_new_app.py \
+  --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
+  --binary "$CANDIDATE_BINARY" --namespace-prefix dcmig-newapp-run \
+  --image "$HTTP_8080_DIGEST" --second-image "$SECOND_HTTP_8080_DIGEST" \
+  --sidecar-image "$HTTP_8081_DIGEST" --output ./private-newapp-evidence \
+  --cases all --allow-test-mutations --allow-regular-pvc --timeout 240
+```
+
+Apps awaiting their first binary build can generate read-only review artifacts, but cannot produce an executable live plan until the DC image controller has resolved their automatic ImageChange triggers. A new-app origin does not bypass unsupported hooks/test/custom behavior, selector/ownership checks or stale dependency checks.
