@@ -28,10 +28,14 @@ get() { curl -fsS --connect-timeout 3 --max-time 5 --cacert "$sa/ca.crt" -H "Aut
 field() { printf '%s' "$current" | sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p"; }
 write() {
   rv=$(field resourceVersion)
-  stamp=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  stamp=$(date -u '+%Y-%m-%dT%H:%M:%S.000000Z')
   body="{\"apiVersion\":\"coordination.k8s.io/v1\",\"kind\":\"Lease\",\"metadata\":{\"name\":\"worker\",\"namespace\":\"$POD_NAMESPACE\",\"resourceVersion\":\"$rv\",\"labels\":{\"migration.openshift-dc.io/configuration-run\":\"$RUN_ID\"}},\"spec\":{\"holderIdentity\":\"$1\",\"leaseDurationSeconds\":20,\"renewTime\":\"$stamp\"}}"
   code=$(curl -sS --connect-timeout 3 --max-time 5 --cacert "$sa/ca.crt" -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -X PUT --data-binary "$body" -o /tmp/lease-response -w '%{http_code}' "$url")
-  [ "$code" = 200 ]
+  case "$code" in
+    200) return 0 ;;
+    409) return 1 ;;
+    *) cat /tmp/lease-response >&2; exit 45 ;;
+  esac
 }
 release() {
   trap - TERM INT EXIT
