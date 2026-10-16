@@ -90,6 +90,8 @@ Apps awaiting their first binary build can generate read-only review artifacts, 
 
 ## Multiple namespaces in one invocation
 
+The [actual multi-namespace evidence](multiple-namespaces-live-tests.md) records six passing cases on OpenShift 4.21.36.
+
 `--projects namespace-a,namespace-b,namespace-c` supports generation and live planning in one invocation. Artifacts are written under each namespace directory even when every DC has the same name. Duplicate names in the project list are processed once. Empty, skipped, failed and manual projects/workloads retain separate report entries; any failure still returns a nonzero aggregate exit while later namespaces are processed.
 
 Run `tools/qualify_namespaces.py` to verify this against actual `oc new-app --as-deployment-config` workloads. It creates six labelled namespaces: three same-named apps with distinct HTTP responses and replica counts 1/2/0, an unselected sentinel app, an unsupported test DC and an empty namespace. It checks multi-project generation/planning, nonpersistent dry runs of those plans, manual and RBAC partial failures, and isolated cutover/recovery in different orders. A test-only reader is granted DC-list permission in two namespaces and denied the third; its short-lived credential stays private.

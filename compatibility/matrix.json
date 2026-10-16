@@ -127,7 +127,7 @@
         "k8s.io/apimachinery": "v0.31.3",
         "k8s.io/client-go": "v0.31.3"
       },
-      "testedAt": "2026-10-16T00:29:21.363355+00:00",
+      "testedAt": "2026-10-16T00:41:43.930520+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "partial (actual cluster; see linked session evidence)",
@@ -145,7 +145,8 @@
       "artifactSHA256": "b21b39c83941a3944c528387293e4c3355fb57137fc1f1874cc452c237b370fb",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
-        "compatibility/evidence/2026-10-15-4.21.36.json"
+        "compatibility/evidence/2026-10-15-4.21.36.json",
+        "compatibility/evidence/2026-10-16-multiple-namespaces-4.21.36.json"
       ]
     },
     {

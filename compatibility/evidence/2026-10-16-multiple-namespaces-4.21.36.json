@@ -1,0 +1,348 @@
+{
+  "schemaVersion": "v1",
+  "kind": "actual-openshift-multiple-namespaces-test-session",
+  "result": "partial",
+  "suiteResult": "passed",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "testedAt": "2026-10-16T00:37:05.224505+00:00",
+  "completedAt": "2026-10-16T00:41:43.930520+00:00",
+  "artifactSHA256": "b21b39c83941a3944c528387293e4c3355fb57137fc1f1874cc452c237b370fb",
+  "platform": "darwin/arm64",
+  "goSourceRevision": "050cfcc891dbe8491f59c8ddb5f3ee9ab91fe5f2",
+  "revisionAtInvocation": "8cef076d300fcb12e1680156a4cae5fe2ebc9a4f",
+  "driverProvenance": {
+    "baseRevisionAtRun": "8cef076d300fcb12e1680156a4cae5fe2ebc9a4f",
+    "driverSHA256": "bd6ef3f107a85721b2901798d232a15a5c9c41706a95e2d8bfc31cb5d98bad95",
+    "driverWasUncommittedAtInvocation": true,
+    "driverContentCommit": "ee8f6a9a50d7f73ac363ea5c21c42676cd2781f7",
+    "note": "Invocation started on the recorded base revision with this new driver uncommitted. Its exact archived SHA-256 matches the driver now committed at driverContentCommit."
+  },
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.31.3",
+    "k8s.io/apimachinery": "v0.31.3",
+    "k8s.io/client-go": "v0.31.3"
+  },
+  "dedicatedNamespaceCount": 6,
+  "namespaces": {
+    "a": "dcmig-ns-final-20261016-a",
+    "b": "dcmig-ns-final-20261016-b",
+    "c": "dcmig-ns-final-20261016-c",
+    "sentinel": "dcmig-ns-final-20261016-sentinel",
+    "manual": "dcmig-ns-final-20261016-manual",
+    "empty": "dcmig-ns-final-20261016-empty"
+  },
+  "migrationNamespaceCount": 3,
+  "targetedCases": 6,
+  "passedTargetedCases": 6,
+  "testCases": [
+    {
+      "case": "batch-generation",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:38:31.919276+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "singleInvocation": true,
+        "duplicateProcessedOnce": true,
+        "sameResourceName": "web",
+        "namespacedArtifactDirectories": [
+          "dcmig-ns-final-20261016-a",
+          "dcmig-ns-final-20261016-b",
+          "dcmig-ns-final-20261016-c"
+        ],
+        "emptyNamespaces": 1,
+        "reservedSkipped": 1,
+        "totals": {
+          "requested": 5,
+          "generated": 3,
+          "applied": 0,
+          "ready": 0,
+          "skipped": 1,
+          "manual": 0,
+          "failed": 0,
+          "empty": 1
+        }
+      }
+    },
+    {
+      "case": "batch-planning",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:38:38.885221+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "singleInvocation": true,
+        "independentMigrationIDs": [
+          "6158395f02dce2921b77aa01",
+          "b853bff8bf2c485bd6527026",
+          "3dbc4c0d7d7b3f517ba0f2e4"
+        ],
+        "planFiles": [
+          "batch-planning-plan-0119/dcmig-ns-final-20261016-a/web.plan.json",
+          "batch-planning-plan-0119/dcmig-ns-final-20261016-b/web.plan.json",
+          "batch-planning-plan-0119/dcmig-ns-final-20261016-c/web.plan.json"
+        ],
+        "totals": {
+          "requested": 4,
+          "generated": 3,
+          "applied": 0,
+          "ready": 0,
+          "skipped": 0,
+          "manual": 0,
+          "failed": 0,
+          "empty": 1
+        }
+      }
+    },
+    {
+      "case": "batch-plan-dry-runs",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:38:50.101021+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "allThreeBatchPlansServerValidated": true,
+        "destinationsPersisted": 0,
+        "sourceSpecsUnchanged": true
+      }
+    },
+    {
+      "case": "batch-manual-partial-failure",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:38:59.182373+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "failureDoesNotStopLaterNamespaces": true,
+        "aggregateExitNonzero": true,
+        "manualSourceUnchanged": true,
+        "totals": {
+          "generate": {
+            "requested": 5,
+            "generated": 4,
+            "applied": 0,
+            "ready": 0,
+            "skipped": 0,
+            "manual": 1,
+            "failed": 0,
+            "empty": 1
+          },
+          "plan": {
+            "requested": 5,
+            "generated": 4,
+            "applied": 0,
+            "ready": 0,
+            "skipped": 0,
+            "manual": 1,
+            "failed": 0,
+            "empty": 1
+          }
+        }
+      }
+    },
+    {
+      "case": "batch-rbac-partial-failure",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:39:18.553995+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "allowedNamespaces": [
+          "dcmig-ns-final-20261016-a",
+          "dcmig-ns-final-20261016-c"
+        ],
+        "deniedNamespace": "dcmig-ns-final-20261016-b",
+        "laterAllowedNamespaceProcessed": true,
+        "totals": {
+          "requested": 3,
+          "generated": 2,
+          "applied": 0,
+          "ready": 0,
+          "skipped": 0,
+          "manual": 0,
+          "failed": 1,
+          "empty": 0
+        }
+      }
+    },
+    {
+      "case": "cutover-recovery-namespace-isolation",
+      "result": "passed",
+      "startedAt": "2026-10-16T00:39:26.555363+00:00",
+      "namespaces": [
+        "dcmig-ns-final-20261016-a",
+        "dcmig-ns-final-20261016-b",
+        "dcmig-ns-final-20261016-c",
+        "dcmig-ns-final-20261016-sentinel",
+        "dcmig-ns-final-20261016-manual",
+        "dcmig-ns-final-20261016-empty"
+      ],
+      "observations": {
+        "sameNamedApplicationsMigrated": 3,
+        "replicas": [
+          1,
+          2,
+          0
+        ],
+        "destinationUIDs": [
+          "2866c545-03aa-49a1-a81b-4aab5b73b890",
+          "9b6cc818-d2a8-4645-b4d3-f8b91a8abbd8",
+          "0dce0cf7-48d6-47ff-9d62-26ba6f76ee12"
+        ],
+        "migrationIDs": [
+          "6158395f02dce2921b77aa01",
+          "b853bff8bf2c485bd6527026",
+          "3dbc4c0d7d7b3f517ba0f2e4"
+        ],
+        "cutoverOrder": [
+          "a",
+          "b",
+          "c"
+        ],
+        "recoveryOrder": [
+          "b",
+          "c",
+          "a"
+        ],
+        "otherNamespaceStateVerifiedAfterEveryStep": true,
+        "distinctHTTPResponsesVerified": true,
+        "sentinelAndManualSourcesUnchanged": true
+      }
+    }
+  ],
+  "localValidation": {
+    "pythonTests": 9,
+    "black": "passed",
+    "gitDiffCheck": "passed",
+    "goSourceChanged": false,
+    "existingGoValidation": "119 race cases, vet, scanners and five cross-builds recorded for this unchanged binary in the preceding new-app session"
+  },
+  "retainedResources": "Six final labelled test namespaces; recovered source workloads and paused zero-replica destination Deployments; unselected sentinel and manual sources unchanged. No storage or cluster role provisioned. Short-lived DC-list-only service-account access is namespace-scoped.",
+  "limitations": [
+    "Actual OpenShift 4.21.36 and one native binary only; no new version/platform qualification.",
+    "Generation and planning batch multiple projects. Mutating stages each execute one reviewed, namespace-bound plan with its own application health URL.",
+    "Earlier driver attempt had two harness errors (empty blockers omitted from JSON and unsupported pathlib opener), with a dependent dry-run check also failing. Those attempts remain evidence and are not counted as passing cases."
+  ],
+  "priorEvidence": "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
+  "resourceIdentityAudit": {
+    "result": "passed",
+    "servicesWithUIDAndSpecPreserved": 5,
+    "imageStreamsWithUIDPreserved": 5,
+    "recoveredSourceSpecsAndDestinationUIDsVerified": 3,
+    "resources": [
+      {
+        "namespace": "dcmig-ns-final-20261016-a",
+        "kind": "Service",
+        "name": "web",
+        "uid": "9edc5f04-188b-4b3a-be20-644134336794",
+        "specUnchanged": true
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-a",
+        "kind": "ImageStream",
+        "name": "web",
+        "uid": "fd7e80d7-cb09-49e7-adb5-101ffee4d076",
+        "specUnchanged": "not asserted; identity retained"
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-b",
+        "kind": "Service",
+        "name": "web",
+        "uid": "ed28419c-daf0-4a18-ab61-3db6affe268a",
+        "specUnchanged": true
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-b",
+        "kind": "ImageStream",
+        "name": "web",
+        "uid": "bfb44f57-7be5-4f5e-aa0f-0c49056e4621",
+        "specUnchanged": "not asserted; identity retained"
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-c",
+        "kind": "Service",
+        "name": "web",
+        "uid": "d3373460-4c53-43bc-9e8f-0b465bca32f9",
+        "specUnchanged": true
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-c",
+        "kind": "ImageStream",
+        "name": "web",
+        "uid": "15600f65-9f99-4a3d-8c9e-0c1862590114",
+        "specUnchanged": "not asserted; identity retained"
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-sentinel",
+        "kind": "Service",
+        "name": "web",
+        "uid": "af11662b-b3ed-457c-b5cd-8e34c6954e46",
+        "specUnchanged": true
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-sentinel",
+        "kind": "ImageStream",
+        "name": "web",
+        "uid": "d3cc4efe-368c-4a49-aae5-8e6af6179032",
+        "specUnchanged": "not asserted; identity retained"
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-manual",
+        "kind": "Service",
+        "name": "web",
+        "uid": "901175f0-d5bb-4d51-90f6-bd9200393d56",
+        "specUnchanged": true
+      },
+      {
+        "namespace": "dcmig-ns-final-20261016-manual",
+        "kind": "ImageStream",
+        "name": "web",
+        "uid": "048dd982-7f68-4e13-951a-98f1a78a0362",
+        "specUnchanged": "not asserted; identity retained"
+      }
+    ]
+  },
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/multiple-namespaces-live-20261016/openshift-4.21.36-multiple-namespaces-evidence.tar.gz",
+    "archiveSHA256": "80d0efecca3a09f9ed831ae47cf83311f90bae575467fce0b9d893c5a8888ed2",
+    "manifestSHA256": "15d40a229088630d7496ce734821071b0bc350e74e0b9da42cf1be0ae3ffada8",
+    "files": 865,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "allManifestEntriesVerified": true,
+    "generatedAt": "2026-10-16T00:41:45.238391+00:00"
+  }
+}
