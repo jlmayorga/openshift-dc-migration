@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
+	authorizationv1 "k8s.io/api/authorization/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -29,6 +30,14 @@ import (
 )
 
 type contractCluster struct {
+	deniedLocalSCCReviewAccess    bool
+	rejectLocalSCCReviewRequest   bool
+	omitLocalSCCReviewAPI         bool
+	localSCCReviewStatus          *authorizationv1.SubjectAccessReviewStatus
+	localSCCReviewCalls           int
+	reviewedSCC                   string
+	podSCCOverride                *string
+	dropRequiredSCC               bool
 	mutateSCCSpec                 func(map[string]interface{})
 	mutatePodSpec                 func(map[string]interface{})
 	injectedPodVolumes            []corev1.Volume
@@ -72,16 +81,47 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		t.Errorf("non JSON negotiation: %s", req.Header.Get("Accept"))
 	}
 	if strings.HasSuffix(req.URL.Path, "selfsubjectaccessreviews") {
-		jsonResponse(w, map[string]interface{}{"kind": "SelfSubjectAccessReview", "apiVersion": "authorization.k8s.io/v1", "status": map[string]interface{}{"allowed": true}})
+		var review authorizationv1.SelfSubjectAccessReview
+		_ = json.NewDecoder(req.Body).Decode(&review)
+		allowed := !c.deniedLocalSCCReviewAccess || review.Spec.ResourceAttributes == nil || review.Spec.ResourceAttributes.Resource != "localsubjectaccessreviews"
+		jsonResponse(w, map[string]interface{}{"kind": "SelfSubjectAccessReview", "apiVersion": "authorization.k8s.io/v1", "status": map[string]interface{}{"allowed": allowed}})
 		return
 	}
 	resources := map[string][]string{"/apis/apps.openshift.io/v1": {"deploymentconfigs"}, "/apis/apps/v1": {"deployments", "replicasets", "statefulsets", "daemonsets"}, "/api/v1": {"pods", "services", "replicationcontrollers", "endpoints"}, "/apis/authorization.k8s.io/v1": {"selfsubjectaccessreviews"}, "/apis/autoscaling/v2": {"horizontalpodautoscalers"}, "/apis/image.openshift.io/v1": {"imagestreamtags"}, "/apis/security.openshift.io/v1": {"podsecuritypolicysubjectreviews"}, "/apis/quota.openshift.io/v1": {"appliedclusterresourcequotas"}}
 	if names, ok := resources[req.URL.Path]; ok {
+		if req.URL.Path == "/apis/authorization.k8s.io/v1" && !c.omitLocalSCCReviewAPI {
+			names = append(names, "localsubjectaccessreviews")
+		}
 		items := []interface{}{}
 		for _, name := range names {
 			items = append(items, map[string]interface{}{"name": name, "kind": "Object", "verbs": []string{"get", "list", "create", "update"}})
 		}
 		jsonResponse(w, map[string]interface{}{"kind": "APIResourceList", "apiVersion": "v1", "resources": items})
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/localsubjectaccessreviews") && req.Method == http.MethodPost {
+		if c.rejectLocalSCCReviewRequest {
+			http.Error(w, "review permission changed after access check", http.StatusForbidden)
+			return
+		}
+		var review authorizationv1.LocalSubjectAccessReview
+		_ = json.NewDecoder(req.Body).Decode(&review)
+		ns := c.source.GetNamespace()
+		sa, _, _ := unstructured.NestedString(c.source.Object, "spec", "template", "spec", "serviceAccountName")
+		if sa == "" {
+			sa = "default"
+		}
+		expectedGroups := []string{"system:serviceaccounts", "system:serviceaccounts:" + ns, "system:authenticated"}
+		attributes := review.Spec.ResourceAttributes
+		if review.Namespace != ns || review.Spec.User != "system:serviceaccount:"+ns+":"+sa || strings.Join(review.Spec.Groups, ",") != strings.Join(expectedGroups, ",") || attributes == nil || attributes.Namespace != ns || attributes.Group != "security.openshift.io" || attributes.Version != "v1" || attributes.Resource != "securitycontextconstraints" || attributes.Verb != "use" || attributes.Name != c.destination.Spec.Template.Annotations["openshift.io/required-scc"] {
+			t.Errorf("wrong SCC subject or resource attributes: %+v", review.Spec)
+		}
+		c.localSCCReviewCalls++
+		review.Status.Allowed = true
+		if c.localSCCReviewStatus != nil {
+			review.Status = *c.localSCCReviewStatus
+		}
+		jsonResponse(w, &review)
 		return
 	}
 	if req.Method == http.MethodGet && c.denyConstraintRead != "" && strings.HasSuffix(req.URL.Path, "/"+c.denyConstraintRead) {
@@ -105,7 +145,11 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		if c.mutateSCCSpec != nil {
 			c.mutateSCCSpec(template.(map[string]interface{})["spec"].(map[string]interface{}))
 		}
-		jsonResponse(w, map[string]interface{}{"apiVersion": "security.openshift.io/v1", "kind": "PodSecurityPolicySubjectReview", "status": map[string]interface{}{"allowedBy": map[string]interface{}{"name": "restricted-v2", "kind": "SecurityContextConstraints"}, "template": map[string]interface{}{"spec": template.(map[string]interface{})["spec"]}}})
+		name := c.reviewedSCC
+		if name == "" {
+			name = "restricted-v2"
+		}
+		jsonResponse(w, map[string]interface{}{"apiVersion": "security.openshift.io/v1", "kind": "PodSecurityPolicySubjectReview", "status": map[string]interface{}{"allowedBy": map[string]interface{}{"name": name, "kind": "SecurityContextConstraints"}, "template": map[string]interface{}{"spec": template.(map[string]interface{})["spec"]}}})
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/pods") && req.Method == http.MethodPost {
@@ -119,6 +163,15 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		}
 		var pod corev1.Pod
 		_ = json.NewDecoder(req.Body).Decode(&pod)
+		if required := pod.Annotations["openshift.io/required-scc"]; required != "" {
+			pod.Annotations["openshift.io/scc"] = required
+			if c.podSCCOverride != nil {
+				pod.Annotations["openshift.io/scc"] = *c.podSCCOverride
+			}
+			if c.dropRequiredSCC {
+				delete(pod.Annotations, "openshift.io/required-scc")
+			}
+		}
 		pod.Spec.Volumes = append(pod.Spec.Volumes, c.injectedPodVolumes...)
 		if c.destination != nil {
 			for key, value := range c.destination.Spec.Template.Labels {

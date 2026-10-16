@@ -211,6 +211,18 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 			reason, _, _ := unstructured.NestedString(response.Object, "status", "reason")
 			return fmt.Errorf("service account %s cannot admit destination SCC template: %s", sa, reason)
 		}
+		if required := template.Annotations["openshift.io/required-scc"]; required != "" && allowed["name"] != required {
+			if err := r.authorizeRequiredSCC(ctx, ns, sa, required); err != nil {
+				return err
+			}
+			// Defaults from another SCC are not evidence for the required SCC.
+			// Preserve the reviewed input and let the subsequent Pod dry run
+			// enforce/default its required SCC, after proving SA authorization.
+			return nil
+		}
+		if name, ok := allowed["name"].(string); !ok || name == "" {
+			return errors.New("SCC review omitted its selected SCC name; cannot verify workload policy")
+		}
 		spec, found, e := unstructured.NestedMap(response.Object, "status", "template", "spec")
 		if e != nil || !found {
 			return errors.New("SCC review omitted its defaulted Pod spec")
@@ -236,6 +248,11 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		admitted, err := r.Dynamic.Resource(schema.GroupVersionResource{Version: "v1", Resource: "pods"}).Namespace(ns).Create(ctx, &unstructured.Unstructured{Object: request}, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 		if err != nil {
 			return err
+		}
+		if required := pod.Annotations["openshift.io/required-scc"]; required != "" {
+			if admitted.GetAnnotations()["openshift.io/scc"] != required || admitted.GetAnnotations()["openshift.io/required-scc"] != required {
+				return fmt.Errorf("Pod admission did not preserve/enforce required SCC %q; manual review required", required)
+			}
 		}
 		// Older typed clients silently drop newer Pod budgets. Never estimate
 		// quota/capacity from a response that hides admission-added resources.

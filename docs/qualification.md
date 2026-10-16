@@ -12,6 +12,8 @@ The native artifact recorded in those reports additionally passed [26 constraint
 
 The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. The rebuilt artifact has [four verified storage outcomes and 13 automatic baseline scenarios](storage-guard-live-tests.md), including documented follow-up inspections after TLS failures; supplemental variants still require requalification on that exact artifact.
 
+Raw admission-field validation and required-SCC service-account authorization were added after the storage-guard artifact. Its live evidence remains historical for the recorded hash; fresh exact-artifact qualification is required for these additional guards.
+
 ## Running on a disposable cluster
 
 The baseline driver provisions no cluster, node or PVC. The separately authorized new-app volume case creates a 1Gi claim using an existing StorageClass. Supply a kubeconfig, explicit authorized context, existing disposable `dcmig-*` namespace, and immutable approved HTTP images that listen on port 8080. A cluster administrator/operator must label that namespace `migration.openshift-dc.io/test-namespace=true`; this integration-only namespace read is not required for normal conversion. Reserve the resource name `web`; the harness refuses to overwrite existing objects. The context must permit the integration operations in the RBAC reference and access to ClusterVersion metadata. It also needs network access to the test Route.

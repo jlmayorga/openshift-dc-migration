@@ -81,6 +81,7 @@ class RecoveryFaults(unittest.TestCase):
     def test_admission_checks_do_not_advance_cutover_fault(self):
         for path in [
             "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+            "/apis/authorization.k8s.io/v1/namespaces/lab/localsubjectaccessreviews",
             "/apis/security.openshift.io/v1/namespaces/lab/podsecuritypolicysubjectreviews",
             "/api/v1/namespaces/lab/pods?dryRun=All&fieldManager=dcmig",
             "/apis/apps/v1/namespaces/lab/deployments/web?dryRun=All",
