@@ -215,6 +215,9 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		if e != nil || !found {
 			return errors.New("SCC review omitted its defaulted Pod spec")
 		}
+		if err := validateBaseline(spec, "io.k8s.api.core.v1.PodSpec"); err != nil {
+			return fmt.Errorf("SCC review added unsupported Pod fields; manual review required: %w", err)
+		}
 		// Subject reviews can omit template metadata. Preserve the exact
 		// destination labels/annotations for policy evaluation and routing.
 		return runtime.DefaultUnstructuredConverter.FromUnstructured(spec, &template.Spec)
@@ -238,6 +241,16 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		// quota/capacity from a response that hides admission-added resources.
 		if _, found, _ := unstructured.NestedFieldNoCopy(admitted.Object, "spec", "resources"); found {
 			return errors.New("Pod admission added post-baseline Pod-level resource budgets; manual capacity review required")
+		}
+		spec, found, err := unstructured.NestedMap(admitted.Object, "spec")
+		if err != nil || !found {
+			return errors.New("Pod admission omitted its defaulted Pod spec")
+		}
+		// Admission can introduce new security, volume or placement semantics
+		// even when the reviewed input was baseline-compatible. Validate raw
+		// fields before a typed client can discard them or miss their effects.
+		if err := validateBaseline(spec, "io.k8s.api.core.v1.PodSpec"); err != nil {
+			return fmt.Errorf("Pod admission added unsupported fields; manual review required: %w", err)
 		}
 		expectedLabels := pod.Labels
 		if err = runtime.DefaultUnstructuredConverter.FromUnstructured(admitted.Object, pod); err != nil {

@@ -29,6 +29,8 @@ import (
 )
 
 type contractCluster struct {
+	mutateSCCSpec                 func(map[string]interface{})
+	mutatePodSpec                 func(map[string]interface{})
 	injectedPodVolumes            []corev1.Volume
 	claims                        map[string]corev1.PersistentVolumeClaim
 	volumes                       map[string]corev1.PersistentVolume
@@ -100,6 +102,9 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		var review map[string]interface{}
 		_ = json.NewDecoder(req.Body).Decode(&review)
 		template := review["spec"].(map[string]interface{})["template"]
+		if c.mutateSCCSpec != nil {
+			c.mutateSCCSpec(template.(map[string]interface{})["spec"].(map[string]interface{}))
+		}
 		jsonResponse(w, map[string]interface{}{"apiVersion": "security.openshift.io/v1", "kind": "PodSecurityPolicySubjectReview", "status": map[string]interface{}{"allowedBy": map[string]interface{}{"name": "restricted-v2", "kind": "SecurityContextConstraints"}, "template": map[string]interface{}{"spec": template.(map[string]interface{})["spec"]}}})
 		return
 	}
@@ -128,6 +133,9 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		}
 		if c.injectPodBudget {
 			_ = unstructured.SetNestedMap(object, map[string]interface{}{"requests": map[string]interface{}{"memory": "1Ti"}}, "spec", "resources")
+		}
+		if c.mutatePodSpec != nil {
+			c.mutatePodSpec(object["spec"].(map[string]interface{}))
 		}
 		jsonResponse(w, object)
 		return
