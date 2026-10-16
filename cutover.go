@@ -505,8 +505,14 @@ func (r *Runner) checkHealth(ctx context.Context, p *MigrationPlan) error {
 	}
 	var lastError error
 	err := r.poll(ctx, func(ctx context.Context) (bool, error) {
-		lastError = r.healthAttempt(ctx, p.HealthURL)
-		return lastError == nil, nil
+		attemptError := r.healthAttempt(ctx, p.HealthURL)
+		if attemptError == nil {
+			return true, nil
+		}
+		if ctx.Err() == nil || lastError == nil {
+			lastError = attemptError
+		}
+		return false, nil
 	})
 	if err != nil {
 		return errors.Join(err, lastError)

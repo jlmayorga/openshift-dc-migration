@@ -31,7 +31,7 @@ func TestHealthWaitsForRouterConvergence(t *testing.T) {
 			defer server.Close()
 			r := NewRunner(DefaultOptions())
 			r.PollInterval = time.Millisecond
-			r.Options.ReadinessTimeout = 50 * time.Millisecond
+			r.Options.ReadinessTimeout = 200 * time.Millisecond
 			p := &MigrationPlan{HealthURL: server.URL, Desired: &appsv1.Deployment{}}
 			one := int32(1)
 			p.Desired.Spec.Replicas = &one
@@ -46,6 +46,28 @@ func TestHealthWaitsForRouterConvergence(t *testing.T) {
 				t.Fatal("health was not retried")
 			}
 		})
+	}
+}
+
+func TestHealthDeadlineRetainsLastHTTPFailure(t *testing.T) {
+	r := NewRunner(DefaultOptions())
+	r.Options.ReadinessTimeout = 20 * time.Millisecond
+	r.PollInterval = time.Millisecond
+	calls := 0
+	r.HealthCheck = func(ctx context.Context, _ string) error {
+		calls++
+		if calls == 1 {
+			return errors.New("application health returned HTTP 503")
+		}
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	one := int32(1)
+	p := &MigrationPlan{HealthURL: "https://health.example", Desired: &appsv1.Deployment{}}
+	p.Desired.Spec.Replicas = &one
+	err := r.checkHealth(context.Background(), p)
+	if !errors.Is(err, context.DeadlineExceeded) || !strings.Contains(err.Error(), "HTTP 503") {
+		t.Fatalf("deadline replaced observed health failure: %v", err)
 	}
 }
 
