@@ -6,7 +6,9 @@ The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. N
 
 The [release-note review for 4.14–4.20](docs/compatibility-review.md) is in progress and has identified legacy storage changes and admission/SCC gaps requiring explicit handling. See the [storage tests](docs/storage-guard-live-tests.md) and the newer [actual SCC revocation/refusal/recovery evidence](docs/admission-scc-live-tests.md). Earlier binaries' results do not automatically qualify changed source.
 
-The latest [raw-response tests](docs/raw-response-live-tests.md) verify refusal of an unfamiliar field on a staged Deployment, preservation during explicit recovery, and the existing CSI volume. They also document an activation serialization failure, its recovery and correction, followed by 13 successful baseline scenarios on the rebuilt binary.
+The [raw-response tests](docs/raw-response-live-tests.md) verify refusal of an unfamiliar field on a staged Deployment, preservation during explicit recovery, and the existing CSI volume. They also document an activation serialization failure, its recovery and correction, followed by 13 successful baseline scenarios on the rebuilt binary.
+
+The subsequent [cluster admin-policy tests](docs/admin-policy-live-tests.md) verify pre-retirement refusal for ANP/BANP subjects, peers and future Deployment hash selectors, followed by successful migration/recovery after removing the isolated test policies. Earlier binaries retain their own evidence scope.
 
 Use Go **1.27.2**:
 

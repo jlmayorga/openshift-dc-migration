@@ -1,0 +1,469 @@
+{
+  "schemaVersion": "v1",
+  "kind": "actual-openshift-admin-network-policy-session",
+  "result": "partial",
+  "suiteResult": "passed",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "artifactSHA256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+  "platform": "darwin/arm64",
+  "goSourceRevision": "132542b489709012e98079ef9c5548eb5cf66bfa",
+  "driverRevision": "01596514b917a1f323a088c08289683d7af80f70",
+  "driverSHA256": "231fbfe48e676633c0b6a8a2fab1d759f697ba9e0786ef2769cc614576df97b9",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.31.3",
+    "k8s.io/apimachinery": "v0.31.3",
+    "k8s.io/client-go": "v0.31.3"
+  },
+  "testedAt": "2026-10-16T05:11:25.519276+00:00",
+  "completedAt": "2026-10-16T05:17:39.543319+00:00",
+  "targetedCases": 1,
+  "passedTargetedCases": 1,
+  "policyVariants": 6,
+  "preRetirementRefusals": 12,
+  "cases": [
+    {
+      "case": "admin-policy-selector-refusal-and-recovery",
+      "result": "passed",
+      "startedAt": "2026-10-16T05:11:26.195013+00:00",
+      "observations": {
+        "sourceUID": "1188ecbd-40bd-45d3-a18a-e84f115ccaab",
+        "originalPodUID": "794f4f18-0a44-4e10-a5e8-9b1847bfaeb0",
+        "policyVariants": [
+          {
+            "kind": "AdminNetworkPolicy",
+            "position": "subject",
+            "policyUID": "75e5fd10-a9c1-4276-933b-e3937247ea2e",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "AdminNetworkPolicy",
+            "position": "peer",
+            "policyUID": "b5997878-8104-4e61-a57a-84d88ac0441a",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "AdminNetworkPolicy",
+            "position": "controller-hash",
+            "policyUID": "67baa440-2af0-47aa-bc3c-210682005d67",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "AdminNetworkPolicy dcmig-e21b57d5: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "BaselineAdminNetworkPolicy",
+            "position": "subject",
+            "policyUID": "f8f42c5e-51c3-40fa-8658-dc0007fd2989",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "BaselineAdminNetworkPolicy",
+            "position": "peer",
+            "policyUID": "062af876-5513-471f-99fd-3ec0843f0511",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "BaselineAdminNetworkPolicy",
+            "position": "controller-hash",
+            "policyUID": "38ea9419-b526-4ceb-b8c7-b8264751b0a8",
+            "previousReadOnlyPreflightAccepted": true,
+            "refusals": [
+              {
+                "mode": "preflight",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                }
+              },
+              {
+                "mode": "cutover",
+                "blockedCheck": {
+                  "name": "admin-network-policy-selection",
+                  "status": "blocked",
+                  "detail": "BaselineAdminNetworkPolicy default: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                }
+              }
+            ]
+          }
+        ],
+        "allTestPoliciesRemoved": true,
+        "successfulCutoverAndRecoveryAfterRemoval": true,
+        "marker": "admin-policy-4afa2892"
+      },
+      "namespace": "dcmig-anp-final-20261016-admin-policy"
+    }
+  ],
+  "baseline": {
+    "kind": "actual-openshift",
+    "schemaVersion": "v1",
+    "result": "partial",
+    "minor": "4.21",
+    "artifactSHA256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+    "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+    "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+    "revision": "132542b489709012e98079ef9c5548eb5cf66bfa",
+    "runner": "Mac-mini",
+    "runURL": "local:b2a05257-9f2d-4dd0-a505-ffc16d679811",
+    "testedAt": "2026-10-16T05:11:28.170145+00:00",
+    "scenarios": [
+      "admission-scc",
+      "constraint-preflight",
+      "cutover-exclusive",
+      "cutover-overlap",
+      "dry-run",
+      "hpa-retarget",
+      "image-triggers",
+      "interruption",
+      "rollback",
+      "safe-rerun",
+      "schema",
+      "service-routing",
+      "stale-plan"
+    ],
+    "limitations": [
+      "Outstanding actual scenarios: admission-rejection, connectivity-loss, cross-namespace-image-triggers, exclusive-volume, failed-rollout, multi-container-image-triggers, per-mutation-recovery, restricted-rbac, singleton-worker"
+    ],
+    "openshiftPatch": "4.21.36",
+    "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+    "dependencyVersions": {
+      "k8s.io/api": "v0.31.3",
+      "k8s.io/apimachinery": "v0.31.3",
+      "k8s.io/client-go": "v0.31.3"
+    },
+    "kubernetesVersion": "v1.34.9",
+    "sccEvidence": [
+      {
+        "uid": "ff1dc325-6cd1-4add-8579-49fc2c2356c7",
+        "scc": "restricted-v2",
+        "securityContext": {
+          "fsGroup": 1003430000,
+          "seLinuxOptions": {
+            "level": "s0:c59,c4"
+          },
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        }
+      }
+    ],
+    "privateArtifacts": "/var/folders/qj/vl2t03q52fs9zbk9bj2vzwkm0000gn/T/dcmig-qualification-mf_t29vl"
+  },
+  "baselineLimit": "13 automatic scenario IDs completed; partial/nonzero exit because supplemental records for the exact artifact were not supplied.",
+  "localValidation": {
+    "goRaceCasesIncludingSubtests": 286,
+    "coveragePercent": 77.2,
+    "goVet": "passed",
+    "govulncheck": "zero symbol-level findings",
+    "gosecStats": {
+      "files": 19,
+      "lines": 4110,
+      "nosec": 2,
+      "found": 0
+    },
+    "gosecCompilerErrors": {},
+    "pythonTests": 20,
+    "blackFiles": 18,
+    "crossBuilds": [
+      {
+        "platform": "linux/amd64",
+        "exit": 0,
+        "stderr": "",
+        "sha256": "92e0265b3fc303435955487d8dfd98f3319908a7f7fece2964ffbbf544065368",
+        "scope": "compilation only; other platform artifacts not executed live"
+      },
+      {
+        "platform": "linux/arm64",
+        "exit": 0,
+        "stderr": "",
+        "sha256": "bb4a82fcc81fa70cb53fff7c46951075c7645c4ef2a6f5061a57eec5b4122009",
+        "scope": "compilation only; other platform artifacts not executed live"
+      },
+      {
+        "platform": "darwin/amd64",
+        "exit": 0,
+        "stderr": "",
+        "sha256": "442a74dcc55420b1b570b44d374d55741c2bb5d610aa60e1bd043decc691d641",
+        "scope": "compilation only; other platform artifacts not executed live"
+      },
+      {
+        "platform": "darwin/arm64",
+        "exit": 0,
+        "stderr": "",
+        "sha256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+        "scope": "compilation only; other platform artifacts not executed live"
+      },
+      {
+        "platform": "windows/amd64",
+        "exit": 0,
+        "stderr": "",
+        "sha256": "91c3510bc4ec0c6b9460639ee0f3268dd95f9557b19b6b865599b58d67f86010",
+        "scope": "compilation only; other platform artifacts not executed live"
+      }
+    ]
+  },
+  "regressionEvidence": {
+    "previousArtifactSHA256": "41a63e14db9753aecd043d985095b144e9fec0746b9fd040e6613eb866d015b8",
+    "previousMode": "Read-only preflight only, never previous-binary cutover",
+    "previousReadOnlyPreflightAcceptedAllSixVariants": true,
+    "initialGuardArtifactSHA256": "fdd184aff22d3a5f81c6062ec9a9a59b871f90f2deaaa94e1e70e63cb12f8bed",
+    "initialGuardGoRevision": "93efcf3f8cd8d521e03cb15ec85840a64f6b1b30",
+    "initialGuardCases": [
+      {
+        "case": "admin-policy-selector-refusal-and-recovery",
+        "result": "passed",
+        "startedAt": "2026-10-16T04:58:57.463027+00:00",
+        "observations": {
+          "sourceUID": "46b01054-8251-406f-ad51-6e9794381eab",
+          "originalPodUID": "ca54e0a7-3c27-4d9f-afee-b6fe89aaa6ee",
+          "policyVariants": [
+            {
+              "kind": "AdminNetworkPolicy",
+              "position": "subject",
+              "policyUID": "ff2c3e77-c1c5-4383-b32f-4f897b29eda3",
+              "previousReadOnlyPreflightAccepted": true,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-9c4e70be: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-9c4e70be: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "AdminNetworkPolicy",
+              "position": "peer",
+              "policyUID": "5d92e6e7-d99e-4744-922c-1497533a2fc9",
+              "previousReadOnlyPreflightAccepted": true,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-9c4e70be: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-9c4e70be: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "BaselineAdminNetworkPolicy",
+              "position": "subject",
+              "policyUID": "8d9fbf94-97bd-4f1b-bd5c-7e715f72453a",
+              "previousReadOnlyPreflightAccepted": true,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "BaselineAdminNetworkPolicy",
+              "position": "peer",
+              "policyUID": "df64bff1-eade-49e1-8c7a-3d3bbe2d8c26",
+              "previousReadOnlyPreflightAccepted": true,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            }
+          ],
+          "allTestPoliciesRemoved": true,
+          "successfulCutoverAndRecoveryAfterRemoval": true,
+          "marker": "admin-policy-cce4d71a"
+        },
+        "namespace": "dcmig-anp-20261016-admin-policy"
+      }
+    ],
+    "initialGuardBaseline": "All13 automatic IDs completed; four live policy variants and positive migration/recovery passed on that earlier artifact. Not transferred to final artifact.",
+    "initialDriverSnapshot": "tested-drivers/qualify_admin_policy-initial.py",
+    "initialSourceSnapshot": "initial-source",
+    "unsafeAcceptanceBeforeGuard": "24 leaf cases across ANP/BANP subject/ingress-peer/egress-peer, migration/runtime labels and preflight/cutover.",
+    "unsafeFutureHashAcceptance": "13 leaf cases reproduced after the first guard:12 ANP/BANP positions/modes plus namespace NetworkPolicy. Local regression evidence, not a failed live cutover.",
+    "finalScope": "Live ANP/BANP subject, runtime-label peer and future-hash variants; namespace NetworkPolicy hash refusal has local contract coverage."
+  },
+  "retainedResources": "Two isolated final/initial new-app namespaces retained, sources recovered and owned targets paused0. All temporary cluster policy UIDs removed, original policy identity set unchanged. Baseline driver cleaned its successful fixtures. No SCC, ClusterRole, node, StorageClass, PV/PVC or new storage provisioned.",
+  "limitations": [
+    "Only actual OpenShift4.21.36 and this exact native artifact were executed live; no fully qualified release range.",
+    "One aggregate targeted case contains six policy variants and successful cutover/recovery after removal; these are not six independently migrated applications.",
+    "Subject/peer selector preservation and future-label refusal do not simulate rule priority, ports, node/IP/domain reachability or all CNI data-plane behavior.",
+    "Other current-artifact CSI/runtime/RBAC/image/singleton/per-mutation-recovery/multi-namespace variants remain pending; earlier results retain their original artifact hashes.",
+    "OpenShift4.14 candidate screening is not the completed seven-minor compatibility assessment; all older-version assumptions remain pending."
+  ],
+  "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json",
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/admin-policy-20261016/openshift-4.21.36-admin-policy-evidence.tar.gz",
+    "archiveSHA256": "0ba3cae82774bd5ee48147dd9bec9f46f9bf03d8118601e214c6bde5ef2b50de",
+    "manifestSHA256": "f3384f9d1e7dbc2fec85ca52df4bd6a84adf35dd329d811186592a975e14cc6e",
+    "files": 667,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "allManifestEntriesVerified": true,
+    "generatedAt": "2026-10-16T05:20:51.607862+00:00"
+  },
+  "sourceRebuildValidation": [
+    {
+      "sourceSnapshot": "export-complete/source",
+      "testedArtifactSHA256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+      "rebuildSHA256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+      "byteIdentical": true,
+      "flags": [
+        "-mod=readonly",
+        "-trimpath",
+        "-buildvcs=false",
+        "-ldflags=-s -w -X main.version=maintenance-admin-policy-hash"
+      ],
+      "CGO_ENABLED": "0"
+    },
+    {
+      "sourceSnapshot": "export-complete/initial-source",
+      "testedArtifactSHA256": "fdd184aff22d3a5f81c6062ec9a9a59b871f90f2deaaa94e1e70e63cb12f8bed",
+      "rebuildSHA256": "fdd184aff22d3a5f81c6062ec9a9a59b871f90f2deaaa94e1e70e63cb12f8bed",
+      "byteIdentical": true,
+      "flags": [
+        "-mod=readonly",
+        "-trimpath",
+        "-buildvcs=false",
+        "-ldflags=-s -w -X main.version=maintenance-admin-policy"
+      ],
+      "CGO_ENABLED": "0"
+    }
+  ],
+  "archiveDocumentCopy": "Archive/rebuild metadata appended after packaging to avoid circular checksums."
+}

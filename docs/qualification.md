@@ -16,6 +16,8 @@ Raw admission-field validation and required-SCC service-account authorization we
 
 The subsequent [raw workload response session](raw-response-live-tests.md) passed two targeted cases and 13 automatic baseline scenario IDs on its corrected artifact. It verifies actual refusal of an unfamiliar staged Deployment field, preservation during explicit recovery, and the existing regular CSI volume. The first artifact's activation failure, recovery and serialization correction are documented separately from the final passes. Broader variants still require exact-artifact requalification.
 
+The newer [cluster admin-policy session](admin-policy-live-tests.md) passed six ANP/BANP subject/peer/controller-hash variants within one aggregate case, successful migration/recovery after policy removal, and 13 baseline IDs. All 12 refusals preserve the healthy source, HPA and staged target. This does not transfer earlier artifact results or constitute full policy-engine/CNI qualification.
+
 ## Running on a disposable cluster
 
 The baseline driver provisions no cluster, node or PVC. The separately authorized new-app volume case creates a 1Gi claim using an existing StorageClass. Supply a kubeconfig, explicit authorized context, existing disposable `dcmig-*` namespace, and immutable approved HTTP images that listen on port 8080. A cluster administrator/operator must label that namespace `migration.openshift-dc.io/test-namespace=true`; this integration-only namespace read is not required for normal conversion. Reserve the resource name `web`; the harness refuses to overwrite existing objects. The context must permit the integration operations in the RBAC reference and access to ClusterVersion metadata. It also needs network access to the test Route.

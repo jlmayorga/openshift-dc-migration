@@ -2,8 +2,8 @@
   "schemaVersion": "v1",
   "kind": "release-note-compatibility-review",
   "status": "in-progress",
-  "updatedAt": "2026-10-16T04:41:29.611704+00:00",
-  "codeRevisionAtInventory": "ba43309",
+  "updatedAt": "2026-10-16T05:17:39.543319+00:00",
+  "codeRevisionAtInventory": "132542b489709012e98079ef9c5548eb5cf66bfa",
   "range": {
     "minimum": "4.14",
     "maximum": "4.20"
@@ -251,9 +251,10 @@
         "limitranges",
         "persistentvolumeclaims",
         "persistentvolumes",
-        "nodes"
+        "nodes",
+        "namespaces"
       ],
-      "operations": "read inventory/readiness/traffic/constraints; Pod create dry-run; no production storage provisioning",
+      "operations": "read inventory/readiness/traffic/constraints; Pod create dry-run; target Namespace labels read only when optional cluster policies exist; no production storage provisioning",
       "sourceFiles": [
         "runtime.go",
         "planning.go",
@@ -261,7 +262,8 @@
         "constraints.go",
         "quota.go",
         "scheduling.go",
-        "storage.go"
+        "storage.go",
+        "admin_policy.go"
       ],
       "releaseAssessmentStatus": "pending"
     },
@@ -348,6 +350,19 @@
         "converter.go"
       ],
       "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "policy.networking.k8s.io/v1alpha1 (optional discovered capability)",
+      "resources": [
+        "adminnetworkpolicies",
+        "baselineadminnetworkpolicies"
+      ],
+      "operations": "Read-only group/resource discovery and cluster list with pagination; target Namespace labels only when policies exist; subject/peer Pod-selection comparison; unknown versions/resources/fields require manual review",
+      "sourceFiles": [
+        "admin_policy.go",
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "guard implemented and actual4.21 regression passed; full per-release capability/default assessment pending"
     }
   ],
   "harnessInventoryStatus": "Additional API/resource/operation inventory recorded in docs/compatibility-review.md from qualification-driver literals and helpers; per-release behavioral assessment pending.",
@@ -402,14 +417,18 @@
     {
       "id": "AUTH-01",
       "change": "OCP4.19 node-bound service-account tokens enabled by default",
-      "status": "impact assessment pending",
-      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc"
+      "status": "Named token-binding/claim interaction assessed; no converter request-format change required",
+      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc",
+      "disposition": "Production kubeconfig client treats bearer tokens as opaque and does not mint/parse JWTs; standard token projection and service-account settings preserved. Revoked/expired API requests fail visibly with retained journals; prior actual expiry evidence is not node-deletion or old-server qualification.",
+      "remaining": "Referenced guidance, node-audience/storage interactions, affected patch levels and client-library assessment remain pending."
     },
     {
       "id": "DC-01",
       "change": "OCP4.15 does not create deployer SA when DC capability disabled",
-      "status": "impact assessment pending",
-      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc"
+      "status": "Disabled-capability account change assessed; discovery/offline boundary already implemented",
+      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc",
+      "disposition": "No deployer account creation or cluster capability enablement. Group/resource discovery distinguishes unavailable APIs from denied/authentication failure; exported offline input is usable but cannot execute incomplete-inventory plans. No automatic service-account Secret-name dependency.",
+      "validationScope": "Code review and HTTP/offline contracts; no old cluster or live disabled-capability reconfiguration."
     },
     {
       "id": "ADMISSION-01",
@@ -472,6 +491,28 @@
         }
       ],
       "disposition": "No production or qualification-fixture calls to these versions identified. This is an API-serving assessment, not a completed field/controller/runtime compatibility review."
+    },
+    {
+      "id": "NETWORK-01",
+      "change": "Optional cluster AdminNetworkPolicy/BaselineAdminNetworkPolicy can select DC runtime labels and migrated Pod labels differently, beyond namespace NetworkPolicy checks",
+      "status": "implemented; actual old read-only acceptance and current refusal/recovery verified",
+      "guardCommit": "93efcf3",
+      "evidence": [
+        "https://github.com/openshift/openshift-docs/blob/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L875",
+        "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/network_security/admin-network-policy",
+        "https://network-policy-api.sigs.k8s.io/reference/spec/"
+      ],
+      "scope": "Optional served v1alpha1 selectors; read-only inventory and exact source/namespace label comparison before HPA/source mutation. Unknown API/fields fail for manual review. Not a policy-priority or network reachability engine.",
+      "liveEvidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json"
+    },
+    {
+      "id": "NETWORK-02",
+      "change": "Deployment controller supplies pod-template-hash after Pod dry run; treating the future label as absent can hide namespace/admin policy changes",
+      "status": "guard implemented; unsafe acceptance reproduced locally and final actual ANP/BANP hash variants passed",
+      "guardCommit": "132542b",
+      "scope": "Any namespace NetworkPolicy or applicable ANP/BANP Pod selector depending on pod-template-hash requires manual review before source/HPA mutation. No cross-version hash prediction.",
+      "evidence": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template-hash-label",
+      "liveEvidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json"
     }
   ],
   "remaining": [
@@ -481,5 +522,13 @@
     "Implement any further required guards and tests; requalify exact candidate artifacts.",
     "Only after final review, update matrix/support/release policy for review-based assumptions; preserve integration not-run statuses.",
     "Finish per-release behavior assessment of the recorded harness operations and requalify the final exact artifact after dependency decisions."
+  ],
+  "candidateScreens": [
+    {
+      "minor": "4.14",
+      "entries": 128,
+      "record": "compatibility/reviews/4.14-candidates.json",
+      "status": "candidate pass complete; wider release assessment pending"
+    }
   ]
 }
