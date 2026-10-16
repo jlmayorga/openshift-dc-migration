@@ -175,47 +175,82 @@ func (r *Runner) changeSource(ctx context.Context, p *MigrationPlan, stop, resto
 }
 func (r *Runner) setSourceSpec(ctx context.Context, p *MigrationPlan, desired map[string]interface{}, event string) error {
 	api := r.Dynamic.Resource(dcResource).Namespace(p.Source.GetNamespace())
-	current, err := api.Get(ctx, p.Source.GetName(), metav1.GetOptions{})
-	if err != nil {
-		return err
+	const attempts = 5
+	delay := 100 * time.Millisecond
+	var expected map[string]interface{}
+	for attempt := 1; ; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		current, err := api.Get(ctx, p.Source.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		if current.GetDeletionTimestamp() != nil {
+			return errors.New("source is deleting; refusing mutation")
+		}
+		if current.GetUID() != p.Source.GetUID() {
+			return errors.New("source replaced; refusing mutation")
+		}
+		spec, _, err := unstructured.NestedMap(current.Object, "spec")
+		if err != nil {
+			return err
+		}
+		if attempt == 1 {
+			if !reflect.DeepEqual(spec, sourceSpec(p, false, true)) && !reflect.DeepEqual(spec, sourceSpec(p, false, false)) && !reflect.DeepEqual(spec, sourceSpec(p, true, false)) && !reflect.DeepEqual(spec, parkedSourceSpec(p)) {
+				return errors.New("source semantics changed outside migration; manual recovery required")
+			}
+			expected = spec
+		} else if !reflect.DeepEqual(spec, expected) {
+			return errors.New("source spec changed during conflict retry; explicit recovery required")
+		}
+		if reflect.DeepEqual(spec, desired) {
+			p.Progress.SourceVersion = current.GetResourceVersion()
+			return nil
+		}
+		if err = r.checkpoint(p, "source-intent", "intent: "+event); err != nil {
+			return err
+		}
+		_ = unstructured.SetNestedMap(current.Object, desired, "spec")
+		admitted, err := api.Update(ctx, current, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+		stage := "source update dry run"
+		if err == nil {
+			if admitted.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(admitted.Object["spec"], desired) {
+				return errors.New("source admission changed planned semantics")
+			}
+			var updated *unstructured.Unstructured
+			updated, err = api.Update(ctx, current, metav1.UpdateOptions{FieldValidation: "Strict"})
+			stage = event
+			if err == nil {
+				if updated.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(updated.Object["spec"], desired) {
+					return errors.New("source persisted admission differs; state uncertain")
+				}
+				p.Progress.SourceVersion = updated.GetResourceVersion()
+				return r.checkpoint(p, "source-updated", "confirmed: "+event)
+			}
+			if !apierrors.IsConflict(err) {
+				return fmt.Errorf("%s (state may be uncertain): %w", event, err)
+			}
+		} else if !apierrors.IsConflict(err) {
+			return fmt.Errorf("source update dry run: %w", err)
+		}
+		// A definite conflict rejected this update. Refetch and repeat admission,
+		// accepting status/metadata churn only; never replay an uncertain write.
+		if attempt == attempts {
+			return fmt.Errorf("%s conflict after %d attempts; explicit recovery required: %w", stage, attempts, err)
+		}
+		if err = r.checkpoint(p, "source-intent", fmt.Sprintf("%s conflict; retry %d of %d will refetch and revalidate source identity/spec", stage, attempt+1, attempts)); err != nil {
+			return err
+		}
+		timer := time.NewTimer(delay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+		delay *= 2
 	}
-	if current.GetDeletionTimestamp() != nil {
-		return errors.New("source is deleting; refusing mutation")
-	}
-	if current.GetUID() != p.Source.GetUID() {
-		return errors.New("source replaced; refusing mutation")
-	}
-	spec, _, err := unstructured.NestedMap(current.Object, "spec")
-	if err != nil {
-		return err
-	}
-	if !reflect.DeepEqual(spec, sourceSpec(p, false, true)) && !reflect.DeepEqual(spec, sourceSpec(p, false, false)) && !reflect.DeepEqual(spec, sourceSpec(p, true, false)) && !reflect.DeepEqual(spec, parkedSourceSpec(p)) {
-		return errors.New("source semantics changed outside migration; manual recovery required")
-	}
-	if reflect.DeepEqual(spec, desired) {
-		p.Progress.SourceVersion = current.GetResourceVersion()
-		return nil
-	}
-	if err = r.checkpoint(p, "source-intent", "intent: "+event); err != nil {
-		return err
-	}
-	_ = unstructured.SetNestedMap(current.Object, desired, "spec")
-	admitted, err := api.Update(ctx, current, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
-	if err != nil {
-		return fmt.Errorf("source update dry run: %w", err)
-	}
-	if admitted.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(admitted.Object["spec"], desired) {
-		return errors.New("source admission changed planned semantics")
-	}
-	updated, err := api.Update(ctx, current, metav1.UpdateOptions{FieldValidation: "Strict"})
-	if err != nil {
-		return fmt.Errorf("%s (state may be uncertain): %w", event, err)
-	}
-	if updated.GetUID() != p.Source.GetUID() || !reflect.DeepEqual(updated.Object["spec"], desired) {
-		return errors.New("source persisted admission differs; state uncertain")
-	}
-	p.Progress.SourceVersion = updated.GetResourceVersion()
-	return r.checkpoint(p, "source-updated", "confirmed: "+event)
 }
 func (r *Runner) destination(ctx context.Context, p *MigrationPlan) (*appsv1.Deployment, error) {
 	_, d, err := r.destinationState(ctx, p)
