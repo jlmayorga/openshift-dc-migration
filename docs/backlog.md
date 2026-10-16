@@ -2,7 +2,7 @@
 
 - [x] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
 
-  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-parallel-release-review.json). Parallel review additionally covered 4.21. Source assumptions are separate from actual integrations; maintained-client adoption and final release qualification remain open.
+  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-client-upgrade-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; final release qualification remains open.
 
   Scope and deliverables:
 

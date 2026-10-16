@@ -1,6 +1,6 @@
 {
   "schemaVersion": "v1",
-  "updatedAt": "2026-10-16T05:59:00.049278+00:00",
+  "updatedAt": "2026-10-16T07:07:34.998900+00:00",
   "minimum": "4.14",
   "newestGA": "4.22",
   "newestGASource": "https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22",
@@ -165,29 +165,30 @@
       "openshiftPatch": "4.21.36",
       "kubernetesVersion": "v1.34.9",
       "dependencyVersions": {
-        "k8s.io/api": "v0.31.3",
-        "k8s.io/apimachinery": "v0.31.3",
-        "k8s.io/client-go": "v0.31.3"
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
       },
-      "testedAt": "2026-10-16T05:59:14.689162+00:00",
+      "testedAt": "2026-10-16T06:54:31.620564+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "partial (actual cluster; see linked session evidence)",
+      "integrationResult": "passed (all22scenarioIDs on recorded native Darwin/arm64 artifact; full release matrix incomplete)",
       "limitations": [
-        "Recorded actual evidence is for the previous0.31.3 artifact. The aligned0.37.1 final-artifact qualification is in progress; older passes are not transferred.",
-        "Targeted label-refusal test, not an actual cross-zone scheduler execution or CSI attachment-limit qualification.",
-        "Full release qualification remains partial; nine automatic-runner supplemental scenario records remain absent for this exact artifact.",
-        "Earlier new-app/multiple-namespace/recovery/etc records retain their original hashes and are not transferred to this artifact.",
-        "No new namespace, storage provision or SCC grant for the PV case; baseline reuses an existing disposable namespace.",
-        "Only the recorded native platform was executed live. Source-review assumptions for4.14\u20134.20 are separate from actual integration results.",
-        "Current artifact passed four PV-label variants/eight refusals, positive regular-CSI cutover/recovery and13automatic baseline IDs across two namespaces."
+        "Actual execution is limited to OpenShift4.21.36/Kubernetesv1.34.9 and the recorded native binary.",
+        "OpenShift4.14\u20134.20 use source-review assumptions, not actual integration passes.",
+        "OpenShift4.22 and other shipped platform binaries lack matching actual qualification; full release gate remains closed.",
+        "All six injected faults eventually recovered; write5 required explicit rollback rerun after a visible resourceVersion conflict. The helper observation error and original failure are retained.",
+        "Namespace isolation initially refused for actual Pod capacity before source retirement; existing plans passed after UID-audited completed-fixture retirement.",
+        "Volume/worker ownership checks combine source-drain checks and samples, not every-instant or cross-node/driver guarantees.",
+        "Selected completed isolated fixtures were retired after snapshots/UID checks; historical results are retained. RegularPVC/PV preserved."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-pv-topology-4.21.36.json",
-      "artifactSHA256": "811c3c6a8bc9ca63dcfc65920403d9718f48145eedf2dcddc780f0e15004b932",
+      "evidence": "compatibility/evidence/2026-10-16-client-upgrade-4.21.36.json",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-pv-topology-4.21.36.json",
         "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json",
         "compatibility/evidence/2026-10-16-raw-responses-4.21.36.json",
         "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
