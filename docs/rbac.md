@@ -18,3 +18,5 @@ The core v1 Endpoints API is used as the 4.14 routing baseline. Later optional A
 Do not grant namespace deletion, privileged SCCs or cluster-admin to the converter. Pause external reconcilers and scalers before cutover. The local plan lock coordinates one process only; it is not a cluster-wide lease.
 
 The new-app integration runner additionally creates test namespaces, BuildConfigs/Builds, ImageStream imports and template-generated resources. The explicitly authorized regular-PVC case creates a 1Gi claim through an existing StorageClass and reads only its resulting PV metadata. These test-only permissions are not required by ordinary conversion; the regular-volume test uses default restricted pod admission without an extra SCC binding.
+
+The singleton integration runner creates one namespaced `coordination.k8s.io/v1` Lease and a test account limited to get/update that named Lease. The permission runner creates short-lived TokenRequests for its explicit expiry case. These are harness-only dependencies; neither is required by the converter.

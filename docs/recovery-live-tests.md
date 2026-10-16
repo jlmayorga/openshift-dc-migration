@@ -2,6 +2,8 @@
 
 All **15 additional targeted cases passed** on **OpenShift 4.21.36 / Kubernetes v1.34.9**, using the same native binary as the [26-case preflight session](preflight-live-tests.md). This brings that exact binary to **41 targeted passing cases**, plus the earlier 13 automatic baseline scenario IDs. Full release qualification remains partial.
 
+A [subsequent seven-case session](worker-expiry-live-tests.md) covers singleton heartbeats, real token expiration and additional recovery guards. The 15 cases below retain their original scope and provenance.
+
 ## Lost responses after committed writes
 
 The recovery driver forwards requests through a loopback-only authenticated `oc proxy` and a credential-free fault proxy. Each case allows one specific real API write to commit, withholds its success response, and returns unavailable responses to subsequent converter requests. It then restores access, explicitly rolls back and repeats rollback.

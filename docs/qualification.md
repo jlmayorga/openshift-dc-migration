@@ -8,6 +8,8 @@ OpenShift 4.14 / Kubernetes 1.27 remains the mandatory floor. The current releas
 
 The current native artifact additionally passed [26 constraint/migration cases](preflight-live-tests.md) and [15 runtime/recovery cases](recovery-live-tests.md). Its successful quota preflight and actual runtime-failure recovery are separate evidence. The matrix remains partial until all required targets, artifacts and scenarios pass.
 
+[Seven further cases](worker-expiry-live-tests.md) verify singleton ownership through success/failure/cancellation, actual expired credentials, orphan recovery refusal and staged/foreign-controller guards on that same artifact.
+
 ## Running on a disposable cluster
 
 The baseline driver provisions no cluster, node or PVC. The separately authorized new-app volume case creates a 1Gi claim using an existing StorageClass. Supply a kubeconfig, explicit authorized context, existing disposable `dcmig-*` namespace, and immutable approved HTTP images that listen on port 8080. A cluster administrator/operator must label that namespace `migration.openshift-dc.io/test-namespace=true`; this integration-only namespace read is not required for normal conversion. Reserve the resource name `web`; the harness refuses to overwrite existing objects. The context must permit the integration operations in the RBAC reference and access to ClusterVersion metadata. It also needs network access to the test Route.
