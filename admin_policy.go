@@ -103,6 +103,9 @@ func compareAdminSelection(raw map[string]interface{}, namespace map[string]stri
 		return err
 	}
 	if nsSelector.Matches(labels.Set(namespace)) {
+		if err = checkControllerHashSelector(podSelector); err != nil {
+			return err
+		}
 		for _, source := range sources {
 			if podSelector.Matches(labels.Set(source)) != podSelector.Matches(labels.Set(target)) {
 				return errors.New("selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement")

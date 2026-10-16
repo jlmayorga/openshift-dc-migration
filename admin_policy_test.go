@@ -32,7 +32,7 @@ func adminPolicyFixture(resource, position, label string) unstructured.Unstructu
 func TestAdminPolicyChangeBlocksBeforeSourceRetirement(t *testing.T) {
 	for _, resource := range []string{"adminnetworkpolicies", "baselineadminnetworkpolicies"} {
 		for _, position := range []string{"subject", "ingress-peer", "egress-peer"} {
-			for _, label := range []string{migrationLabel, "deployment"} {
+			for _, label := range []string{migrationLabel, "deployment", "pod-template-hash"} {
 				for _, mode := range []string{"preflight", "cutover"} {
 					t.Run(resource+"/"+position+"/"+label+"/"+mode, func(t *testing.T) {
 						r, c, path := cutoverTest(t, "exclusive", true)

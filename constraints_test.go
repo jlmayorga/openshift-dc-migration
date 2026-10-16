@@ -16,7 +16,7 @@ import (
 )
 
 func TestConstraintFailureLeavesSourceAndAutoscalerUntouched(t *testing.T) {
-	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity", "pod-label", "pod-budget", "runtime-policy", "runtime-peer", "pdb"} {
+	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity", "pod-label", "pod-budget", "runtime-policy", "runtime-peer", "controller-hash-policy", "pdb"} {
 		t.Run(scenario, func(t *testing.T) {
 			r, c, path := cutoverTest(t, "exclusive", true)
 			original := c.source.DeepCopy()
@@ -40,6 +40,8 @@ func TestConstraintFailureLeavesSourceAndAutoscalerUntouched(t *testing.T) {
 				c.networkPolicies = []networkingv1.NetworkPolicy{{ObjectMeta: metav1.ObjectMeta{Name: "legacy-peer"}, Spec: networkingv1.NetworkPolicySpec{PodSelector: metav1.LabelSelector{}, Ingress: []networkingv1.NetworkPolicyIngressRule{{From: []networkingv1.NetworkPolicyPeer{{PodSelector: &metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{{Key: "deployment", Operator: metav1.LabelSelectorOpExists}}}}}}}}}}
 			case "runtime-policy":
 				c.networkPolicies = []networkingv1.NetworkPolicy{{ObjectMeta: metav1.ObjectMeta{Name: "legacy-rc-label"}, Spec: networkingv1.NetworkPolicySpec{PodSelector: metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{{Key: "deployment", Operator: metav1.LabelSelectorOpExists}}}}}}
+			case "controller-hash-policy":
+				c.networkPolicies = []networkingv1.NetworkPolicy{{ObjectMeta: metav1.ObjectMeta{Name: "controller-hash"}, Spec: networkingv1.NetworkPolicySpec{PodSelector: metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{{Key: "pod-template-hash", Operator: metav1.LabelSelectorOpExists}}}}}}
 			case "network-policy":
 				c.networkPolicies = []networkingv1.NetworkPolicy{{ObjectMeta: metav1.ObjectMeta{Name: "target-denied"}, Spec: networkingv1.NetworkPolicySpec{PodSelector: metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{{Key: migrationLabel, Operator: metav1.LabelSelectorOpExists}}}}}}
 			case "node-capacity":

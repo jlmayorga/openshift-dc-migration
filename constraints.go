@@ -34,6 +34,16 @@ type ConstraintAssessment struct {
 	Warnings         []string          `json:"warnings"`
 }
 
+func checkControllerHashSelector(selector labels.Selector) error {
+	requirements, _ := selector.Requirements()
+	for _, requirement := range requirements {
+		if requirement.Key() == "pod-template-hash" {
+			return errors.New("policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement")
+		}
+	}
+	return nil
+}
+
 func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged *appsv1.Deployment, result *Result) (runErr error) {
 	a := &ConstraintAssessment{CheckedAt: r.Now().UTC().Format("2006-01-02T15:04:05Z"), Status: "blocked", Checks: []ConstraintCheck{}, Warnings: []string{
 		"Point-in-time checks do not reserve quota or node capacity. Concurrent changes, image/runtime/storage failures and controller-identity or generated-name-specific admission can still prevent startup.",
@@ -380,6 +390,9 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 				selector, err := metav1.LabelSelectorAsSelector(raw)
 				if err != nil {
 					return err
+				}
+				if err = checkControllerHashSelector(selector); err != nil {
+					return fmt.Errorf("NetworkPolicy %s: %w", policy.Name, err)
 				}
 				for _, current := range sourceLabels {
 					if selector.Matches(labels.Set(current)) != selector.Matches(labels.Set(pod.Labels)) {
