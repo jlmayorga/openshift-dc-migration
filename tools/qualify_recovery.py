@@ -19,7 +19,7 @@ from urllib.parse import parse_qs, urlsplit
 from qualify_configurations import Live
 
 
-def persistent_mutation(method, target):
+def persistent_mutation(method, target, body=b""):
     """Exclude admission/authorization reviews and server dry runs from faults."""
     url = urlsplit(target)
     reviews = {
@@ -31,10 +31,18 @@ def persistent_mutation(method, target):
         "podsecuritypolicyselfsubjectreviews",
         "podsecuritypolicysubjectreviews",
     }
+    delete_dry_run = False
+    if method == "DELETE" and body:
+        try:
+            options = json.loads(body)
+        except (ValueError, UnicodeError):
+            options = None
+        delete_dry_run = isinstance(options, dict) and bool(options.get("dryRun"))
     return (
         method in {"PUT", "POST", "DELETE", "PATCH"}
         and "dryRun" not in parse_qs(url.query)
         and url.path.rstrip("/").rsplit("/", 1)[-1] not in reviews
+        and not delete_dry_run
     )
 
 
@@ -77,10 +85,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             )
             response = connection.getresponse()
             data = response.read()
-            mutation = persistent_mutation(self.command, self.path)
+            mutation = persistent_mutation(self.command, self.path, body)
             with self.server.lock:
                 if mutation and 200 <= response.status < 300:
                     self.server.count += 1
+                lose = (
+                    mutation
+                    and self.server.after == self.server.count
+                    and response.status < 300
+                )
                 self.server.requests.append(
                     dict(
                         method=self.command,
@@ -88,12 +101,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         status=response.status,
                         mutation=mutation,
                         mutationNumber=self.server.count,
+                        faultInjected=lose,
                     )
-                )
-                lose = (
-                    mutation
-                    and self.server.after == self.server.count
-                    and response.status < 300
                 )
                 if lose:
                     self.server.lost = True
@@ -218,7 +227,7 @@ def main():
             )
             plan = live.tool("plan", health=health)
             live.tool("stage", plan)
-            proxy.after, proxy.count = number, 0
+            proxy.after, proxy.count, proxy.requests = number, 0, []
             failed_report = live.tool("cutover", plan, expected=1)
             assert (
                 proxy.lost and proxy.count == number
@@ -245,6 +254,19 @@ def main():
             successful = [
                 r for r in writes if r["mutation"] and 200 <= r["status"] < 300
             ]
+            assert len(successful) == number
+            assert sum(r["faultInjected"] for r in writes) == 1
+            assert successful[-1]["faultInjected"]
+            method, resource = [
+                ("DELETE", "/horizontalpodautoscalers/web"),
+                ("PUT", "/deploymentconfigs/web"),
+                ("PUT", "/deploymentconfigs/web"),
+                ("PUT", "/deploymentconfigs/web"),
+                ("PUT", "/deployments/web"),
+                ("POST", "/horizontalpodautoscalers"),
+            ][number - 1]
+            assert successful[-1]["method"] == method
+            assert urlsplit(successful[-1]["path"]).path.endswith(resource)
             return {
                 "lostResponseAfterMutation": number,
                 "mutation": successful[-1],

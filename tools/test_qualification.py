@@ -8,6 +8,12 @@ from qualify_recovery import persistent_mutation
 
 
 class RecoveryFaults(unittest.TestCase):
+    def test_delete_options_dry_run_is_not_a_persistent_write(self):
+        path = "/apis/autoscaling/v2/namespaces/lab/horizontalpodautoscalers/web"
+        self.assertFalse(persistent_mutation("DELETE", path, b'{"dryRun":["All"]}'))
+        self.assertTrue(persistent_mutation("DELETE", path, b'{"dryRun":[]}'))
+        self.assertTrue(persistent_mutation("DELETE", path, b"{}"))
+
     def test_admission_checks_do_not_advance_cutover_fault(self):
         for path in [
             "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
