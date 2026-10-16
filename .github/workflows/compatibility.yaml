@@ -28,10 +28,17 @@ jobs:
           import json,os
           full=os.environ['EVENT_NAME']!='push'
           matrix=json.load(open('compatibility/matrix.json'))
-          minors=[v['minor'] for v in matrix['targets'] if v['releaseRequirement']!='development' and v.get('qualificationPolicy','actual-cluster')=='actual-cluster'] if full else [matrix['newestGA']]
-          platforms=['linux-amd64','linux-arm64','darwin-amd64','darwin-arm64','windows-amd64'] if full else ['linux-amd64']
-          rows=[{'minor':m,'platform':p} for m in minors for p in platforms]
-          if full:rows.append({'minor':'next','platform':'linux-amd64'})
+          if matrix.get('activeReleaseScope'):
+              import sys
+              sys.path.insert(0,'tools')
+              from release_gate import load_scope
+              scope=load_scope(matrix)
+              rows=[{'minor':scope['actualMinor'],'platform':a['platform'].replace('/','-')} for a in scope['artifacts'].values()]
+          else:
+              minors=[v['minor'] for v in matrix['targets'] if v['releaseRequirement']!='development' and v.get('qualificationPolicy','actual-cluster')=='actual-cluster'] if full else [matrix['newestGA']]
+              platforms=['linux-amd64','linux-arm64','darwin-amd64','darwin-arm64','windows-amd64'] if full else ['linux-amd64']
+              rows=[{'minor':m,'platform':p} for m in minors for p in platforms]
+              if full:rows.append({'minor':'next','platform':'linux-amd64'})
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('targets='+json.dumps({'include':rows})+'\n')
           PY
   qualify:

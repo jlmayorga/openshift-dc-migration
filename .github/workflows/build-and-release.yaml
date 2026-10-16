@@ -23,24 +23,8 @@ jobs:
           python3 tools/check-vulnerabilities.py dist/govulncheck.json
           /tmp/security-tools/gosec -fmt=json -out=dist/gosec.json ./...
       - run: |
-          mkdir -p dist
-          for target in linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64; do
-            goos=${target%/*}; goarch=${target#*/}; suffix=''
-            if [ "$goos" = windows ]; then suffix=.exe; fi
-            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -mod=readonly -buildvcs=false -trimpath \
-              -ldflags="-s -w -X main.version=${GITHUB_REF_NAME} -X main.commit=${GITHUB_SHA} -X main.buildDate=$(git show -s --format=%cI HEAD)" \
-              -o "dist/openshift-dc-converter-$goos-$goarch$suffix" .
-          done
-          (cd dist && sha256sum openshift-dc-converter-* > SHA256SUMS)
-          python3 - <<'PYMETA'
-          import json,os,sys
-          sys.path.insert(0,'tools')
-          from release_gate import tree_digest,dependency_digest
-          with open('dist/build-provenance.json','w') as f:json.dump({'revision':os.environ['GITHUB_SHA'],'fixtureSHA256':tree_digest('testdata'),'dependencySHA256':dependency_digest()},f)
-          PYMETA
-          go version > dist/build-metadata.txt
-          go list -m all >> dist/build-metadata.txt
-          cp compatibility/matrix.json dist/compatibility-matrix.json
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_*.py'
+          PYTHONDONTWRITEBYTECODE=1 python3 tools/build_qualified.py --output dist
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-candidates
@@ -57,14 +41,7 @@ jobs:
         with:
           name: release-candidates
           path: dist
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
-        with:
-          pattern: actual-openshift-*
-          merge-multiple: true
-          path: evidence
-          github-token: ${{ github.token }}
-          run-id: ${{ vars.OPENSHIFT_QUALIFICATION_RUN_ID }}
-      - run: python3 tools/release_gate.py --artifacts dist --evidence evidence
+      - run: python3 tools/release_gate.py --artifacts dist --export-evidence evidence
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: compatibility-results
@@ -85,4 +62,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dist/* --draft --verify-tag --title "$RELEASE_TAG" --notes 'Qualified binaries, checksums, build metadata and actual OpenShift compatibility results. Review before publishing.'
+        run: |
+          gh release create "$RELEASE_TAG" dist/* --draft --verify-tag --title "$RELEASE_TAG" --notes 'Scoped maintenance candidate: Linux amd64 and Darwin arm64 qualified on OpenShift 4.21.36. Frozen tested build metadata is retained. OpenShift 4.14–4.20 use source-review assumptions; 4.22 and other platforms remain untested. See attached release-scope.json and gate-result.json. Review before publishing.'
