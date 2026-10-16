@@ -12,6 +12,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func testOptions(t *testing.T) Options {
@@ -138,6 +140,69 @@ func TestHTTPFailuresAndCancellation(t *testing.T) {
 			}
 			if e = json.Unmarshal(b, &saved); e != nil || len(saved.Results) != 1 {
 				t.Fatalf("missing partial report: %v", e)
+			}
+		})
+	}
+}
+
+func TestAccessReviewUsesActualResourceVersionAcrossServerDefaults(t *testing.T) {
+	for _, serverDefault := range []string{"", "*"} {
+		t.Run("default="+serverDefault, func(t *testing.T) {
+			dc := fixture(t)
+			var lists atomic.Int32
+			r := liveTestRunner(t, func(w http.ResponseWriter, req *http.Request) {
+				if discoveryResponse(w, req) {
+					return
+				}
+				if strings.HasSuffix(req.URL.Path, "/selfsubjectaccessreviews") {
+					var body map[string]interface{}
+					_ = json.NewDecoder(req.Body).Decode(&body)
+					attrs := body["spec"].(map[string]interface{})["resourceAttributes"].(map[string]interface{})
+					version, _ := attrs["version"].(string)
+					if version == "" {
+						version = serverDefault
+					}
+					// This authorizer allows the actual DC endpoint, but not a
+					// review for an omitted or wildcard API version.
+					jsonResponse(w, map[string]interface{}{"kind": "SelfSubjectAccessReview", "apiVersion": "authorization.k8s.io/v1", "status": map[string]interface{}{"allowed": version == "v1", "reason": "only apps.openshift.io/v1 DC list is authorized"}})
+					return
+				}
+				if req.Method == http.MethodGet && strings.HasSuffix(req.URL.Path, "/deploymentconfigs") {
+					lists.Add(1)
+					jsonResponse(w, map[string]interface{}{"kind": "DeploymentConfigList", "apiVersion": "apps.openshift.io/v1", "items": []interface{}{dc.Object}})
+					return
+				}
+				t.Errorf("unexpected request %s %s", req.Method, req.URL.Path)
+				http.NotFound(w, req)
+			})
+			if err := r.Run(context.Background()); err != nil || lists.Load() != 1 || r.Report.Totals.Generated != 1 {
+				t.Fatal("review disagreed with authorized endpoint", err, r.Report)
+			}
+		})
+	}
+}
+
+func TestPermissionReviewMatchesEndpointGroupVersion(t *testing.T) {
+	for _, endpoint := range []schema.GroupVersionResource{{Version: "v1", Resource: "pods"}, hpaResource, {Group: adminPolicyGroup, Version: adminPolicyVersion, Resource: "adminnetworkpolicies"}} {
+		t.Run(endpoint.Group+"/"+endpoint.Version, func(t *testing.T) {
+			r := liveTestRunner(t, func(w http.ResponseWriter, req *http.Request) {
+				if !strings.HasSuffix(req.URL.Path, "/selfsubjectaccessreviews") {
+					t.Errorf("unexpected request %s", req.URL.Path)
+					http.NotFound(w, req)
+					return
+				}
+				var body map[string]interface{}
+				_ = json.NewDecoder(req.Body).Decode(&body)
+				attrs := body["spec"].(map[string]interface{})["resourceAttributes"].(map[string]interface{})
+				allowed := attrs["group"] == endpoint.Group || endpoint.Group == "" && attrs["group"] == nil
+				allowed = allowed && attrs["version"] == endpoint.Version && attrs["resource"] == endpoint.Resource
+				jsonResponse(w, map[string]interface{}{"kind": "SelfSubjectAccessReview", "apiVersion": "authorization.k8s.io/v1", "status": map[string]interface{}{"allowed": allowed}})
+			})
+			if err := r.connect(); err != nil {
+				t.Fatal(err)
+			}
+			if err := r.access(context.Background(), "example", endpoint.Group, endpoint.Resource, "get"); err != nil {
+				t.Fatal("review version differs from requested endpoint", err)
 			}
 		})
 	}

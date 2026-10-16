@@ -2,6 +2,8 @@
 
 All live modes discover baseline API resource lists and create `authorization.k8s.io/v1` SelfSubjectAccessReviews. Ordinary generation needs only list access to `apps.openshift.io/v1` DeploymentConfigs in requested namespaces, plus API discovery. It does not GET namespace objects or cluster-version metadata. Reserved namespaces are filtered first. Offline input needs no cluster credentials.
 
+Permission reviews specify the same resource API version as the operation: `v1` for baseline resources, `v2` for HPAs and the assessed admin-policy version when that optional API is used. This avoids relying on the empty/wildcard review-version default that changed in Kubernetes 1.28. An allowed review still does not bypass authorization or admission on the real request.
+
 | Operation | Additional namespace permissions |
 | --- | --- |
 | Live plan | list core Services/RCs, apps Deployments/ReplicaSets/StatefulSets/DaemonSets, batch Jobs, autoscaling/v2 HPAs; get source DC and get known Services/HPAs during revalidation |

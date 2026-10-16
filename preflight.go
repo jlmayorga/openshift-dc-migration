@@ -60,7 +60,16 @@ func (r *Runner) access(ctx context.Context, ns, group, resource, verb string) e
 	}
 	ctx, cancel := context.WithTimeout(ctx, r.Options.RequestTimeout)
 	defer cancel()
-	review := &authorizationv1.SelfSubjectAccessReview{Spec: authorizationv1.SelfSubjectAccessReviewSpec{ResourceAttributes: &authorizationv1.ResourceAttributes{Namespace: ns, Group: group, Resource: resource, Verb: verb}}}
+	// Review the same version used by the real request instead of relying on
+	// the server's empty/wildcard default, which changed in Kubernetes 1.28.
+	version := "v1"
+	switch group {
+	case "autoscaling":
+		version = "v2"
+	case adminPolicyGroup:
+		version = adminPolicyVersion
+	}
+	review := &authorizationv1.SelfSubjectAccessReview{Spec: authorizationv1.SelfSubjectAccessReviewSpec{ResourceAttributes: &authorizationv1.ResourceAttributes{Namespace: ns, Group: group, Version: version, Resource: resource, Verb: verb}}}
 	response, err := r.Kube.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, review, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("check %s %s in %s: %w", verb, resource, ns, err)
