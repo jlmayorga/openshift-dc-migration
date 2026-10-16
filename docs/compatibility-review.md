@@ -22,7 +22,7 @@ The [structured review record](../compatibility/evidence/2026-10-16-release-note
 
 ## Production API and operation inventory
 
-This inventory follows `runtime.go`, `converter.go`, `baseline.go`, `planning.go`, `application.go`, `cutover.go`, `constraints.go`, `quota.go`, `scheduling.go`, `storage.go` and `scc.go`. The code graph and path coverage were checked, with source reads for material behavior. The baseline field catalog is generated from Kubernetes 1.27.16 OpenAPI. Network traffic uses JSON; optional APIs are discovered when needed.
+This inventory follows `runtime.go`, `converter.go`, `baseline.go`, `planning.go`, `application.go`, `cutover.go`, `constraints.go`, `quota.go`, `scheduling.go`, `storage.go`, `scc.go` and `raw_resources.go`. The code graph and path coverage were checked, with source reads for material behavior. The baseline field catalog is generated from Kubernetes 1.27.16 OpenAPI. Network traffic uses JSON; optional APIs are discovered when needed.
 
 | API | Resources and use |
 | --- | --- |
@@ -30,7 +30,7 @@ This inventory follows `runtime.go`, `converter.go`, `baseline.go`, `planning.go
 | `apps/v1` | Deployments: get, dry-run/actual create/update; ReplicaSets: list, representative create dry run, ownership/termination checks; StatefulSets/DaemonSets: controller overlap inventory |
 | `batch/v1` | Jobs: controller overlap inventory; production does not create replacement hook Jobs |
 | core `v1` | Pods: namespace and cluster inventory, raw create dry run, readiness/ownership/termination and allocation checks; RCs: source ownership/retirement; Services: inventory/read; Endpoints: traffic verification; ResourceQuotas/LimitRanges: read; PVCs/PVs: bound storage/topology/plugin checks; Nodes: placement/capacity inventory |
-| `autoscaling/v2` | HPAs: raw baseline validation plus typed reads/list, dry-run/actual delete/create for temporary freeze and retarget/restoration |
+| `autoscaling/v2` | HPAs: raw list/read/create-response baseline validation, dry-run/actual delete/create for temporary freeze and retarget/restoration; recovery deletion uses raw ownership metadata |
 | `networking.k8s.io/v1` | NetworkPolicies: read and compare workload/peer Pod selectors against current source labels |
 | `policy/v1` | PodDisruptionBudgets: read synchronized availability budget before controller retirement |
 | `authorization.k8s.io/v1` | SelfSubjectAccessReview: ephemeral caller permission review; LocalSubjectAccessReview: optional namespace-scoped proof of service-account use of its required SCC when the SCC subject review selected another policy |
@@ -58,4 +58,4 @@ The raw SCC and Pod spec guards (`278d942`) reject newer security/volume/resourc
 - OpenShift 4.15 stops creating the deployer service account when the DC capability is disabled. Verify disabled-capability discovery/offline behavior and associated controller/RBAC changes across all minors. Source: [4.15 notes](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc).
 - Finish all per-release removals, field/default/feature-gate changes, dry-run/admission behavior, controller/image semantics, resource accounting/scheduling, storage migration, and applicable patch advisories against the inventory. Review aligned client-library candidates against these contracts; SDK compatibility is separate from `kubectl` version-skew policy.
 - Add any required guards/tests and produce the final per-release/resource disposition. Only then update matrix/support/release policy to consume review-based assumptions for unavailable 4.14–4.20 targets. Preserve all actual artifact hashes and never synthesize integration passes.
-- Audit raw Deployment/HPA admission responses before typed decoding. The new raw-spec guard covers SCC and Pod responses; it does not establish complete raw-field coverage for every resource boundary.
+- Raw Deployment/HPA/ReplicaSet response guards now supplement SCC/Pod validation. Contract tests reproduce formerly hidden fields and verify pre-retirement refusal, persisted-create identity retention and recovery without dropping unfamiliar destination fields. These changes still require exact-artifact live requalification; they do not establish complete raw-field coverage for every resource boundary.

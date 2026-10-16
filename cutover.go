@@ -218,32 +218,36 @@ func (r *Runner) setSourceSpec(ctx context.Context, p *MigrationPlan, desired ma
 	return r.checkpoint(p, "source-updated", "confirmed: "+event)
 }
 func (r *Runner) destination(ctx context.Context, p *MigrationPlan) (*appsv1.Deployment, error) {
-	d, err := r.Kube.AppsV1().Deployments(p.Desired.Namespace).Get(ctx, p.Desired.Name, metav1.GetOptions{})
+	_, d, err := r.destinationState(ctx, p)
+	return d, err
+}
+func (r *Runner) destinationState(ctx context.Context, p *MigrationPlan) (*unstructured.Unstructured, *appsv1.Deployment, error) {
+	object, d, err := r.getDeploymentState(ctx, p.Desired.Namespace, p.Desired.Name, r.Options.Mode != "rollback")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if d.DeletionTimestamp != nil {
-		return nil, errors.New("destination is deleting; manual inspection required")
+		return nil, nil, errors.New("destination is deleting; manual inspection required")
 	}
 	if d.Annotations[sourceAnnotation] != string(p.Source.GetUID()) || d.Annotations[planAnnotation] != planDigest(p) || d.Labels[migrationLabel] != p.ID {
-		return nil, errors.New("destination ownership/UID changed; refusing mutation")
+		return nil, nil, errors.New("destination ownership/UID changed; refusing mutation")
 	}
 	if p.Progress.DestinationUID == "" {
 		if p.Progress.AdmittedSpec == nil || !reflect.DeepEqual(d.Spec, *p.Progress.AdmittedSpec) || d.Spec.Replicas == nil || *d.Spec.Replicas != 0 || !d.Spec.Paused {
-			return nil, errors.New("cannot recover unknown destination UID from non-staged state")
+			return nil, nil, errors.New("cannot recover unknown destination UID from non-staged state")
 		}
 		p.Progress.DestinationUID = string(d.UID)
 		if err = savePlan(r.Options.PlanFile, p); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	if string(d.UID) != p.Progress.DestinationUID {
-		return nil, errors.New("destination UID changed")
+		return nil, nil, errors.New("destination UID changed")
 	}
-	return d, nil
+	return object, d, nil
 }
 func (r *Runner) changeDestination(ctx context.Context, p *MigrationPlan, activate bool) error {
-	d, err := r.destination(ctx, p)
+	original, d, err := r.destinationState(ctx, p)
 	if err != nil {
 		return err
 	}
@@ -279,26 +283,49 @@ func (r *Runner) changeDestination(ctx context.Context, p *MigrationPlan, activa
 	if err = r.checkpoint(p, "destination-intent", fmt.Sprintf("intent: set destination replicas=%d paused=%t", *d.Spec.Replicas, d.Spec.Paused)); err != nil {
 		return err
 	}
-	// Validate this exact update through admission before persisting it.
-	admitted, err := r.Kube.AppsV1().Deployments(d.Namespace).Update(ctx, d, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+	request, err := resourceObject(d, deploymentResource, "Deployment")
+	if err != nil {
+		return err
+	}
+	if !activate {
+		// Recovery stops the owned live object without discarding fields a
+		// newer server added outside this client's typed model.
+		request = original.DeepCopy()
+		_ = unstructured.SetNestedField(request.Object, int64(0), "spec", "replicas")
+		_ = unstructured.SetNestedField(request.Object, true, "spec", "paused")
+		annotations := request.GetAnnotations()
+		delete(annotations, imageTriggerAnnotation)
+		request.SetAnnotations(annotations)
+	}
+	admitted, err := r.updateResource(ctx, deploymentResource, "Deployment", request, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 	if err != nil {
 		return fmt.Errorf("destination update dry run: %w", err)
 	}
-	if !reflect.DeepEqual(admitted.Spec, d.Spec) || admitted.Annotations[imageTriggerAnnotation] != d.Annotations[imageTriggerAnnotation] {
+	if activate {
+		if err = validateResourceSpec(admitted, deploymentSpecSchema); err != nil {
+			return err
+		}
+	}
+	if !reflect.DeepEqual(admitted.Object["spec"], request.Object["spec"]) || admitted.GetAnnotations()[imageTriggerAnnotation] != request.GetAnnotations()[imageTriggerAnnotation] {
 		return errors.New("admission changed activation/recovery spec; manual review required")
 	}
-	updated, err := r.Kube.AppsV1().Deployments(d.Namespace).Update(ctx, d, metav1.UpdateOptions{FieldValidation: "Strict"})
+	updated, err := r.updateResource(ctx, deploymentResource, "Deployment", request, metav1.UpdateOptions{FieldValidation: "Strict"})
 	if err != nil {
 		return fmt.Errorf("destination update uncertain: %w", err)
 	}
-	if !reflect.DeepEqual(updated.Spec, d.Spec) {
+	if activate {
+		if err = validateResourceSpec(updated, deploymentSpecSchema); err != nil {
+			return err
+		}
+	}
+	if !reflect.DeepEqual(updated.Object["spec"], request.Object["spec"]) || updated.GetAnnotations()[imageTriggerAnnotation] != request.GetAnnotations()[imageTriggerAnnotation] {
 		return errors.New("persisted destination differs from dry run; inspect immediately")
 	}
 	return r.checkpoint(p, "destination-updated", "confirmed destination update")
 }
 func (r *Runner) freezeHPA(ctx context.Context, p *MigrationPlan, h autoscalingv2.HorizontalPodAutoscaler) error {
 	api := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(h.Namespace)
-	current, err := api.Get(ctx, h.Name, metav1.GetOptions{})
+	current, err := r.getHPA(ctx, h.Namespace, h.Name)
 	if err != nil {
 		return err
 	}
@@ -332,7 +359,6 @@ func cleanHPA(h autoscalingv2.HorizontalPodAutoscaler) *autoscalingv2.Horizontal
 	return d
 }
 func (r *Runner) createHPA(ctx context.Context, p *MigrationPlan, h autoscalingv2.HorizontalPodAutoscaler, restore bool) error {
-	api := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(h.Namespace)
 	desired := cleanHPA(h)
 	if !restore {
 		desired.Spec.ScaleTargetRef = autoscalingv2.CrossVersionObjectReference{APIVersion: "apps/v1", Kind: "Deployment", Name: p.Desired.Name}
@@ -341,7 +367,7 @@ func (r *Runner) createHPA(ctx context.Context, p *MigrationPlan, h autoscalingv
 	desired.Labels[migrationLabel] = p.ID
 	desired.Annotations = ensureMap(desired.Annotations)
 	desired.Annotations[planAnnotation] = planDigest(p)
-	current, err := api.Get(ctx, h.Name, metav1.GetOptions{})
+	current, err := r.getHPA(ctx, h.Namespace, h.Name)
 	if err == nil {
 		if current.DeletionTimestamp != nil {
 			return errors.New("HPA is deleting; cannot claim a restored/retargeted autoscaler")
@@ -357,15 +383,21 @@ func (r *Runner) createHPA(ctx context.Context, p *MigrationPlan, h autoscalingv
 	if err = r.checkpoint(p, "hpa-create-intent", "intent: recreate HPA "+h.Name+" with reviewed target"); err != nil {
 		return err
 	}
-	admitted, err := api.Create(ctx, desired, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+	admitted, err := r.createHPAObject(ctx, desired, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 	if err != nil {
 		return err
 	}
 	if !reflect.DeepEqual(admitted.Spec, desired.Spec) {
 		return errors.New("HPA admission changed restored/retargeted semantics")
 	}
-	_, err = api.Create(ctx, desired, metav1.CreateOptions{FieldValidation: "Strict"})
-	return err
+	created, err := r.createHPAObject(ctx, desired, metav1.CreateOptions{FieldValidation: "Strict"})
+	if err != nil {
+		return err
+	}
+	if !reflect.DeepEqual(created.Spec, desired.Spec) {
+		return errors.New("persisted HPA changed restored/retargeted semantics")
+	}
+	return nil
 }
 func (r *Runner) poll(ctx context.Context, check func(context.Context) (bool, error)) error {
 	ctx, cancel := context.WithTimeout(ctx, r.Options.ReadinessTimeout)
@@ -546,7 +578,7 @@ func (r *Runner) healthAttempt(ctx context.Context, healthURL string) error {
 }
 func (r *Runner) verifyCutover(ctx context.Context, p *MigrationPlan) error {
 	for _, h := range p.HPAs {
-		live, err := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(h.Namespace).Get(ctx, h.Name, metav1.GetOptions{})
+		live, err := r.getHPA(ctx, h.Namespace, h.Name)
 		if err != nil {
 			return err
 		}
@@ -574,20 +606,20 @@ func (r *Runner) rollback(ctx context.Context, p *MigrationPlan, result *Result)
 	}
 	for _, h := range p.HPAs {
 		api := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(h.Namespace)
-		current, err := api.Get(ctx, h.Name, metav1.GetOptions{})
+		current, err := r.Dynamic.Resource(hpaResource).Namespace(h.Namespace).Get(ctx, h.Name, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			continue
 		}
 		if err != nil {
 			return err
 		}
-		if current.UID == h.UID {
+		if current.GetUID() == h.UID {
 			continue
 		}
-		if current.Labels[migrationLabel] != p.ID || current.Annotations[planAnnotation] != planDigest(p) {
+		if current.GetLabels()[migrationLabel] != p.ID || current.GetAnnotations()[planAnnotation] != planDigest(p) {
 			return errors.New("foreign HPA blocks recovery")
 		}
-		uid, rv := current.UID, current.ResourceVersion
+		uid, rv := current.GetUID(), current.GetResourceVersion()
 		if err = r.checkpoint(p, "hpa-recovery-intent", "intent: remove migrated HPA before stopping destination"); err != nil {
 			return err
 		}

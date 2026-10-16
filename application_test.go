@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -30,6 +33,8 @@ import (
 )
 
 type contractCluster struct {
+	mutateResponse                func(*http.Request, map[string]interface{})
+	inspectRequest                func(*http.Request, []byte)
 	deniedLocalSCCReviewAccess    bool
 	rejectLocalSCCReviewRequest   bool
 	omitLocalSCCReviewAPI         bool
@@ -73,6 +78,32 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 	t.Helper()
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.inspectRequest != nil && req.Body != nil {
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Body = io.NopCloser(bytes.NewReader(body))
+		c.inspectRequest(req, body)
+	}
+	if c.mutateResponse != nil {
+		output := w
+		recorder := httptest.NewRecorder()
+		w = recorder
+		defer func() {
+			for key, values := range recorder.Header() {
+				output.Header()[key] = values
+			}
+			output.WriteHeader(recorder.Code)
+			var object map[string]interface{}
+			if recorder.Code >= 200 && recorder.Code < 300 && json.Unmarshal(recorder.Body.Bytes(), &object) == nil {
+				c.mutateResponse(req, object)
+				_ = json.NewEncoder(output).Encode(object)
+			} else {
+				_, _ = output.Write(recorder.Body.Bytes())
+			}
+		}()
+	}
 	if c.lost {
 		http.Error(w, "connection lost", 503)
 		return
@@ -300,7 +331,9 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		if c.destination == nil {
 			http.Error(w, "not found", 404)
 		} else {
-			jsonResponse(w, c.destination)
+			response := c.destination.DeepCopy()
+			response.TypeMeta = metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"}
+			jsonResponse(w, response)
 		}
 		return
 	}
@@ -360,6 +393,7 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 					version, _ := strconv.Atoi(c.hpas[i].ResourceVersion)
 					c.hpas[i].ResourceVersion = strconv.Itoa(version + 1)
 				}
+				h.TypeMeta = metav1.TypeMeta{APIVersion: "autoscaling/v2", Kind: "HorizontalPodAutoscaler"}
 				jsonResponse(w, &h)
 				return
 			}

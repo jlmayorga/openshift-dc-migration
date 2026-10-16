@@ -57,6 +57,7 @@ def visit(name):
 
 
 visit("io.k8s.api.apps.v1.Deployment")
+visit("io.k8s.api.apps.v1.ReplicaSetSpec")
 visit("io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec")
 json.dump(
     {

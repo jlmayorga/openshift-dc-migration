@@ -134,13 +134,14 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 			}
 		}
 	}
-	hpas, err := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	for _, h := range hpas.Items {
+	for _, raw := range rawHPAs.Items {
+		h, err := decodeResource[autoscalingv2.HorizontalPodAutoscaler](&raw, "")
+		if err != nil {
+			return nil, err
+		}
+
 		if h.Spec.ScaleTargetRef.Kind == "DeploymentConfig" && h.Spec.ScaleTargetRef.Name == dc.GetName() {
-			p.HPAs = append(p.HPAs, h)
+			p.HPAs = append(p.HPAs, *h)
 			if h.Spec.ScaleTargetRef.APIVersion != "apps.openshift.io/v1" {
 				p.Blockers = append(p.Blockers, "HPA source API version is ambiguous; set an explicit apps.openshift.io/v1 target before planning")
 			}
@@ -337,7 +338,7 @@ func (r *Runner) revalidatePlan(ctx context.Context, p *MigrationPlan) error {
 		}
 	}
 	for _, h := range p.HPAs {
-		live, e := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(h.Namespace).Get(ctx, h.Name, metav1.GetOptions{})
+		live, e := r.getHPA(ctx, h.Namespace, h.Name)
 		if e != nil && !apierrors.IsNotFound(e) {
 			return e
 		}

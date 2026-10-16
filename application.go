@@ -92,7 +92,7 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 		}
 	}
 	desired := stagedDeployment(p)
-	existing, err := r.Kube.AppsV1().Deployments(ns).Get(ctx, desired.Name, metav1.GetOptions{})
+	existing, err := r.getDeployment(ctx, ns, desired.Name)
 	if err == nil {
 		if existing.DeletionTimestamp != nil {
 			return errors.New("destination is deleting; cannot stage it")
@@ -122,7 +122,7 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 	if !apierrors.IsNotFound(err) {
 		return err
 	}
-	admitted, err := r.Kube.AppsV1().Deployments(ns).Create(ctx, desired, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+	admitted, err := r.createDeployment(ctx, desired, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 	if err != nil {
 		return fmt.Errorf("server dry run: %w", err)
 	}
@@ -143,12 +143,16 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 		return err
 	}
 	// Use original request again so admission does not depend on replaying server-generated fields.
-	created, err := r.Kube.AppsV1().Deployments(ns).Create(ctx, desired, metav1.CreateOptions{FieldValidation: "Strict"})
+	createdObject, err := r.createResource(ctx, deploymentResource, "Deployment", desired, metav1.CreateOptions{FieldValidation: "Strict"})
 	if err != nil {
 		return fmt.Errorf("create destination (inspect uncertain state and rerun safely): %w", err)
 	}
 	result.Applied = true
-	p.Progress.DestinationUID = string(created.UID)
+	p.Progress.DestinationUID = string(createdObject.GetUID())
+	created, err := decodeResource[appsv1.Deployment](createdObject, deploymentSpecSchema)
+	if err != nil {
+		return fmt.Errorf("persisted destination requires manual review; identity retained for recovery: %w", err)
+	}
 	p.Progress.Phase = "staged"
 	if err = validateAdmission(desired, created); err != nil {
 		return fmt.Errorf("persisted admission differs; inspect zero-replica object: %w", err)

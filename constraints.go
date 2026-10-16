@@ -111,7 +111,7 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		active.Annotations[imageTriggerAnnotation] = tr
 	}
 	if err := check("deployment-admission", func() error {
-		admitted, err := r.Kube.AppsV1().Deployments(ns).Update(ctx, active, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+		admitted, err := r.updateDeployment(ctx, active, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 		if err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 	}
 	if err := check("autoscaler-admission", func() error {
 		for i, h := range p.HPAs {
-			current, err := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).Get(ctx, h.Name, metav1.GetOptions{})
+			current, err := r.getHPA(ctx, ns, h.Name)
 			if err != nil {
 				return err
 			}
@@ -156,7 +156,7 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 			request.Status = autoscalingv2.HorizontalPodAutoscalerStatus{}
 			request.Spec.ScaleTargetRef.APIVersion = "apps/v1"
 			request.Spec.ScaleTargetRef.Kind = "Deployment"
-			admitted, err := r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).Create(ctx, request, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+			admitted, err := r.createHPAObject(ctx, request, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 			if err != nil {
 				return err
 			}
@@ -176,7 +176,7 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 	controller := true
 	rs := &appsv1.ReplicaSet{ObjectMeta: metav1.ObjectMeta{Name: "dcmig-check-" + p.ID, Namespace: ns, Labels: active.Spec.Template.Labels, OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: active.Name, UID: active.UID, Controller: &controller}}}, Spec: appsv1.ReplicaSetSpec{Replicas: &replicas, MinReadySeconds: active.Spec.MinReadySeconds, Selector: active.Spec.Selector.DeepCopy(), Template: *active.Spec.Template.DeepCopy()}}
 	if err := check("replicaset-admission", func() error {
-		admitted, err := r.Kube.AppsV1().ReplicaSets(ns).Create(ctx, rs, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+		admitted, err := r.dryRunReplicaSet(ctx, rs)
 		if err != nil {
 			return err
 		}
