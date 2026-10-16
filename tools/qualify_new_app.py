@@ -1223,8 +1223,8 @@ def add_advanced_cases(cases, live, args):
         ] and not self_active_destination(live)
         return {"unsafeVolumeOverlapRejected": True, "sourceUnchanged": True}
 
-    def failed_initial_rollout():
-        live.app("failed-initial-rollout")
+    def failed_initial_rollout(orphan=False):
+        live.app("orphan-recovery" if orphan else "failed-initial-rollout")
 
         def inject(spec):
             pod = spec["template"]["spec"]
@@ -1284,10 +1284,59 @@ def add_advanced_cases(cases, live, args):
         ]
         assert 42 in exit_codes, "Injected startup failure was not observed"
         live.snapshot("failed-destination-startup")
+        if orphan:
+            target = live.get("deployment")
+            migration_id = json.loads(plan.read_text())["id"]
+            assert (
+                target["metadata"]["annotations"][
+                    "migration.openshift-dc.io/source-uid"
+                ]
+                == source["metadata"]["uid"]
+            )
+            live.oc(
+                "delete", "deployment", live.name, "--cascade=foreground", "--wait=true"
+            )
+            live.oc(
+                "create",
+                "-f",
+                "-",
+                body={
+                    "apiVersion": "v1",
+                    "kind": "Pod",
+                    "metadata": {
+                        "name": "orphan",
+                        "namespace": live.ns,
+                        "labels": {
+                            "migration.openshift-dc.io/id": migration_id,
+                            "migration.openshift-dc.io/configuration-run": live.run,
+                        },
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "idle",
+                                "image": args.image,
+                                "command": ["/bin/sh", "-ec", "exec sleep 86400"],
+                            }
+                        ],
+                        "terminationGracePeriodSeconds": 1,
+                    },
+                },
+            )
+            assert not live.get("pod", "orphan")["metadata"].get("ownerReferences")
+            blocked = live.tool(
+                "rollback", plan, expected=1, extra=("--readiness-timeout", "5s")
+            )
+            assert not json.loads(blocked.read_text())["results"][0]["ready"]
+            assert live.get("dc")["spec"]["replicas"] == 0
+            assert json.loads(plan.read_text())["progress"]["phase"] != "rolled-back"
+            live.snapshot("orphan-blocked-source-restoration")
+            live.oc("delete", "pod", "orphan", "--wait=true")
         live.tool("rollback", plan)
         assert live.get("dc")["spec"] == source["spec"]
-        assert live.get("deployment")["spec"]["replicas"] == 0
-        assert live.get("deployment")["spec"]["paused"]
+        if not orphan:
+            assert live.get("deployment")["spec"]["replicas"] == 0
+            assert live.get("deployment")["spec"]["paused"]
         assert live.http(health) == original_response
         live.tool("rollback", plan)
         return {
@@ -1298,6 +1347,7 @@ def add_advanced_cases(cases, live, args):
             "sourceRemainedRetiredUntilExplicitRecovery": True,
             "sourceSpecAndHTTPRecovered": True,
             "recoveryRerun": "verified",
+            "orphanBlockedRestorationUntilRemoved": orphan,
         }
 
     def failed_image_rollout():
@@ -1375,6 +1425,7 @@ def add_advanced_cases(cases, live, args):
             "volume-overlap": volume_overlap,
             "failed-image-rollout": failed_image_rollout,
             "failed-initial-rollout": failed_initial_rollout,
+            "orphan-recovery": lambda: failed_initial_rollout(orphan=True),
             "recreate-hook": lambda: rejected_strategy(
                 "recreate-hook",
                 {

@@ -99,6 +99,8 @@ Apps awaiting their first binary build can generate read-only review artifacts, 
 
 The `failed-initial-rollout` case deliberately exits with code 42 only when the destination migration label is present. Its source is healthy and all pre-retirement admission/capacity checks pass; actual startup fails after source retirement. The runner verifies a failed, non-ready result, retained recovery state, and explicit source/HTTP restoration. This proves a runtime failure path that quota preflight cannot replace. The feature runner's `multi-image` fixture uses a sleeping sidecar so independently updating both tags does not depend on configurable HTTP ports.
 
+The `orphan-recovery` case extends that actual startup failure: after source retirement it removes only the owned destination, introduces an idle ownerless Pod carrying the migration ID, and verifies rollback refuses to restore the source while that Pod exists. Removing the test orphan permits explicit recovery and a safe recovery rerun. It tests the missing-controller case without starting a duplicate application worker.
+
 ## Multiple namespaces in one invocation
 
 The [actual multi-namespace evidence](multiple-namespaces-live-tests.md) records six passing cases on OpenShift 4.21.36.

@@ -30,7 +30,9 @@ def main():
         p.add_argument("--" + key, required=True)
     p.add_argument("--allow-test-mutations", action="store_true")
     p.add_argument("--timeout", type=int, default=90)
-    p.add_argument("--cases", help="Comma-separated test names; omitted runs all")
+    p.add_argument(
+        "--cases", help="Comma-separated test names; omitted runs standard cases"
+    )
     p.add_argument(
         "--expiry-wait-limit",
         type=int,
