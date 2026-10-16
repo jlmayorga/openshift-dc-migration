@@ -4,6 +4,33 @@ import subprocess
 import sys
 import tempfile
 from qualify_openshift import validate_target
+from qualify_recovery import persistent_mutation
+
+
+class RecoveryFaults(unittest.TestCase):
+    def test_admission_checks_do_not_advance_cutover_fault(self):
+        for path in [
+            "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+            "/apis/security.openshift.io/v1/namespaces/lab/podsecuritypolicysubjectreviews",
+            "/api/v1/namespaces/lab/pods?dryRun=All&fieldManager=dcmig",
+            "/apis/apps/v1/namespaces/lab/deployments/web?dryRun=All",
+        ]:
+            with self.subTest(path=path):
+                self.assertFalse(persistent_mutation("POST", path))
+
+    def test_real_workload_mutations_advance_fault(self):
+        for method, path in [
+            (
+                "DELETE",
+                "/apis/autoscaling/v2/namespaces/lab/horizontalpodautoscalers/web",
+            ),
+            ("PUT", "/apis/apps.openshift.io/v1/namespaces/lab/deploymentconfigs/web"),
+            ("PUT", "/apis/apps/v1/namespaces/lab/deployments/web"),
+            ("POST", "/apis/autoscaling/v2/namespaces/lab/horizontalpodautoscalers"),
+        ]:
+            with self.subTest(method=method, path=path):
+                self.assertTrue(persistent_mutation(method, path))
+                self.assertFalse(persistent_mutation("GET", path))
 
 
 class NewAppAuthorization(unittest.TestCase):

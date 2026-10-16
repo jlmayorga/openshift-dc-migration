@@ -14,8 +14,28 @@ import pathlib
 import re
 import subprocess
 import threading
+from urllib.parse import parse_qs, urlsplit
 
 from qualify_configurations import Live
+
+
+def persistent_mutation(method, target):
+    """Exclude admission/authorization reviews and server dry runs from faults."""
+    url = urlsplit(target)
+    reviews = {
+        "selfsubjectaccessreviews",
+        "subjectaccessreviews",
+        "localsubjectaccessreviews",
+        "selfsubjectrulesreviews",
+        "podsecuritypolicyreviews",
+        "podsecuritypolicyselfsubjectreviews",
+        "podsecuritypolicysubjectreviews",
+    }
+    return (
+        method in {"PUT", "POST", "DELETE", "PATCH"}
+        and "dryRun" not in parse_qs(url.query)
+        and url.path.rstrip("/").rsplit("/", 1)[-1] not in reviews
+    )
 
 
 class FaultProxy(http.server.ThreadingHTTPServer):
@@ -57,11 +77,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             )
             response = connection.getresponse()
             data = response.read()
-            mutation = (
-                self.command in {"PUT", "POST", "DELETE", "PATCH"}
-                and "dryRun=" not in self.path
-                and "/selfsubjectaccessreviews" not in self.path
-            )
+            mutation = persistent_mutation(self.command, self.path)
             with self.server.lock:
                 if mutation and 200 <= response.status < 300:
                     self.server.count += 1
