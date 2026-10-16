@@ -114,6 +114,33 @@ class NamespaceAuthorization(unittest.TestCase):
                 self.assertIn("Explicit disposable target", proc.stderr)
 
 
+class WorkerAuthorization(unittest.TestCase):
+    def test_invalid_target_and_empty_selection_fail_before_access(self):
+        script = pathlib.Path(__file__).with_name("qualify_worker.py")
+        for prefix, cases in [("production", "success"), ("dcmig-test", "")]:
+            command = [
+                sys.executable,
+                str(script),
+                "--context",
+                "test",
+                "--kubeconfig",
+                "/nonexistent",
+                "--binary",
+                "/nonexistent",
+                "--image",
+                "test@sha256:00",
+                "--namespace-prefix",
+                prefix,
+                "--output",
+                "/nonexistent",
+                "--cases",
+                cases,
+                "--allow-test-mutations",
+            ]
+            proc = subprocess.run(command, capture_output=True, text=True, timeout=10)
+            self.assertEqual(proc.returncode, 2)
+
+
 class ConstraintAuthorization(unittest.TestCase):
     def invoke(self, output, cases, acknowledge):
         script = pathlib.Path(__file__).with_name("qualify_constraints.py")
