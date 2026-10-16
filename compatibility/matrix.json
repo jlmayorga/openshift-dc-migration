@@ -1,6 +1,6 @@
 {
   "schemaVersion": "v1",
-  "updatedAt": "2026-10-16T07:29:11.465296+00:00",
+  "updatedAt": "2026-10-16T16:03:38.209615+00:00",
   "minimum": "4.14",
   "newestGA": "4.22",
   "newestGASource": "https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22",
@@ -169,23 +169,25 @@
         "k8s.io/apimachinery": "v0.37.1",
         "k8s.io/client-go": "v0.37.1"
       },
-      "testedAt": "2026-10-16T15:27:02.792586+00:00",
+      "testedAt": "2026-10-16T15:52:40.405271+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "passed (all22scenarioIDs on final source-retry Darwin/arm64 artifact; currentLinux targeted partial; full release matrix incomplete)",
+      "integrationResult": "passed (all22scenarioIDs separately on current Darwin/arm64 and Linux/amd64 artifacts; other platforms untested)",
       "limitations": [
-        "Actual OpenShift 4.21.36 / Kubernetes v1.34.9 only; older 4.14\u20134.20 use source-bound release-review assumptions, not actual integration results.",
-        "OpenShift 4.22 and remaining shipped platforms lack full matching qualification; release gate closed.",
-        "Current native artifact passed all 22 required scenario IDs. Current Linux artifact has seven targeted conflict/unknown-response cases plus three CSI repeats only; historical Linux full-suite outcome belongs to a different binary.",
-        "Ownership sampling supplements source-drain checks; it does not prove every instant, cross-node behavior or every driver. Preflight cannot reserve capacity or guarantee startup.",
-        "Original final-candidate TLS fixture-creation/worker-observation failures are preserved; recovered fixtures verified and fresh isolated tests passed. Preliminary destination Deployment conflict required explicit recovery and remains outside source-only retries."
+        "Current Darwin arm64 and Linux amd64 artifacts each passed all 22 required scenario groups on OpenShift 4.21.36 / Kubernetes v1.34.9.",
+        "Linux arm64, Darwin amd64 and Windows amd64 cross-compiled only; actual execution and integration are not-run.",
+        "OpenShift 4.22 has no actual cluster results on any platform; full release gate remains closed.",
+        "OpenShift 4.14\u20134.20 retain source-bound release-review assumptions, not actual integration passes.",
+        "Historical and targeted-session records retain their original artifact/provenance; authoritative full Linux result is the primary evidence record.",
+        "Worker/volume ownership sampling and point-in-time preflight have the limits described in the actual evidence."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
-      "artifactSHA256": "158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17",
+      "evidence": "compatibility/evidence/2026-10-16-linux-current-full-4.21.36.json",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
         "compatibility/evidence/2026-10-16-source-conflicts-linux-4.21.36.json",
         "compatibility/evidence/2026-10-16-client-upgrade-4.21.36.json",
         "compatibility/evidence/2026-10-16-linux-full-4.21.36.json",
@@ -201,6 +203,54 @@
         "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
         "compatibility/evidence/2026-10-15-4.21.36.json",
         "compatibility/evidence/2026-10-16-multiple-namespaces-4.21.36.json"
+      ],
+      "platformResults": [
+        {
+          "platform": "linux/amd64",
+          "integrationResult": "passed",
+          "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+          "evidence": "compatibility/evidence/2026-10-16-linux-current-full-4.21.36.json",
+          "buildResult": "built and executed",
+          "limitations": []
+        },
+        {
+          "platform": "linux/arm64",
+          "integrationResult": "not-run",
+          "artifactSHA256": "c9894fff5f86cd908f4b140db951b07dc3e089ee8d2f64d267841250eeb70c63",
+          "evidence": null,
+          "buildResult": "cross-compiled only",
+          "limitations": [
+            "No native platform runner configured; actual execution and live qualification not-run"
+          ]
+        },
+        {
+          "platform": "darwin/amd64",
+          "integrationResult": "not-run",
+          "artifactSHA256": "24585aa916aaa057e16a90c567b9110d4e6255c86ed9495ed081d27abb5de663",
+          "evidence": null,
+          "buildResult": "cross-compiled only",
+          "limitations": [
+            "No native platform runner configured; actual execution and live qualification not-run"
+          ]
+        },
+        {
+          "platform": "darwin/arm64",
+          "integrationResult": "passed",
+          "artifactSHA256": "158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17",
+          "evidence": "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
+          "buildResult": "built and executed",
+          "limitations": []
+        },
+        {
+          "platform": "windows/amd64",
+          "integrationResult": "not-run",
+          "artifactSHA256": "2a99fe01355fded82ee1a1b32d5525419d7ef48b0ed8b3cc6d05198652dccf1b",
+          "evidence": null,
+          "buildResult": "cross-compiled only",
+          "limitations": [
+            "No native platform runner configured; actual execution and live qualification not-run"
+          ]
+        }
       ]
     },
     {
@@ -217,7 +267,44 @@
         "No explicitly authorized test-cluster context supplied"
       ],
       "fixture": "testdata/ocp-4.22-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "platformResults": [
+        {
+          "platform": "linux/amd64",
+          "integrationResult": "not-run",
+          "limitations": [
+            "No authorized OpenShift 4.22 test cluster available"
+          ]
+        },
+        {
+          "platform": "linux/arm64",
+          "integrationResult": "not-run",
+          "limitations": [
+            "No authorized OpenShift 4.22 test cluster available"
+          ]
+        },
+        {
+          "platform": "darwin/amd64",
+          "integrationResult": "not-run",
+          "limitations": [
+            "No authorized OpenShift 4.22 test cluster available"
+          ]
+        },
+        {
+          "platform": "darwin/arm64",
+          "integrationResult": "not-run",
+          "limitations": [
+            "No authorized OpenShift 4.22 test cluster available"
+          ]
+        },
+        {
+          "platform": "windows/amd64",
+          "integrationResult": "not-run",
+          "limitations": [
+            "No authorized OpenShift 4.22 test cluster available"
+          ]
+        }
+      ]
     },
     {
       "minor": "next",

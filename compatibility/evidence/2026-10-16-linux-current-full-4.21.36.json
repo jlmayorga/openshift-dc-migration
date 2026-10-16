@@ -1,0 +1,2110 @@
+{
+  "kind": "actual-openshift",
+  "schemaVersion": "v1",
+  "result": "passed",
+  "minor": "4.21",
+  "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+  "runner": "runner",
+  "runURL": "local:cbcf8e19-3fe6-4a53-85a9-c8f850059cac",
+  "testedAt": "2026-10-16T15:52:40.405271+00:00",
+  "scenarios": [
+    "admission-rejection",
+    "admission-scc",
+    "connectivity-loss",
+    "constraint-preflight",
+    "cross-namespace-image-triggers",
+    "cutover-exclusive",
+    "cutover-overlap",
+    "dry-run",
+    "exclusive-volume",
+    "failed-rollout",
+    "hpa-retarget",
+    "image-triggers",
+    "interruption",
+    "multi-container-image-triggers",
+    "per-mutation-recovery",
+    "restricted-rbac",
+    "rollback",
+    "safe-rerun",
+    "schema",
+    "service-routing",
+    "singleton-worker",
+    "stale-plan"
+  ],
+  "limitations": [
+    "Actual OpenShift 4.21.36 / Kubernetes v1.34.9 on Linux amd64 only; OpenShift 4.22 and unavailable CLI platforms remain untested.",
+    "All 22 required scenario groups executed on this Linux artifact, including nine same-artifact actual supplemental records. Earlier native or older-binary outcomes are excluded.",
+    "Ownership sampling supplements source-drain checks and does not prove every instant, cross-node behavior or every CSI driver. Point-in-time preflight cannot reserve capacity or guarantee startup.",
+    "A private feature fixture adapter waits for the destination controller resourceVersion to settle before rollback; no production retry behavior is added.",
+    "Diagnostic Event reads remain denied to the limited test account; those errors are retained. Assertions use permitted API state, reports, HTTP and Pod/Lease samples.",
+    "Cross-build success for Linux arm64, Darwin amd64 and Windows amd64 is compile-only evidence; it supplies no actual execution or OpenShift qualification.",
+    "GitHub workflow execution and release publication are not claimed. Release evidence must match the exact shipped binary hashes and source/dependency/fixture provenance."
+  ],
+  "openshiftPatch": "4.21.36",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.37.1",
+    "k8s.io/apimachinery": "v0.37.1",
+    "k8s.io/client-go": "v0.37.1"
+  },
+  "kubernetesVersion": "v1.34.9",
+  "sccEvidence": [
+    {
+      "uid": "1e194785-f550-4ed2-af4d-90a32f015b29",
+      "scc": "restricted-v2",
+      "securityContext": {
+        "fsGroup": 1002570000,
+        "seLinuxOptions": {
+          "level": "s0:c51,c10"
+        },
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      }
+    }
+  ],
+  "variantEvidence": [
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "admission-rejection",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.205261+00:00",
+      "runURL": "local:linux-current-full-20261016/admission-rejection",
+      "observations": {
+        "case": "quota-admission",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:48:08.749471+00:00",
+        "observations": {
+          "dryRunQuotaDenied": true,
+          "stageQuotaDenied": true,
+          "destinationPersisted": false,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-lnx-cur-perm-20261016-quota-admission"
+      },
+      "evidenceFiles": [
+        {
+          "path": "permissions/cases.json",
+          "sha256": "afcec4823642572790446771453c709e63b2c856aaddc7a59fac7636ec0914aa"
+        },
+        {
+          "path": "permissions-invocation.json",
+          "sha256": "9a251b818ba75d0670af8d06d96222ccf16c5d64a476a996bf570b7adb99b452"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "permissions": 13
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "restricted-rbac",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.214807+00:00",
+      "runURL": "local:linux-current-full-20261016/restricted-rbac",
+      "observations": {
+        "restricted": {
+          "case": "restricted-rbac",
+          "result": "passed",
+          "startedAt": "2026-10-16T15:47:28.514288+00:00",
+          "observations": {
+            "generationWithoutNamespaceRead": "passed",
+            "deniedDCList": "visible failure",
+            "deniedDeploymentCreate": "no persistence",
+            "deniedCutoverUpdate": "source unchanged"
+          },
+          "namespace": "dcmig-lnx-cur-perm-20261016-rbac"
+        },
+        "deniedHPA": {
+          "case": "denied-hpa-mutation",
+          "result": "passed",
+          "startedAt": "2026-10-16T15:49:12.764641+00:00",
+          "observations": {
+            "HPADeleteDenied": true,
+            "HPAUnchanged": true,
+            "sourceUnchanged": true,
+            "destinationReplicas": 0
+          },
+          "namespace": "dcmig-lnx-cur-perm-20261016-rbac-hpa"
+        }
+      },
+      "evidenceFiles": [
+        {
+          "path": "permissions/cases.json",
+          "sha256": "afcec4823642572790446771453c709e63b2c856aaddc7a59fac7636ec0914aa"
+        },
+        {
+          "path": "permissions-invocation.json",
+          "sha256": "9a251b818ba75d0670af8d06d96222ccf16c5d64a476a996bf570b7adb99b452"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "permissions": 13
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "cross-namespace-image-triggers",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.236437+00:00",
+      "runURL": "local:linux-current-full-20261016/cross-namespace-image-triggers",
+      "observations": {
+        "case": "cross-namespace-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:47:14.298231+00:00",
+        "observations": {
+          "crossNamespace": true,
+          "multiContainer": false,
+          "disabled": false,
+          "triggerUpdatesVerified": true,
+          "rollback": "verified"
+        },
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image"
+      },
+      "evidenceFiles": [
+        {
+          "path": "features/cases.json",
+          "sha256": "c77aa2b6d8aa33ca65975b33a273df793843af563309a9de7dab7b6d39af87d1"
+        },
+        {
+          "path": "features-invocation.json",
+          "sha256": "df052d5e1fcf74c62170a7b16fdff79a72ca2440a0fe9621b3b08920a940475a"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "features": 12
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "multi-container-image-triggers",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.252615+00:00",
+      "runURL": "local:linux-current-full-20261016/multi-container-image-triggers",
+      "observations": {
+        "case": "multi-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:48:27.135635+00:00",
+        "observations": {
+          "crossNamespace": false,
+          "multiContainer": true,
+          "disabled": false,
+          "triggerUpdatesVerified": true,
+          "rollback": "verified"
+        },
+        "namespace": "dcmig-lnx-cur-feat-20261016-multi-image"
+      },
+      "evidenceFiles": [
+        {
+          "path": "features/cases.json",
+          "sha256": "c77aa2b6d8aa33ca65975b33a273df793843af563309a9de7dab7b6d39af87d1"
+        },
+        {
+          "path": "features-invocation.json",
+          "sha256": "df052d5e1fcf74c62170a7b16fdff79a72ca2440a0fe9621b3b08920a940475a"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "features": 12
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "singleton-worker",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.271055+00:00",
+      "runURL": "local:linux-current-full-20261016/singleton-worker",
+      "observations": {
+        "cases": [
+          {
+            "case": "success",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:42:11.464086+00:00",
+            "observations": {
+              "sourceUID": "a0b68ee1-c5b1-4073-852c-d3f45f5ac099",
+              "initialWorker": {
+                "uid": "9087feac-8591-49b4-bb3f-9369cdcd0750",
+                "renewTime": "2026-10-16T15:42:41.000000Z",
+                "pod": "web-1-hjk9n"
+              },
+              "destinationWorker": {
+                "uid": "7e871caa-2c5f-4acb-9e5c-6b350f975956",
+                "renewTime": "2026-10-16T15:43:11.000000Z",
+                "pod": "web-548c5ddbb6-6gqd5"
+              },
+              "restoredWorker": {
+                "uid": "7a8e9586-6e9f-48a8-a400-c2cbcac30406",
+                "renewTime": "2026-10-16T15:43:33.000000Z",
+                "pod": "web-1-wrpjq"
+              },
+              "heartbeatSamples": 87,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-lnx-cur-worker-20261016-success"
+          },
+          {
+            "case": "startup-failure",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:43:59.144591+00:00",
+            "observations": {
+              "sourceUID": "0b728e2a-3929-43bd-b7f4-ee4446234b36",
+              "initialWorker": {
+                "uid": "b54ce040-e018-4229-8086-ca3b08969c7c",
+                "renewTime": "2026-10-16T15:44:28.000000Z",
+                "pod": "web-1-tzk24"
+              },
+              "destinationWorker": null,
+              "restoredWorker": {
+                "uid": "ad5a9417-e87a-4611-9867-9b3b7cb87555",
+                "renewTime": "2026-10-16T15:45:21.000000Z",
+                "pod": "web-1-lmqdh"
+              },
+              "heartbeatSamples": 91,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-lnx-cur-worker-20261016-startup-failure"
+          },
+          {
+            "case": "cancellation",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:45:43.749471+00:00",
+            "observations": {
+              "sourceUID": "a9a7b574-b936-438c-9fa0-0b9b393478b6",
+              "initialWorker": {
+                "uid": "a8a92d47-d025-43ab-93ba-7e21d6f00e9e",
+                "renewTime": "2026-10-16T15:46:17.000000Z",
+                "pod": "web-1-d2f7n"
+              },
+              "destinationWorker": {
+                "uid": "5fa0b66b-929f-45e3-962c-90088a842f26",
+                "renewTime": "2026-10-16T15:46:31.000000Z",
+                "pod": "web-5f4f8ddb64-9m2p2"
+              },
+              "restoredWorker": {
+                "uid": "aa773be7-bb83-49f5-b3f0-981cc34e1954",
+                "renewTime": "2026-10-16T15:46:54.000000Z",
+                "pod": "web-1-d5bxr"
+              },
+              "heartbeatSamples": 62,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-lnx-cur-worker-20261016-cancellation"
+          }
+        ],
+        "scope": "Actual source drain plus Pod/Lease samples, not every possible instant or every worker implementation"
+      },
+      "evidenceFiles": [
+        {
+          "path": "worker/cases.json",
+          "sha256": "3cf1fb6d4ae5594ff03450b51067200628b520365920650c223c9d80cd280f2b"
+        },
+        {
+          "path": "worker-invocation.json",
+          "sha256": "77d121573230de4f60e7a33913dc7be4019fb7c9cb346675361a00e6f92b6347"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "worker": 14
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "per-mutation-recovery",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.292813+00:00",
+      "runURL": "local:linux-current-full-20261016/per-mutation-recovery",
+      "observations": {
+        "cases": [
+          {
+            "case": "write-1",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:42:11.661882+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 1,
+              "mutation": {
+                "method": "DELETE",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-lnx-cur-rec-20261016-write-1/horizontalpodautoscalers/web?timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 1,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-freeze-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-1"
+          },
+          {
+            "case": "write-2",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:42:54.237022+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 2,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 2,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-2"
+          },
+          {
+            "case": "write-3",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:43:42.237217+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 3,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 3,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-3"
+          },
+          {
+            "case": "write-4",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:44:29.550792+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 4,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 4,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-4"
+          },
+          {
+            "case": "write-5",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:45:19.843813+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 5,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 5,
+                "faultInjected": true
+              },
+              "interruptedPhase": "destination-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-5"
+          },
+          {
+            "case": "write-6",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:46:10.896960+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 6,
+              "mutation": {
+                "method": "POST",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-lnx-cur-rec-20261016-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+                "status": 201,
+                "mutation": true,
+                "mutationNumber": 6,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-create-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-6"
+          }
+        ],
+        "scope": "Actual committed writes before response loss at each of six mutations; explicit rollback and recovery reruns verified"
+      },
+      "evidenceFiles": [
+        {
+          "path": "recovery/cases.json",
+          "sha256": "8f3718f73f9ed891a86d7203def0245e3f8c4a6316c00a2b5db8b00637fbe580"
+        },
+        {
+          "path": "recovery-invocation.json",
+          "sha256": "afb79deebadd7a972709b5a26c1473ff2a47852ecdd8e4f2714393b70760111e"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "recovery": 30
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "connectivity-loss",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.309736+00:00",
+      "runURL": "local:linux-current-full-20261016/connectivity-loss",
+      "observations": {
+        "cases": [
+          {
+            "case": "write-1",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:42:11.661882+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 1,
+              "mutation": {
+                "method": "DELETE",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-lnx-cur-rec-20261016-write-1/horizontalpodautoscalers/web?timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 1,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-freeze-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-1"
+          },
+          {
+            "case": "write-2",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:42:54.237022+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 2,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 2,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-2"
+          },
+          {
+            "case": "write-3",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:43:42.237217+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 3,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 3,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-3"
+          },
+          {
+            "case": "write-4",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:44:29.550792+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 4,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 4,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-4"
+          },
+          {
+            "case": "write-5",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:45:19.843813+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 5,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps/v1/namespaces/dcmig-lnx-cur-rec-20261016-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 5,
+                "faultInjected": true
+              },
+              "interruptedPhase": "destination-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-5"
+          },
+          {
+            "case": "write-6",
+            "result": "passed",
+            "startedAt": "2026-10-16T15:46:10.896960+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 6,
+              "mutation": {
+                "method": "POST",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-lnx-cur-rec-20261016-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+                "status": 201,
+                "mutation": true,
+                "mutationNumber": 6,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-create-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-lnx-cur-rec-20261016-write-6"
+          }
+        ],
+        "scope": "Actual committed writes before response loss at each of six mutations; explicit rollback and recovery reruns verified"
+      },
+      "evidenceFiles": [
+        {
+          "path": "recovery/cases.json",
+          "sha256": "8f3718f73f9ed891a86d7203def0245e3f8c4a6316c00a2b5db8b00637fbe580"
+        },
+        {
+          "path": "recovery-invocation.json",
+          "sha256": "afb79deebadd7a972709b5a26c1473ff2a47852ecdd8e4f2714393b70760111e"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "recovery": 30
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "runner",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "failed-rollout",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:52:40.319939+00:00",
+      "runURL": "local:linux-current-full-20261016/failed-rollout",
+      "observations": {
+        "failedInitial": {
+          "case": "failed-initial-rollout",
+          "result": "passed",
+          "startedAt": "2026-10-16T15:49:50.985870+00:00",
+          "observations": {
+            "preRetirementAssessmentPassed": true,
+            "destinationStartupExitCode": 42,
+            "failedJournalPhase": "destination-updated",
+            "failureNotReportedReady": true,
+            "sourceRemainedRetiredUntilExplicitRecovery": true,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": "verified",
+            "orphanBlockedRestorationUntilRemoved": false
+          },
+          "namespace": "dcmig-lnx-cur-app-20261016-failed-initial-rollout"
+        },
+        "orphanRecovery": {
+          "case": "orphan-recovery",
+          "result": "passed",
+          "startedAt": "2026-10-16T15:51:11.547525+00:00",
+          "observations": {
+            "preRetirementAssessmentPassed": true,
+            "destinationStartupExitCode": 42,
+            "failedJournalPhase": "destination-updated",
+            "failureNotReportedReady": true,
+            "sourceRemainedRetiredUntilExplicitRecovery": true,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": "verified",
+            "orphanBlockedRestorationUntilRemoved": true
+          },
+          "namespace": "dcmig-lnx-cur-app-20261016-orphan-recovery"
+        }
+      },
+      "evidenceFiles": [
+        {
+          "path": "runtime/cases.json",
+          "sha256": "d136c3ee4d2c91654ec7752ac0fae36201f04b7d0b8f8db0838aab9c6ed04ef6"
+        },
+        {
+          "path": "runtime-invocation.json",
+          "sha256": "1c598fae2ee0056b032c89ad6dd54b5b9c6c6ef4fcabad9615b9b9615ce76b11"
+        }
+      ],
+      "actualBinaryCommandCounts": {
+        "runtime": 11
+      },
+      "provenance": "Fresh actual executions of the current cdbd Linux amd64 binary on the authorized4.21cluster. No native or earlier-binary passes imported. Exact private fixture adapters retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "runner": "runner",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:51:32.477532+00:00",
+      "runURL": "local:regular-csi-46027b15",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-f10155223147",
+      "sampledVolumePodExclusivity": {
+        "samples": 76,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision",
+      "sourceConflictRetryEvents": [
+        "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec"
+      ],
+      "evidenceDirectory": "csi"
+    }
+  ],
+  "privateArtifacts": "/tmp/dcmig-qualification-d1z1j49k",
+  "archiveSourceRebuild": {
+    "result": "passed",
+    "argv": [
+      "go",
+      "build",
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=false",
+      "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+      "-o",
+      "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-rebuilt",
+      "."
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "",
+    "source": "remote-export/source",
+    "sourceRevision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+    "platform": "linux/amd64",
+    "at": "2026-10-16T16:01:24.078138+00:00",
+    "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+    "byteIdentical": true,
+    "archiveSourcePath": "evidence/remote/source",
+    "archiveInputsMatchRebuiltSource": true,
+    "verifiedSourceFiles": 130
+  },
+  "freshDriverJobResults": {
+    "worker": 0,
+    "recovery": 0,
+    "features": 0,
+    "permissions": 0,
+    "runtime": 0,
+    "csi": 0
+  },
+  "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
+  "nativeExecutionPlatform": "linux/amd64",
+  "privateEvidenceRoot": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016",
+  "linuxUnitContractExecution": {
+    "kind": "linux-unit-contract-execution",
+    "result": "passed",
+    "testsAndSubtestsPassed": 381,
+    "topLevelTestsPassed": 83,
+    "failed": 0,
+    "skipped": 0,
+    "raceEnabled": false,
+    "platform": "linux/amd64",
+    "testArtifactSHA256": "6b63a36272e91108697e683418693187a5e8328e5b394943e4994a331d911eda",
+    "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
+    "scope": "Actual Linux unit/loopback execution; separate from actual OpenShift integration and prior Darwin race run"
+  },
+  "multipleNamespaceEvidence": {
+    "result": "passed",
+    "cases": [
+      {
+        "case": "batch-generation",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:57:34.973955+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "singleInvocation": true,
+          "duplicateProcessedOnce": true,
+          "sameResourceName": "web",
+          "namespacedArtifactDirectories": [
+            "dcmig-lnx-cur-ns-20261016-a",
+            "dcmig-lnx-cur-ns-20261016-b",
+            "dcmig-lnx-cur-ns-20261016-c"
+          ],
+          "emptyNamespaces": 1,
+          "reservedSkipped": 1,
+          "totals": {
+            "requested": 5,
+            "generated": 3,
+            "applied": 0,
+            "ready": 0,
+            "skipped": 1,
+            "manual": 0,
+            "failed": 0,
+            "empty": 1
+          }
+        }
+      },
+      {
+        "case": "batch-planning",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:57:40.363110+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "singleInvocation": true,
+          "independentMigrationIDs": [
+            "bdf348e7d65c1001c9c501e7",
+            "032033f52bdf9726953e4017",
+            "096046a253f5c7f95b78bf25"
+          ],
+          "planFiles": [
+            "batch-planning-plan-0138/dcmig-lnx-cur-ns-20261016-a/web.plan.json",
+            "batch-planning-plan-0138/dcmig-lnx-cur-ns-20261016-b/web.plan.json",
+            "batch-planning-plan-0138/dcmig-lnx-cur-ns-20261016-c/web.plan.json"
+          ],
+          "totals": {
+            "requested": 4,
+            "generated": 3,
+            "applied": 0,
+            "ready": 0,
+            "skipped": 0,
+            "manual": 0,
+            "failed": 0,
+            "empty": 1
+          }
+        }
+      },
+      {
+        "case": "batch-plan-dry-runs",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:57:49.780091+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "allThreeBatchPlansServerValidated": true,
+          "destinationsPersisted": 0,
+          "sourceSpecsUnchanged": true
+        }
+      },
+      {
+        "case": "batch-manual-partial-failure",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:57:54.969776+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "failureDoesNotStopLaterNamespaces": true,
+          "aggregateExitNonzero": true,
+          "manualSourceUnchanged": true,
+          "totals": {
+            "generate": {
+              "requested": 5,
+              "generated": 4,
+              "applied": 0,
+              "ready": 0,
+              "skipped": 0,
+              "manual": 1,
+              "failed": 0,
+              "empty": 1
+            },
+            "plan": {
+              "requested": 5,
+              "generated": 4,
+              "applied": 0,
+              "ready": 0,
+              "skipped": 0,
+              "manual": 1,
+              "failed": 0,
+              "empty": 1
+            }
+          }
+        }
+      },
+      {
+        "case": "batch-rbac-partial-failure",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:58:10.765267+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "allowedNamespaces": [
+            "dcmig-lnx-cur-ns-20261016-a",
+            "dcmig-lnx-cur-ns-20261016-c"
+          ],
+          "deniedNamespace": "dcmig-lnx-cur-ns-20261016-b",
+          "laterAllowedNamespaceProcessed": true,
+          "totals": {
+            "requested": 3,
+            "generated": 2,
+            "applied": 0,
+            "ready": 0,
+            "skipped": 0,
+            "manual": 0,
+            "failed": 1,
+            "empty": 0
+          }
+        }
+      },
+      {
+        "case": "cutover-recovery-namespace-isolation",
+        "result": "passed",
+        "startedAt": "2026-10-16T15:58:17.159177+00:00",
+        "namespaces": [
+          "dcmig-lnx-cur-ns-20261016-a",
+          "dcmig-lnx-cur-ns-20261016-b",
+          "dcmig-lnx-cur-ns-20261016-c",
+          "dcmig-lnx-cur-ns-20261016-sentinel",
+          "dcmig-lnx-cur-ns-20261016-manual",
+          "dcmig-lnx-cur-ns-20261016-empty"
+        ],
+        "observations": {
+          "sameNamedApplicationsMigrated": 3,
+          "replicas": [
+            1,
+            2,
+            0
+          ],
+          "destinationUIDs": [
+            "14a1c98a-42aa-43a5-bbc8-1160c274f14c",
+            "636b57ac-b3cf-4312-ac30-88c8db990dbb",
+            "4dca398e-5bb0-4733-9aa1-1baf75eb55c7"
+          ],
+          "migrationIDs": [
+            "bdf348e7d65c1001c9c501e7",
+            "032033f52bdf9726953e4017",
+            "096046a253f5c7f95b78bf25"
+          ],
+          "cutoverOrder": [
+            "a",
+            "b",
+            "c"
+          ],
+          "recoveryOrder": [
+            "b",
+            "c",
+            "a"
+          ],
+          "otherNamespaceStateVerifiedAfterEveryStep": true,
+          "distinctHTTPResponsesVerified": true,
+          "sentinelAndManualSourcesUnchanged": true
+        }
+      }
+    ],
+    "scope": "Fresh actual six-case batch and namespace-isolation execution on this same Linux binary; three same-named apps with1/2/0replicas, sentinel/manual/empty namespaces"
+  },
+  "temporaryPrivilegeCleanup": {
+    "result": "all temporary global and namespace grants and runner removed or already absent",
+    "at": "2026-10-16T16:01:57.586760+00:00",
+    "objects": [
+      {
+        "kind": "ClusterRoleBinding",
+        "name": "dcmig-linux-qualification-20261016",
+        "namespace": null,
+        "uid": "6c5d3d3e-c897-4b98-b28e-a5dda0e2e1cd",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "ClusterRole",
+        "name": "dcmig-linux-qualification-20261016",
+        "namespace": null,
+        "uid": "731d18ef-03cc-4311-bc79-53bcbd637297",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-worker-20261016-startup-failure",
+        "name": "linux-qualification-fixture",
+        "uid": "8b407057-412a-49c5-8431-16f5073cae17",
+        "namespaceUID": "f7302aa8-cfc2-4bad-abb1-067d37024858",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-worker-20261016-startup-failure",
+        "name": "linux-qualification-fixture",
+        "uid": "81538538-89da-4ae6-8c90-79058a6a0037",
+        "namespaceUID": "f7302aa8-cfc2-4bad-abb1-067d37024858",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-perm-20261016-quota-admission",
+        "name": "linux-qualification-fixture",
+        "uid": "cfe3009d-36c7-4ecf-a95d-db881368b47b",
+        "namespaceUID": "0546df74-6cc8-46f4-9498-a845a0ca9955",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-perm-20261016-quota-admission",
+        "name": "linux-qualification-fixture",
+        "uid": "f5e3739e-da42-4d70-a9ec-37dae3dc3363",
+        "namespaceUID": "0546df74-6cc8-46f4-9498-a845a0ca9955",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-perm-20261016-rbac",
+        "name": "linux-qualification-fixture",
+        "uid": "fe9c93ff-22eb-40b0-acb4-5d4cd35a15da",
+        "namespaceUID": "ae2b659b-7b33-478b-a5ff-9dba4dc6dac1",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-perm-20261016-rbac",
+        "name": "linux-qualification-fixture",
+        "uid": "cba394ce-fd25-435c-a1b7-46125c4b63c9",
+        "namespaceUID": "ae2b659b-7b33-478b-a5ff-9dba4dc6dac1",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-sentinel",
+        "name": "linux-qualification-fixture",
+        "uid": "45649ffd-6c1b-4802-95c5-57040fd43a6b",
+        "namespaceUID": "abda364a-13a8-46cd-b55b-4dfdf5c6ec02",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-sentinel",
+        "name": "linux-qualification-fixture",
+        "uid": "87a6f144-72e8-41dc-add7-a2be7864702f",
+        "namespaceUID": "abda364a-13a8-46cd-b55b-4dfdf5c6ec02",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-perm-20261016-foreign",
+        "name": "linux-qualification-fixture",
+        "uid": "3fb6bc37-90e8-4081-942a-ac6c651cc700",
+        "namespaceUID": "ffd80fd9-e630-42a3-9df9-396c23369540",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-perm-20261016-foreign",
+        "name": "linux-qualification-fixture",
+        "uid": "c0afc94b-49e2-497a-9953-7e6261fdf558",
+        "namespaceUID": "ffd80fd9-e630-42a3-9df9-396c23369540",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-worker-20261016-success",
+        "name": "linux-qualification-fixture",
+        "uid": "cc489504-c566-41e8-86e9-6abb9b0a2a52",
+        "namespaceUID": "a5bc0afd-4611-4855-9276-878be5f7640b",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-worker-20261016-success",
+        "name": "linux-qualification-fixture",
+        "uid": "d9444ea6-47ba-4ff0-b001-0511638ce704",
+        "namespaceUID": "a5bc0afd-4611-4855-9276-878be5f7640b",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-6",
+        "name": "linux-qualification-fixture",
+        "uid": "c13df20f-aa35-4b55-beef-a8c42cc9a6cd",
+        "namespaceUID": "bbd4a354-bad5-40f2-abbe-99c18c3489b0",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-6",
+        "name": "linux-qualification-fixture",
+        "uid": "af6557e2-a2ee-43f0-8660-ffb1d0d9b0a9",
+        "namespaceUID": "bbd4a354-bad5-40f2-abbe-99c18c3489b0",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-feat-20261016-multi-image",
+        "name": "linux-qualification-fixture",
+        "uid": "f7f69a8f-4a7a-4019-bb87-63678a4bd715",
+        "namespaceUID": "24376d08-1a65-4899-b629-9e327fdc10f7",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-feat-20261016-multi-image",
+        "name": "linux-qualification-fixture",
+        "uid": "43f8ce7e-f099-47cc-87f9-af32954842d5",
+        "namespaceUID": "24376d08-1a65-4899-b629-9e327fdc10f7",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-base-20261016",
+        "name": "linux-qualification-fixture",
+        "uid": "2b270a75-3667-4711-a732-89baea179f48",
+        "namespaceUID": "4ae38e02-c628-4b8d-a233-9302f6306b90",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-base-20261016",
+        "name": "linux-qualification-fixture",
+        "uid": "31395bef-944f-4cb2-9e1c-0dc560e79e6b",
+        "namespaceUID": "4ae38e02-c628-4b8d-a233-9302f6306b90",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-empty",
+        "name": "linux-qualification-fixture",
+        "uid": "c1a11bed-82e5-4964-8c2a-a5649e185e1e",
+        "namespaceUID": "6bd44315-9dbb-46b4-8642-8c485627352a",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-empty",
+        "name": "linux-qualification-fixture",
+        "uid": "20436d08-c06b-4433-85ab-e7b19828711f",
+        "namespaceUID": "6bd44315-9dbb-46b4-8642-8c485627352a",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-a",
+        "name": "linux-qualification-fixture",
+        "uid": "a03534b0-e852-455d-b288-4bb7403e0d9e",
+        "namespaceUID": "a48b5361-18b4-4e54-85e8-0f56a44ab9c3",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-a",
+        "name": "linux-qualification-fixture",
+        "uid": "e100ecba-9661-4662-a8f9-2c7703f2c356",
+        "namespaceUID": "a48b5361-18b4-4e54-85e8-0f56a44ab9c3",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image",
+        "name": "linux-qualification-fixture",
+        "uid": "f56dbcca-573a-4bc7-ac88-62dc03aef5b2",
+        "namespaceUID": "4291c29a-b538-40d1-961d-20dfe6fc3437",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image",
+        "name": "linux-qualification-fixture",
+        "uid": "1c46658a-b85f-402b-b948-be506ccafb63",
+        "namespaceUID": "4291c29a-b538-40d1-961d-20dfe6fc3437",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-manual",
+        "name": "linux-qualification-fixture",
+        "uid": "2e843ef4-d313-4b91-abe7-07b4aae667ef",
+        "namespaceUID": "69b5b441-c172-4737-84f0-dacbcb9fbcb9",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-manual",
+        "name": "linux-qualification-fixture",
+        "uid": "774ecd93-6a3f-494e-9fcc-054df49b41b3",
+        "namespaceUID": "69b5b441-c172-4737-84f0-dacbcb9fbcb9",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-1",
+        "name": "linux-qualification-fixture",
+        "uid": "8f74a55a-15c8-4c81-b7dc-08ca14dda549",
+        "namespaceUID": "a1530397-1e1c-48e0-8040-ade623609980",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-1",
+        "name": "linux-qualification-fixture",
+        "uid": "d078e09b-2721-408e-ac89-feaa6a69a52f",
+        "namespaceUID": "a1530397-1e1c-48e0-8040-ade623609980",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-c",
+        "name": "linux-qualification-fixture",
+        "uid": "34e69a03-a2ac-4dab-b49a-389685b076cd",
+        "namespaceUID": "4aedd1e1-6b14-49fd-b14f-071faff0f5c3",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-c",
+        "name": "linux-qualification-fixture",
+        "uid": "2a8528d9-9fff-4d6f-9eea-b6981f174be6",
+        "namespaceUID": "4aedd1e1-6b14-49fd-b14f-071faff0f5c3",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-worker-20261016-cancellation",
+        "name": "linux-qualification-fixture",
+        "uid": "b3b55236-eb2d-49ab-a9d6-d13185120243",
+        "namespaceUID": "82459a2d-e496-45c9-9ac4-dd02f94f23f5",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-worker-20261016-cancellation",
+        "name": "linux-qualification-fixture",
+        "uid": "e89fa35b-f754-4987-abfe-7c3b7ef74c27",
+        "namespaceUID": "82459a2d-e496-45c9-9ac4-dd02f94f23f5",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-perm-20261016-rbac-hpa",
+        "name": "linux-qualification-fixture",
+        "uid": "35a9648b-c9bb-4263-8cf0-c368cff5397f",
+        "namespaceUID": "859f267b-53a4-406a-a1c2-f5441328ac3d",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-perm-20261016-rbac-hpa",
+        "name": "linux-qualification-fixture",
+        "uid": "5fbf4db4-03ed-4452-8d94-80982086f530",
+        "namespaceUID": "859f267b-53a4-406a-a1c2-f5441328ac3d",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-3",
+        "name": "linux-qualification-fixture",
+        "uid": "a83576b1-93e0-482c-9691-d620d2c83310",
+        "namespaceUID": "c39718ce-0258-43f9-89a0-93a028ad40e5",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-3",
+        "name": "linux-qualification-fixture",
+        "uid": "b389c1b5-09aa-418d-9b85-e9c3017e1d8c",
+        "namespaceUID": "c39718ce-0258-43f9-89a0-93a028ad40e5",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-nf-c-20261016-regular-pvc",
+        "name": "linux-qualification-fixture",
+        "uid": "f4b21f3e-69e4-49a5-995f-6d78f7516e88",
+        "namespaceUID": "1f24eaeb-a655-4f58-b175-fbe863403991",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-nf-c-20261016-regular-pvc",
+        "name": "linux-qualification-fixture",
+        "uid": "905cc757-f489-4c10-aadd-1d292578bf52",
+        "namespaceUID": "1f24eaeb-a655-4f58-b175-fbe863403991",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "6fa49d70-f75f-462a-9102-8e9c9e3fa6be",
+        "namespaceUID": "ffa2b9c6-5f05-47b1-b373-017d07b4ab8b",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "4d096732-2383-4187-bdcf-d0a41d600a86",
+        "namespaceUID": "ffa2b9c6-5f05-47b1-b373-017d07b4ab8b",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-ns-20261016-b",
+        "name": "linux-qualification-fixture",
+        "uid": "413eae75-c137-4bc2-b9fc-379bf3459aac",
+        "namespaceUID": "9d1fdd2a-81b8-432b-8139-6e09dad005e4",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-ns-20261016-b",
+        "name": "linux-qualification-fixture",
+        "uid": "1d4bdad9-915b-46c6-92cd-9811f2ccbfd9",
+        "namespaceUID": "9d1fdd2a-81b8-432b-8139-6e09dad005e4",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-app-20261016-orphan-recovery",
+        "name": "linux-qualification-fixture",
+        "uid": "62f7004f-a1b4-4a75-bb56-53882a8da59d",
+        "namespaceUID": "152467cf-6756-47d4-8e1c-6a675f3fb558",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-app-20261016-orphan-recovery",
+        "name": "linux-qualification-fixture",
+        "uid": "3d05f1ad-673d-4058-aec0-eb865b7deda9",
+        "namespaceUID": "152467cf-6756-47d4-8e1c-6a675f3fb558",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "4c0b63ec-f912-43e4-b8c9-91753e2764ac",
+        "namespaceUID": "40126d22-450f-4097-9ade-0605e2a9e9ea",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "c22c48be-92e9-4068-a77d-ca4fd449fd69",
+        "namespaceUID": "40126d22-450f-4097-9ade-0605e2a9e9ea",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image-images",
+        "name": "linux-qualification-fixture",
+        "uid": "e79cb200-725b-4da7-9358-d2038d1932ed",
+        "namespaceUID": "e82d23e9-5932-43f4-82c1-d8783c4d4daf",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image-images",
+        "name": "linux-qualification-fixture",
+        "uid": "f98b07b0-9f6a-4d10-81d1-558fe49834eb",
+        "namespaceUID": "e82d23e9-5932-43f4-82c1-d8783c4d4daf",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-app-20261016-failed-initial-rollout",
+        "name": "linux-qualification-fixture",
+        "uid": "3de4f24a-d5f5-488a-8356-4634e04bb8fe",
+        "namespaceUID": "d3692401-fd23-42ca-8f70-a3f8d5c198bc",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-app-20261016-failed-initial-rollout",
+        "name": "linux-qualification-fixture",
+        "uid": "1240079e-eee7-48a3-9b97-27d19c0fa384",
+        "namespaceUID": "d3692401-fd23-42ca-8f70-a3f8d5c198bc",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-feat-20261016-disabled-image",
+        "name": "linux-qualification-fixture",
+        "uid": "1f967c86-00ce-4016-b5e1-a9ba04b7defa",
+        "namespaceUID": "229bf4ec-e8ab-4cd8-a5cd-72548bdac571",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-feat-20261016-disabled-image",
+        "name": "linux-qualification-fixture",
+        "uid": "cf788f1a-0789-4745-ab13-5f2259b40e0a",
+        "namespaceUID": "229bf4ec-e8ab-4cd8-a5cd-72548bdac571",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-4",
+        "name": "linux-qualification-fixture",
+        "uid": "bbc906ce-fd5a-4530-b460-d5b07ede4aa7",
+        "namespaceUID": "e94cd9fe-7d0b-41ef-8043-37f279fa0cc9",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-cur-rec-20261016-write-4",
+        "name": "linux-qualification-fixture",
+        "uid": "4af0d9ec-0de8-4203-8cc5-b9f140ed3503",
+        "namespaceUID": "e94cd9fe-7d0b-41ef-8043-37f279fa0cc9",
+        "result": "already absent"
+      },
+      {
+        "kind": "Pod",
+        "name": "runner",
+        "namespace": "dcmig-linux-runner-20261016",
+        "uid": "5ea337cb-8dca-44ff-b8fd-eee6102060a0",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "ServiceAccount",
+        "name": "qualifier",
+        "namespace": "dcmig-linux-runner-20261016",
+        "uid": "b250878d-5da1-46a6-aa1e-2b077beb5847",
+        "result": "UID verified and removed"
+      }
+    ]
+  },
+  "endVerification": {
+    "result": "passed",
+    "at": "2026-10-16T16:00:17.255916+00:00",
+    "noActiveConverterProcesses": true,
+    "binaryHashAndSourceUnchanged": true,
+    "CSIOriginalSourceFullSpecAndAvailability": true,
+    "CSIOriginalPVCAndPVUIDs": true,
+    "CSIDestinationPausedZero": true,
+    "multiNamespaceCases": 6,
+    "multiNamespaceSourcesAndPausedTargetsRecovered": true
+  },
+  "originalStagingVerification": {
+    "result": "passed",
+    "record": "old-staging-end-verification.json",
+    "fullSourceSpecUIDAndAvailabilityPreserved": true,
+    "destinationUIDPausedZeroPreserved": true
+  },
+  "remoteArchiveVerification": {
+    "result": "passed",
+    "size": 3441978,
+    "files": 1957,
+    "sha256": "0524e5255b2e7072570699d413a652efd7d36a940d1ce6e5f37b8dfa37893c62",
+    "transport": "Same sealed credential-scanned archive downloaded in bounded chunks",
+    "chunks": [
+      {
+        "offset": 0,
+        "size": 49152,
+        "sha256": "3d3b4ac9e53e4b70c3060faf2160246b550ab1d5b8bd0e82b1c67f6cc66fec1b"
+      },
+      {
+        "offset": 49152,
+        "size": 49152,
+        "sha256": "dea01839d30af73184bc2f1579a04ed8708223900ab3429c6d8614777af3395c"
+      },
+      {
+        "offset": 98304,
+        "size": 49152,
+        "sha256": "8324b388da7af4e8f7dcdc36c3be76ead6ed3db701566e9af3c4a51d3f165bdd"
+      },
+      {
+        "offset": 147456,
+        "size": 49152,
+        "sha256": "7760fdbea7d57b95809f953b002cc084e6debe803c1b8c8944efedd71434e30d"
+      },
+      {
+        "offset": 196608,
+        "size": 49152,
+        "sha256": "8835e844372cd47561233f02de25e62e12245393c239d9b4f46a0b26a2895f7c"
+      },
+      {
+        "offset": 245760,
+        "size": 49152,
+        "sha256": "4ff3b9d53ba1032574f3c2ce999ef8408b92872a13243cc4e2dd34e8876c656f"
+      },
+      {
+        "offset": 294912,
+        "size": 49152,
+        "sha256": "8a4c66c8cb4a36cfddf190711e6268c41fedf81431cd72df07819b7f03b9c958"
+      },
+      {
+        "offset": 344064,
+        "size": 49152,
+        "sha256": "413b5fd34ae8bf42a12ad8f1a0fa725667a621c43e9100c351b5147a17cb05ab"
+      },
+      {
+        "offset": 393216,
+        "size": 49152,
+        "sha256": "a0f0c33d9c67043f80ee6cd7c12bde736697cd989ca1b1403cc2c0eb5050b476"
+      },
+      {
+        "offset": 442368,
+        "size": 49152,
+        "sha256": "0dd3f445e99460e644450d7588a9d566ea04b99778138fde736b60e124b67297"
+      },
+      {
+        "offset": 491520,
+        "size": 49152,
+        "sha256": "3da26e72bb500e7e929b980a489dd450ea14be9605b568e0eb4ddffe755242d2"
+      },
+      {
+        "offset": 540672,
+        "size": 49152,
+        "sha256": "ea7af2a44b076830406d0486c3b563aee2c600a0ad1e9ebbee518ac0e68b95ff"
+      },
+      {
+        "offset": 589824,
+        "size": 49152,
+        "sha256": "a553b8f71600520e530be12273686bbc2f3bc1b166a184b86cad7dc1139b7593"
+      },
+      {
+        "offset": 638976,
+        "size": 49152,
+        "sha256": "4bd5ee4a0b107cca6b52a58e688c6cb20464a682d84a76d0826c503fd29e36ae"
+      },
+      {
+        "offset": 688128,
+        "size": 49152,
+        "sha256": "7d8ef7931c4841afb916a746394ac413fc038373921f17e1c54bd4e92b96fcc8"
+      },
+      {
+        "offset": 737280,
+        "size": 49152,
+        "sha256": "d89152d066552bea9201fdab2dd0351fe93627681e1ca88aed740c5f3cdd1f8d"
+      },
+      {
+        "offset": 786432,
+        "size": 49152,
+        "sha256": "370aadf050b6def65b038e82c4d2cb5e4db3373659d7282901b4c780b26e9653"
+      },
+      {
+        "offset": 835584,
+        "size": 49152,
+        "sha256": "d858b0f7aa647ceb2936b6a3460c85caa22875bd6a7db32d0963f6bbaf074c81"
+      },
+      {
+        "offset": 884736,
+        "size": 49152,
+        "sha256": "9ee5ffbea58b5651344c5761d511e6723cc6bc3631e7c197ecef047bfb46a06c"
+      },
+      {
+        "offset": 933888,
+        "size": 49152,
+        "sha256": "c58856c20fd588ba40aba52e64b9ceed731cc292fb20530524d14dc5c90b9380"
+      },
+      {
+        "offset": 983040,
+        "size": 49152,
+        "sha256": "d723f86e3c40ef638e16de0aa1d060da9df4959dfd4fb65845c080624a3d8396"
+      },
+      {
+        "offset": 1032192,
+        "size": 49152,
+        "sha256": "75c82e87d6cb338da1fa6b7b52afcfb087ff8812debccd8551e2550c19d94f1e"
+      },
+      {
+        "offset": 1081344,
+        "size": 49152,
+        "sha256": "89f0ad03555bac6693e4445b4ecd0ab6e704a9591ccbfa859cc108aff8cee6ba"
+      },
+      {
+        "offset": 1130496,
+        "size": 49152,
+        "sha256": "2d470ff0d7b9c1f074c6d0fe8a8c35ed58a33a67b5bb16d976b0b3112a0c0d74"
+      },
+      {
+        "offset": 1179648,
+        "size": 49152,
+        "sha256": "65f219eb52f8893122d0d97afd5f470eff19d6d8fb0331dd9eee091d7a5517e1"
+      },
+      {
+        "offset": 1228800,
+        "size": 49152,
+        "sha256": "300e490c7a3ccab03f2b7087a83f09733d2816bd63f16255efb2f192d1b2d427"
+      },
+      {
+        "offset": 1277952,
+        "size": 49152,
+        "sha256": "a08fe16c379fca7fbf7589c9883ecc9ff4cbc1b8d6ac69e6460f15b52d71a9ed"
+      },
+      {
+        "offset": 1327104,
+        "size": 49152,
+        "sha256": "f2957b4427adfb39b193f7e122fd6a73f8d0e0ea985e879f3e11a25b74bcc052"
+      },
+      {
+        "offset": 1376256,
+        "size": 49152,
+        "sha256": "2223c04ecc8b9ec5242380346299fff6e113befc0482fe42ed63e37fa7a47258"
+      },
+      {
+        "offset": 1425408,
+        "size": 49152,
+        "sha256": "a427126e573349b1ddfecd13b47eee4bb6eea1aca36615462ba85e08685db07c"
+      },
+      {
+        "offset": 1474560,
+        "size": 49152,
+        "sha256": "1dcb1dfeb67beb0680adac20609f7f0af208312df171e2f471813dff232481e3"
+      },
+      {
+        "offset": 1523712,
+        "size": 49152,
+        "sha256": "0a8c6054ff2e44d4dee7438cad34143e22abdb4a3543386d44e88f1462b4102b"
+      },
+      {
+        "offset": 1572864,
+        "size": 49152,
+        "sha256": "eed709977380548ef44d1d53fef8ddb0f269b795bae9e50ae4aec9d593516aae"
+      },
+      {
+        "offset": 1622016,
+        "size": 49152,
+        "sha256": "6bddcb719ea9ff9f506f4ea69b7fa557227314efa61dd575d63755149ca68a14"
+      },
+      {
+        "offset": 1671168,
+        "size": 49152,
+        "sha256": "46dfa01db7b255a6863d844b2d77cabf6155c9c3b3da3f2055b98b0d24cfea2f"
+      },
+      {
+        "offset": 1720320,
+        "size": 49152,
+        "sha256": "ac73c4b55e6bb8584dc92013764afed6018276a391ad6512da164d79f00a9eec"
+      },
+      {
+        "offset": 1769472,
+        "size": 49152,
+        "sha256": "28f13999b93b377de242dd905cebb031a8d5d1cb5ddbdced394b2fd89942774c"
+      },
+      {
+        "offset": 1818624,
+        "size": 49152,
+        "sha256": "5158b85dc3e4caddac3d00301f11c1388be9785d5fb03ea04c402e187e717b1d"
+      },
+      {
+        "offset": 1867776,
+        "size": 49152,
+        "sha256": "edfa14310dfc1f0ff8270becc943849ffb300c477c1e2d99c76e4f8ada6d92e9"
+      },
+      {
+        "offset": 1916928,
+        "size": 49152,
+        "sha256": "5780fc47878553bc1a85307effe48dd57c2a471710a3ae33cd2c22c137f5dbd7"
+      },
+      {
+        "offset": 1966080,
+        "size": 49152,
+        "sha256": "e3052c7bc94e5eaa928915fa7ba9a5cd26a0b750f1029f3daeb8e067ba24d4ee"
+      },
+      {
+        "offset": 2015232,
+        "size": 49152,
+        "sha256": "cf982ef7d8660ef6112e0d6138f59ba631d2cab69a99a318f311f028997fa8f7"
+      },
+      {
+        "offset": 2064384,
+        "size": 49152,
+        "sha256": "71553a8487f2d7913314c45da8e28619d5275f1a232fe0ad29c86942b0d0ba9f"
+      },
+      {
+        "offset": 2113536,
+        "size": 49152,
+        "sha256": "c6d923d08c10e680e26b1f5645b4d1deda052360452a3949e8b6e6dd4e550f9b"
+      },
+      {
+        "offset": 2162688,
+        "size": 49152,
+        "sha256": "67f7dce9c8321a61fdb7798623c87ccc6e634c104a6a71c651a4a60aec8df994"
+      },
+      {
+        "offset": 2211840,
+        "size": 49152,
+        "sha256": "36ab849a1c630e88e91aeae3022ef33a587089119c594fdb586f12bb51501645"
+      },
+      {
+        "offset": 2260992,
+        "size": 49152,
+        "sha256": "57b139653c807478eeba1826be1b9580f2db30f8b50798f60bacc0def59ee8a5"
+      },
+      {
+        "offset": 2310144,
+        "size": 49152,
+        "sha256": "b4492ff8d4e13e5ca15e25852ae5fd1aba1572587f477f18e99c9cbaf2b8bd98"
+      },
+      {
+        "offset": 2359296,
+        "size": 49152,
+        "sha256": "3b2e098d85d48fa7cd47c25b0326a74d7b33792109c86e20dd5bef868e0b8977"
+      },
+      {
+        "offset": 2408448,
+        "size": 49152,
+        "sha256": "cd9f130a824b7fad2ccf3e6759d35285ca269b3cfe51afbfb35b2ca27964f632"
+      },
+      {
+        "offset": 2457600,
+        "size": 49152,
+        "sha256": "2e8e8803daedad29d229eff721d12ac1c8c65b961474a7e59dde79eb0c820f62"
+      },
+      {
+        "offset": 2506752,
+        "size": 49152,
+        "sha256": "166f59f32a5de02142095eed60eec9d42d24afa0e68ca1ffc345a833ffd9f0cd"
+      },
+      {
+        "offset": 2555904,
+        "size": 49152,
+        "sha256": "02ccd543b567034f744aaf3c80086f83165d819f36b1c8bbce81ccc0869d0a7f"
+      },
+      {
+        "offset": 2605056,
+        "size": 49152,
+        "sha256": "50a0065823b9761bcf1a258c4168c00a7c31661347294091bb98ab74e2c5e524"
+      },
+      {
+        "offset": 2654208,
+        "size": 49152,
+        "sha256": "25e11778cc01108eb3ad7ec0205a4159f3c43542b59720f8f467f3a74b47739d"
+      },
+      {
+        "offset": 2703360,
+        "size": 49152,
+        "sha256": "898a7c490af787a77c4cc15e92f6d29efd377bc99f7b2bcb760ddab8ba90919a"
+      },
+      {
+        "offset": 2752512,
+        "size": 49152,
+        "sha256": "97f4c09cdd0c1cac757a520748d3185eaa99e6b8dee5042753d3aae3d3ccb37a"
+      },
+      {
+        "offset": 2801664,
+        "size": 49152,
+        "sha256": "46a310d80914aa67bd1731f561e95f2cd95d3d426785bf900776392c65319033"
+      },
+      {
+        "offset": 2850816,
+        "size": 49152,
+        "sha256": "ee37b576079b97a1e6ecdfc51cf12dae87c012212d1587bce1459d21e9ec3c99"
+      },
+      {
+        "offset": 2899968,
+        "size": 49152,
+        "sha256": "60824bb6a3f080198754b7f542f44f8c37cae61ee8cb66a0caea469f04818125"
+      },
+      {
+        "offset": 2949120,
+        "size": 49152,
+        "sha256": "fc240c014527381845e6b25669f7eac6ab6d01fd2976aabb2c638540f793cbea"
+      },
+      {
+        "offset": 2998272,
+        "size": 49152,
+        "sha256": "29a46294f1fda0b6cdf9383678577d5b79ef36cb3f62d8f3d70d8fc68541ffb2"
+      },
+      {
+        "offset": 3047424,
+        "size": 49152,
+        "sha256": "1f6d4bb6569f936db33d19c6c877d75ea5cd12789f99bfd387b5659537376b1c"
+      },
+      {
+        "offset": 3096576,
+        "size": 49152,
+        "sha256": "e170d66e6c82b76b07690a01acc9d5751ca2272a7f83a4c935bc7947d32d87bd"
+      },
+      {
+        "offset": 3145728,
+        "size": 49152,
+        "sha256": "695d25e122fe30c5ecffee46da1d9e561e3c2f01feeb572b349bde61deb0b4c4"
+      },
+      {
+        "offset": 3194880,
+        "size": 49152,
+        "sha256": "83508b152f48447b837d8ad303b72be3bbc958f4ee5d3955a4a7be2bf4dadb6e"
+      },
+      {
+        "offset": 3244032,
+        "size": 49152,
+        "sha256": "4c13ed96f5f1cca6e1ff2b609c5842ad078d97b9f899916b814500aae1e1929d"
+      },
+      {
+        "offset": 3293184,
+        "size": 49152,
+        "sha256": "014e85fde7d0ae76187cb9497f4018611a2d2d97e05b44716de99ad6d70caaca"
+      },
+      {
+        "offset": 3342336,
+        "size": 49152,
+        "sha256": "5760452c786b8408c8043521ddf826c0852e6c78ae5e766687f387e305680263"
+      },
+      {
+        "offset": 3391488,
+        "size": 49152,
+        "sha256": "9fc41e4888631048f653b3afb06fabc7a5f1cb77fe1bbd365c574411b442020a"
+      },
+      {
+        "offset": 3440640,
+        "size": 1338,
+        "sha256": "7528e66a3d4df1dc6ee4cf3b30be07c67c2110ad14424643aafed1bc42b75d9a"
+      }
+    ]
+  },
+  "unavailablePlatformBuilds": [
+    {
+      "platform": "linux/arm64",
+      "argv": [
+        "go",
+        "build",
+        "-mod=readonly",
+        "-trimpath",
+        "-buildvcs=false",
+        "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+        "-o",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-linux-arm64",
+        "."
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "result": "compiled-only",
+      "actualExecution": false,
+      "qualification": "not-run; no authorized execution environment available",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "at": "2026-10-16T15:46:05.870666+00:00",
+      "artifactSHA256": "c9894fff5f86cd908f4b140db951b07dc3e089ee8d2f64d267841250eeb70c63",
+      "binary": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-linux-arm64"
+    },
+    {
+      "platform": "darwin/amd64",
+      "argv": [
+        "go",
+        "build",
+        "-mod=readonly",
+        "-trimpath",
+        "-buildvcs=false",
+        "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+        "-o",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-darwin-amd64",
+        "."
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "result": "compiled-only",
+      "actualExecution": false,
+      "qualification": "not-run; no authorized execution environment available",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "at": "2026-10-16T15:46:05.984388+00:00",
+      "artifactSHA256": "24585aa916aaa057e16a90c567b9110d4e6255c86ed9495ed081d27abb5de663",
+      "binary": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-darwin-amd64"
+    },
+    {
+      "platform": "windows/amd64",
+      "argv": [
+        "go",
+        "build",
+        "-mod=readonly",
+        "-trimpath",
+        "-buildvcs=false",
+        "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+        "-o",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-windows-amd64.exe",
+        "."
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "result": "compiled-only",
+      "actualExecution": false,
+      "qualification": "not-run; no authorized execution environment available",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "at": "2026-10-16T15:46:05.923667+00:00",
+      "artifactSHA256": "2a99fe01355fded82ee1a1b32d5525419d7ef48b0ed8b3cc6d05198652dccf1b",
+      "binary": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/converter-windows-amd64.exe"
+    }
+  ],
+  "sameArtifactEarlierTargetedEvidence": {
+    "path": "compatibility/evidence/2026-10-16-source-conflicts-linux-4.21.36.json",
+    "scope": "Earlier7conflict/uncertain-response cases and3CSIrepetitions on identical cdbd artifact; historicalpartialsession retained, no earlier-binary or native passes imported into this freshfull22 run"
+  },
+  "evidenceFiles": [
+    {
+      "path": "remote-export/full/qualification-final.json",
+      "sha256": "1d0ce6224484ba00feac1fa1fb74df7c885af55fce94b91777b70a7173c69be0"
+    },
+    {
+      "path": "remote-export/full/supplemental-evidence.json",
+      "sha256": "1421b24b03cb4806e55cdba30307b2e82f7df7166c172b26a45e7ba0010ce69a"
+    },
+    {
+      "path": "remote-export/full/unit-contract-execution.json",
+      "sha256": "a976669f33f116b9e22cddc624ffa593bc10de4adf931656263b0e02cef3d090"
+    },
+    {
+      "path": "remote-export/full/namespaces/cases.json",
+      "sha256": "7e5275c572ddf23bc79b75fd7104d648c22794cbe729e6f13e601513dd8c59d4"
+    },
+    {
+      "path": "remote-export/full/end-verification.json",
+      "sha256": "321c035e8da2d50bc4312c7d8e391cb7a2ca18328d1d5c303bff33ad135ec085"
+    },
+    {
+      "path": "remote-export/full/jobs-completed.json",
+      "sha256": "8c6b1d50df68c675ad904deb20d3dde7a12c32c3df218729beea34e17c25c438"
+    },
+    {
+      "path": "permission-cleanup/result.json",
+      "sha256": "9d3043c952198deb87b12a391cd38b92ceb53d72861e07192f2a6d297a6b5d80"
+    },
+    {
+      "path": "old-staging-end-verification.json",
+      "sha256": "ac8ba340a5155c61b57d19588ac884f074b4d71349f9e85f934e9f0a758b506e"
+    },
+    {
+      "path": "unavailable-platform-builds.json",
+      "sha256": "1aaaf7ced3a04642c638792cfdefb7319fcfcd42d052a1058118b129d2eb9def"
+    }
+  ],
+  "auxiliaryNamespaceRetirement": {
+    "result": "passed",
+    "namespaces": [
+      {
+        "namespace": "dcmig-lnx-cur-base-20261016",
+        "namespaceUID": "4ae38e02-c628-4b8d-a233-9302f6306b90",
+        "result": "UID verified; no active workloads or PVC; retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-feat-20261016-cross-namespace-image-images",
+        "namespaceUID": "e82d23e9-5932-43f4-82c1-d8783c4d4daf",
+        "result": "UID verified; no active workloads or PVC; retired"
+      }
+    ],
+    "at": "2026-10-16T16:03:51.369998+00:00"
+  },
+  "multiNamespaceRetirement": {
+    "result": "passed",
+    "namespaces": [
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-a",
+        "namespaceUID": "a48b5361-18b4-4e54-85e8-0f56a44ab9c3",
+        "result": "verified and retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-b",
+        "namespaceUID": "9d1fdd2a-81b8-432b-8139-6e09dad005e4",
+        "result": "verified and retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-c",
+        "namespaceUID": "4aedd1e1-6b14-49fd-b14f-071faff0f5c3",
+        "result": "verified and retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-sentinel",
+        "namespaceUID": "abda364a-13a8-46cd-b55b-4dfdf5c6ec02",
+        "result": "verified and retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-manual",
+        "namespaceUID": "69b5b441-c172-4737-84f0-dacbcb9fbcb9",
+        "result": "verified and retired"
+      },
+      {
+        "namespace": "dcmig-lnx-cur-ns-20261016-empty",
+        "namespaceUID": "6bd44315-9dbb-46b4-8642-8c485627352a",
+        "result": "verified and retired"
+      }
+    ],
+    "at": "2026-10-16T16:01:36.665930+00:00"
+  },
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-current-full-20261016/openshift-4.21.36-linux-current-full-evidence.tar.gz",
+    "archiveSHA256": "8a5f7fa9de07873408b2075a6b046d0c2e851d05444aeda22693b631131bf080",
+    "files": 2400,
+    "manifestSHA256": "65c184f91a74b47589f67aeb324dcaf380585c59738cf9d07b1d90fe4f6732b0",
+    "allManifestEntriesVerified": true,
+    "credentialScan": "Host admin and qualifier actual values absent; remote export separately scanned all restricted-account tokens before transfer",
+    "sealedAt": "2026-10-16T16:04:39.950670+00:00",
+    "scope": "Public snapshot before appending archive/rebuild metadata, avoiding circular checksums; actual current Linux cdbd/source eb8, fresh full22plus381unit and6namespace cases, unavailable platforms compiled-only"
+  }
+}
