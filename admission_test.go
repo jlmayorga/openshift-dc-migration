@@ -27,6 +27,9 @@ func TestAdmissionFieldsCannotBypassBaselineOrPreRetirementChecks(t *testing.T) 
 			container := spec["containers"].([]interface{})[0].(map[string]interface{})
 			container["securityContext"] = map[string]interface{}{"appArmorProfile": map[string]interface{}{"type": "Localhost", "localhostProfile": "migration-fixture"}}
 		}},
+		{"operator", func(spec map[string]interface{}) {
+			spec["tolerations"] = []interface{}{map[string]interface{}{"key": "generation", "operator": "Gt", "value": "2", "effect": "NoSchedule"}}
+		}},
 	}
 	for _, field := range fields {
 		for _, scope := range []string{"scc", "pod"} {

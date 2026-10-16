@@ -32,6 +32,15 @@ func validateBaseline(object map[string]interface{}, root string) error {
 			return nil
 		}
 		if s.Ref != "" {
+			// Swagger does not enumerate this string field. New SDKs know
+			// comparison operators that the minimum server cannot interpret.
+			if s.Ref == "#/definitions/io.k8s.api.core.v1.Toleration" {
+				if toleration, ok := value.(map[string]interface{}); ok {
+					if op, found := toleration["operator"]; found && op != nil && op != "" && op != "Equal" && op != "Exists" {
+						return fmt.Errorf("%s.operator %v is not in Kubernetes 1.27 baseline; use Equal/Exists or review migration manually", path, op)
+					}
+				}
+			}
 			var ok bool
 			s, ok = catalog.Definitions[strings.TrimPrefix(s.Ref, "#/definitions/")]
 			if !ok {
