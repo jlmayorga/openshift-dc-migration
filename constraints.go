@@ -260,17 +260,55 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		if err != nil {
 			return err
 		}
-		sourceLabels, _, err := unstructured.NestedStringMap(p.Source.Object, "spec", "template", "metadata", "labels")
+		if len(policies.Items) == 0 {
+			return nil
+		}
+		sourceSelector, _, err := unstructured.NestedStringMap(p.Source.Object, "spec", "selector")
 		if err != nil {
 			return err
 		}
-		for _, policy := range policies.Items {
-			selector, err := metav1.LabelSelectorAsSelector(&policy.Spec.PodSelector)
-			if err != nil {
-				return err
+		if len(sourceSelector) == 0 {
+			return errors.New("missing source Pod selector for NetworkPolicy assessment")
+		}
+		sources, err := r.Kube.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(sourceSelector).String()})
+		if err != nil {
+			return err
+		}
+		sourceLabels := []map[string]string{}
+		for _, source := range sources.Items {
+			if source.Status.Phase != corev1.PodSucceeded && source.Status.Phase != corev1.PodFailed {
+				sourceLabels = append(sourceLabels, source.Labels)
 			}
-			if selector.Matches(labels.Set(sourceLabels)) != selector.Matches(labels.Set(pod.Labels)) {
-				return fmt.Errorf("NetworkPolicy %s selects source and destination differently; review connectivity before source retirement", policy.Name)
+		}
+		if len(sourceLabels) == 0 {
+			return errors.New("no current source Pods to compare with destination NetworkPolicy selection")
+		}
+		for _, policy := range policies.Items {
+			selectors := []*metav1.LabelSelector{&policy.Spec.PodSelector}
+			for _, rule := range policy.Spec.Ingress {
+				for _, peer := range rule.From {
+					if peer.PodSelector != nil {
+						selectors = append(selectors, peer.PodSelector)
+					}
+				}
+			}
+			for _, rule := range policy.Spec.Egress {
+				for _, peer := range rule.To {
+					if peer.PodSelector != nil {
+						selectors = append(selectors, peer.PodSelector)
+					}
+				}
+			}
+			for _, raw := range selectors {
+				selector, err := metav1.LabelSelectorAsSelector(raw)
+				if err != nil {
+					return err
+				}
+				for _, current := range sourceLabels {
+					if selector.Matches(labels.Set(current)) != selector.Matches(labels.Set(pod.Labels)) {
+						return fmt.Errorf("NetworkPolicy %s selects current source Pods and proposed destination differently; review workload/peer selectors before source retirement", policy.Name)
+					}
+				}
 			}
 		}
 		if len(policies.Items) > 0 {

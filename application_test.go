@@ -339,7 +339,7 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 			sourceN := c.sourceReplicas
 			pods := []corev1.Pod{}
 			if sourceN > 0 || c.blockRetirement {
-				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "source-pod", Namespace: "example", UID: "source-pod", Labels: map[string]string{"deploymentconfig": "web", "app": "web"}}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
+				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "source-pod", Namespace: "example", UID: "source-pod", Labels: map[string]string{"deploymentconfig": "web", "app": "web", "deployment": "web-1"}}, Status: corev1.PodStatus{Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}}}})
 			}
 			if c.orphanLabels != nil {
 				pods = append(pods, corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "orphan", UID: "orphan", Labels: c.orphanLabels}})
