@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-16",
+  "reviewer": "parallel review 4.19–4.21",
+  "reviewType": "source-based release impact assessment, not an integration result",
+  "assessmentStatus": "complete within declared scope; parent consolidation and compatibility decision pending",
+  "reviewCompleteWithinDeclaredScope": true,
+  "compatibilityAssumed": false,
+  "integrationPassClaimed": false,
+  "codeRevision": "0dcf787",
+  "codeFileSha256": {
+    "baseline.go": "49a264d54400d82d852c16f1d908c3f2bdef3057b6f42015ccaeb1d4abf9dbd9",
+    "constraints.go": "a37e16cc51f455fbe916bc69302e56eb33823d8fba8945a50cf2e05a98e277fb",
+    "scc.go": "e1b302a57bc035123fe8324955e753b8e39fcf884cf213ee399ee1169d011c0d",
+    "scheduling.go": "c8a89665d3cd67384a9a1c33f5e250573d890b4bbda60bea60176a848474e071",
+    "quota.go": "b5cacb97d4a1c716b21e4a98ff1bd1c22623d188ca812cba72e92a4cfb3321ae",
+    "storage.go": "173f351a076767a1fa8dfecff24adbe4c6d00bddea81cff7dc676a55ec77eafe",
+    "preflight.go": "6aac6036a5daa82c60caa688accf4c0a155298095a1ce8e947a5b22723372657",
+    "converter.go": "d24b829b221cea620fa0865ea3418e84e2dbf15fa4cd97158b93881c3054d054",
+    "cutover.go": "e65963d60105fbc8647e355811355d11bddac3f4e97c7fb84340d05c3616e183",
+    "raw_resources.go": "3d572a365f7c12d1d58420aab364eb9d7e7bdf5996a06e676be0e4253b35ceac",
+    "planning.go": "dc1c006c9640039cc2716350520c66b0f95205bc8d6b559f769abb3bd8ff05ad",
+    "compatibility/baseline-1.27.json": "5fe8102b0a489439b6cdb1aab42d67c9da3cb3d136f0a10205443f80b798fdfe"
+  },
+  "graphVerification": {
+    "tier": 2,
+    "project": "Users-jlmayorga-sandbox-personal-openshift-dc-migration",
+    "generation": "2026-10-16T05:37:20Z",
+    "checkedPaths": [
+      "baseline.go",
+      "preflight.go",
+      "constraints.go",
+      "scheduling.go",
+      "quota.go",
+      "storage.go",
+      "scc.go",
+      "raw_resources.go",
+      "converter.go",
+      "cutover.go",
+      "planning.go",
+      "runtime.go"
+    ],
+    "coverage": "All 12 Go paths metadata_match/no_recorded_issue at final coverage generation; initial graph symbol/trace/snippet exploration used05:37:20Z. Direct source reads used for material behavior. Best effort; not a completeness proof.",
+    "finalCoverageGeneration": "2026-10-16T05:52:43Z"
+  },
+  "scope": {
+    "production": "DC apps.openshift.io/v1; apps/v1 Deployments/ReplicaSets; autoscaling/v2 HPA; corev1 Pods/RCs/Services/Endpoints/quotas/limits/PVC/PV/Nodes/namespace labels; network policies/PDB; authorizationv1 SSAR/LSAR; OpenShift SCC subject review/AppliedClusterResourceQuota; optional admin policy discovery; image-trigger annotation/controller behavior. Full inventory in docs/compatibility-review.md.",
+    "harness": "Additional core/RBAC/Lease/Route/image/build/template/ClusterVersion/TokenRequest/isolated quota and storage fixtures from the documented inventory. Harness creates resources explicitly and cannot assume old server behavior from 4.21 execution.",
+    "method": "Read extracted candidates for 4.19/4.20, inspect surrounding source/mandatory API removal and known-issue sections, search full immutable release notes and errata modules by inventory/behavior; correlate relevant field/default/controller/accounting/storage/security changes with code, baseline catalog and primary upstream resource-accounting helpers. 4.21 includes immutable release-note assembly and all 51 retrieved referenced sources (50 content sources plus commit response); targeted relevant entries and complete section-heading scan, rather than claiming line-by-line review of every unrelated product feature.",
+    "excluded": "No cluster upgrade execution, no removed/manual post-baseline feature qualification, no guarantee of runtime image pulls/CSI mounts/network connectivity/CPUManager device or NUMA fit, no blanket validation of every platform-specific operator or all CVE fixed versions. These are prerequisites/explicit manual features, not missing API translation fixes."
+  },
+  "limits": [
+    "Older server integrations are unavailable; this record contains no synthetic integration passes.",
+    "API dry run and access reviews are current evidence, not a reservation or a guarantee against later RBAC/admission/quota/policy/capacity drift.",
+    "The existing preflight report explicitly says scheduler plugins, CSI attachment limits, volume mounting and external network dependencies are not simulated; runtime startup and recovery remain independently checked.",
+    "Client-library compilation/security and final exact-artifact integration qualification are consolidated parent work.",
+    "Advisory bullets relevant to tool operations were assessed; this is not a blanket claim that every patch is vulnerability-free or that Red Hat backports correspond one-to-one with upstream patch numbers."
+  ],
+  "openshift": "4.21",
+  "kubernetes": "1.34",
+  "sources": [
+    {
+      "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/release_notes/ocp-4-21-release-notes.adoc",
+      "sha256": "d6aa3a3bc63e9114073df98f5eba129f82592da76b458986e31056d95cb7da16",
+      "bytes": 5296,
+      "localSource": ".scratchpad/parallel-release-review-20261016/419-421/ocp-4.21.adoc"
+    },
+    {
+      "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+      "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+      "bytes": 451881,
+      "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md"
+    }
+  ],
+  "findings": [
+    {
+      "id": "421-MAPPING-API",
+      "change": "OpenShift4.21 explicitly uses Kubernetes1.34; DRA alpha serving removals and new beta admission API",
+      "toolPaths": "documented production/harness inventory; preflight.go:requireAPI",
+      "disposition": "no-direct-removed-API-use",
+      "assessment": "Official About-this-release explicitly maps1.34. Removed resource.k8s.io/v1alpha3 types and v1alpha4 DRA gRPC do not occur in either inventory; automatic ResourceClaims/custom-scheduler migrations require manual review. New MutatingAdmissionPolicy beta is server admission infrastructure, not a converter configuration API.",
+      "evidence": [
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-about-this-release.adoc",
+          "sha256": "f7403fe47c650fc31838dfa3ed56c0a68113bb4e02c546eeb4dd2a1f090e0aab",
+          "bytes": 3882,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-about-this-release.adoc",
+          "line": 8,
+          "endLine": 8,
+          "excerptSha256": "22458004ae5030e860a6bd09b76dea7d418ac5bfe5f89742fd2d9c45fe35c5e7"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1608,
+          "endLine": 1609,
+          "excerptSha256": "e3361b37cdbb311fcb5a10c28fe7331bdfa2da07826a9f70e72907b8147cfa1f"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1613,
+          "endLine": 1613,
+          "excerptSha256": "8b9d81e958010ab16c9033475dacbc430b4ed58a2e46211a7b5d3ad112bfaf5a"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1624,
+          "endLine": 1625,
+          "excerptSha256": "f3878ac64d72ad870d0dba63ce43f08598102c152e17b0e229d2ba6d94c0ede8"
+        }
+      ],
+      "validationOrRequiredAction": "Retain endpoint discovery and raw server admission; actual 4.21.36 results remain specific to the exact artifact."
+    },
+    {
+      "id": "421-ACCOUNTING",
+      "change": "PodLevelResources beta/default, hugepage/default/HPA/downwardAPI behavior; in-place resize conditions",
+      "toolPaths": "scheduling.go:observedPodRequests; quota.go:podResources; constraints.go rawPod budgets",
+      "disposition": "existing-conservative-accounting-and-manual-target-guard",
+      "assessment": "Target Pod budgets are refused before typed conversion, including admission defaults. Other running Pods raw spec.resources requests CPU/memory/hugepages override per-resource aggregate then overhead, matching official v1.34.9 PodRequests. Container observed requests/allocatedResources maxima match feasible resizing. For infeasible resize current spec-max may overestimate safely. No separate Pod-level status budget is used by1.34 helper; no demonstrated undercount from this review.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1712,
+          "endLine": 1712,
+          "excerptSha256": "8171d692f6d3b32761d52e4a50b58bf1b9220ed0a3cbd9a278737f78f1a3db36"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1672,
+          "endLine": 1672,
+          "excerptSha256": "7ccdfecd099b0088cf83f1e2fd0cfe161a56f15944ea87785b240dbda1e5de9a"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1654,
+          "endLine": 1654,
+          "excerptSha256": "c29d6ee64243128b3859ff20e4a422d62ce514030f46521f777f1edf7949bc62"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/v1.34.9/staging/src/k8s.io/component-helpers/resource/helpers.go",
+          "sha256": "bc12107dc9dceb9066d4e8d17b53ba7ec6518fc8a2d554815d43edd4fb7b0e99",
+          "bytes": 16193,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/v1.34.9-resource-helpers.go",
+          "line": 144,
+          "endLine": 170,
+          "excerptSha256": "55ad4368dd174f90362c4db59369de42a3595d3e8d94f16d0d4d3b735956fb16"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/v1.34.9/staging/src/k8s.io/component-helpers/resource/helpers.go",
+          "sha256": "bc12107dc9dceb9066d4e8d17b53ba7ec6518fc8a2d554815d43edd4fb7b0e99",
+          "bytes": 16193,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/v1.34.9-resource-helpers.go",
+          "line": 253,
+          "endLine": 259,
+          "excerptSha256": "41e4e01c890710e68b60a29298402c7f41a6c66a6ecc7e5b28244c8a923dd124"
+        }
+      ],
+      "validationOrRequiredAction": "Existing observed-allocation contracts + sidecar/overhead tests. Do not infer new Pod target features are supported just because external allocations are counted."
+    },
+    {
+      "id": "421-SECURITY-DEFAULTS",
+      "change": "PodSecurity baseline/restricted block probe/lifecycle host; usernamespace+volumeDevices invalid; SCC usernamespace policies",
+      "toolPaths": "constraints.go actual Pod dryrun/SCCreview; scc.go; converter.go template preservation",
+      "disposition": "existing-server-refusal-or-runtime-prerequisite",
+      "assessment": "Nonempty probe/lifecycle host values and hostUsers=false+volumeDevices are existing fields whose validation changed; actual raw Pod create dryrun returns rejection before source mutation. hostUsers is preserved and defaults true per linkedguidance; isolated namespaces need compatible UID/GID/filesystems. ActualSA defaulting/requiredSCC checks do not assume legacypolicy names. nested-container UID constraints corrected in4.21.25 are evaluated from current server policy.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1858,
+          "endLine": 1858,
+          "excerptSha256": "ca657cfa26cecf637a26aa56f5b59c22bd3ac23763c8c898ca317f15c2770220"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1847,
+          "endLine": 1847,
+          "excerptSha256": "cedc40d748f826f06e042ad0a89e899a16e2a33039b9ddfa66156d8554af64e5"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/nodes-pods-user-namespaces-configuring.adoc",
+          "sha256": "f0ed93d6c732a78e1a6a58de034375a8b8fd9ed73653673d5599b4a30432fa31",
+          "bytes": 8513,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/ocp-4.21-modules__nodes-pods-user-namespaces-configuring.adoc",
+          "line": 99,
+          "endLine": 99,
+          "excerptSha256": "8c90f8e5af22bbe736e84f4b43f0839b8f06acec0fa00c24d7d92d621130fbb5"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/zstream-4-21-25.adoc",
+          "sha256": "3d57451b7c929361f96e41f56c67deefff5ed29322991f5834842d972fd56a48",
+          "bytes": 4076,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__zstream-4-21-25.adoc",
+          "line": 26,
+          "endLine": 26,
+          "excerptSha256": "274f65aa0da9abfbd12d06aca851cd2630045574d7ed2beb0204fec08039a1f3"
+        }
+      ],
+      "validationOrRequiredAction": "Retain recheck-admission-before-retirement and SA authorization contracts. Could add representative probehost serverrejection fixture during consolidated regression if not covered."
+    },
+    {
+      "id": "421-NEW-FIELDS",
+      "change": "Container restart rules, EnvFiles/fileKeyRef, hostnameOverride; stricter supplemental groups inherited",
+      "toolPaths": "baseline.go raw field validation; converter.go input; constraints.go raw admission",
+      "disposition": "existing-manual-feature-guard",
+      "assessment": "New container restartPolicy/restartPolicyRules, env FileKeyRef and Pod hostnameOverride are post-baseline fields, so unavailable typed knowledge cannot silently erase them. Native-sidecar restartPolicy/recursiveReadOnly/supplementalGroupsPolicy/seLinuxChangePolicy guards continue from earlier releases. Broader string enum validation is separate parent review; field presence alone is not an enum validator.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1587,
+          "endLine": 1587,
+          "excerptSha256": "cf5b929301263a2cbf6ee3408e05509275dac0077ce5ce5b91b2e6e4b864bcb5"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1588,
+          "endLine": 1590,
+          "excerptSha256": "25b0d0681b5eb52c93f73f93f483082c8163c555dfe8f3e3c3deac875a5b2ba2"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1603,
+          "endLine": 1603,
+          "excerptSha256": "4e1603db1130c5aa6367493d0888acfc3d828b3ca6e529812a2ed6b2cb81ab54"
+        }
+      ],
+      "validationOrRequiredAction": "Keep representative raw input/SCC/Pod/create-response unknown-field contracts; parent will evaluate enum changes during SDK alignment."
+    },
+    {
+      "id": "421-IMAGE",
+      "change": "Default openshift ClusterImagePolicy active; signature mirroring issue in disconnected clusters; short-name pull fix",
+      "toolPaths": "converter.go image references/triggers; cutover.go Ready/HTTP; qualification image imports/builds",
+      "disposition": "reviewed-runtime-prerequisite",
+      "assessment": "Pod dryrun does not pull or prove signatures. Official known issue specifically concerns mirroring release images without Sigstore signatures and future CVO Pods, not a blanket statement that every arbitrary application image must have Red Hat signature. Workload image policy/trust/auth/mirror resolution must function on target nodes; unqualified image searches also have patch-dependent behavior. Converter preserves full image references and does not disable image policies.",
+      "evidence": [
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-release-notes-new-features.adoc",
+          "sha256": "5f25bea5dea0281ab9090f90e39b24801c3e02a1d5f05612f5c3c0a3f4adf86b",
+          "bytes": 48285,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-release-notes-new-features.adoc",
+          "line": 483,
+          "endLine": 487,
+          "excerptSha256": "1df928f7258ededcda1d87566fb88c8741fe2436c779762e8c85fee687edf0e8"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-release-notes-known-issues.adoc",
+          "sha256": "017c288f5fcdf61aebffa1bb272bf284c5b55a3999852e936d4e6767b90627c7",
+          "bytes": 6474,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-release-notes-known-issues.adoc",
+          "line": 10,
+          "endLine": 16,
+          "excerptSha256": "adc60e970e360dd3c7ff045731908b5cde0bdca083ff9c58882bf360094a8d09"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/zstream-4-21-2.adoc",
+          "sha256": "d39349e75489671989beb9cdc7b01cf1069ef58d718e38c12e34c0d0c1170bf2",
+          "bytes": 5430,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__zstream-4-21-2.adoc",
+          "line": 54,
+          "endLine": 54,
+          "excerptSha256": "09b2e249b51c07105ee54afaaf3eb6bfec94db568e655d15a47fe62214a1038c"
+        }
+      ],
+      "validationOrRequiredAction": "Use immutable fully-qualified test images; explicitly validate required image signatures/credentials/mirrors before exclusive cutover. Startup failure tests/recovery do not prove everypossible imagepolicy."
+    },
+    {
+      "id": "421-STORAGE",
+      "change": "oVirt CSI Driver Operator removed; mutable CSI attach counts TP inOpenShift; resize/VolumeAttributesClass GA",
+      "toolPaths": "storage.go legacyplugin guard; scheduling.go boundPVC/PV topology; constraints.go declaredruntime limits; harnessstorage",
+      "disposition": "reviewed-runtime-prerequisite",
+      "assessment": "oVirt CSI operator removal is platform/driver availability, not removal of generic CSI Pod/PV API; do not block all CSI or assume old mounted volume proves a new mount. Users need a supported functioning driver. Tool does not write production claims/classes/snapshots/resize status or simulate dynamic CSI attach limits; regular CSI fixture cannot certify all vendor storage. RWO/RWX still recursive SELinux by default per linked 4.21 guidance; post-baseline namespace-injected seLinuxChangePolicy requires manual review.",
+      "evidence": [
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-release-notes-new-features.adoc",
+          "sha256": "5f25bea5dea0281ab9090f90e39b24801c3e02a1d5f05612f5c3c0a3f4adf86b",
+          "bytes": 48285,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-release-notes-new-features.adoc",
+          "line": 601,
+          "endLine": 603,
+          "excerptSha256": "0ffe87a051543168e567aa097dfd6395403c1a001e74721e10e05118c09fe228"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-release-notes-new-features.adoc",
+          "sha256": "5f25bea5dea0281ab9090f90e39b24801c3e02a1d5f05612f5c3c0a3f4adf86b",
+          "bytes": 48285,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-release-notes-new-features.adoc",
+          "line": 621,
+          "endLine": 629,
+          "excerptSha256": "6b339fa61369c88c9d6bf2777a70af15410893f15afb705b59001d39af224329"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/rn-ocp-release-notes-new-features.adoc",
+          "sha256": "5f25bea5dea0281ab9090f90e39b24801c3e02a1d5f05612f5c3c0a3f4adf86b",
+          "bytes": 48285,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__rn-ocp-release-notes-new-features.adoc",
+          "line": 611,
+          "endLine": 615,
+          "excerptSha256": "6314235f34e7d5f60df4a04d37e6cd9d059fcff8c8fad91ae3d03c81658f1edb"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/storage-persistent-storage-selinuxChangePolicy.adoc",
+          "sha256": "5c9d479deebb8c3cd32da980a410ddfd940acaf0c8d8f1118803f7fdc7a03cad",
+          "bytes": 2877,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/ocp-4.21-modules__storage-persistent-storage-selinuxChangePolicy.adoc",
+          "line": 30,
+          "endLine": 36,
+          "excerptSha256": "133b8a8b30e92d1d1d12ab7e1712b3ae8ab412b8ed727bbc4ea55a7ecebd7e17"
+        }
+      ],
+      "validationOrRequiredAction": "Keep supported storage/data continuity and removed plugin refusal evidence; require external driver/attachment/mount review before exclusive cutover."
+    },
+    {
+      "id": "421-CONTROLLERS",
+      "change": "RC terminatingReplica reconciliation and Deployment availableReplica timing fixes; long name fix; HPA API version validation",
+      "toolPaths": "cutover.go owned Pod termination/readiness; converter.go name/metadata; planning.go HPA snapshot; constraints.go dryruns",
+      "disposition": "existing-exact-validation-and-observation",
+      "assessment": "Controller status/additional events are observational; actual owned Pod termination and Ready/health checks remain necessary. HPA retarget uses explicit apps/v1 Deployment API version; server dry run validates exact create body. Source DC updates are dynamic apps.openshift.io/v1 rather than upstream RC/scale calls. Repeated exactserver dry runs and actual responses cannot be replaced by status synthesis.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1813,
+          "endLine": 1813,
+          "excerptSha256": "315343eeb834bfc1e4eb744922327853644b9d21e6b2316686963366076fbc15"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1851,
+          "endLine": 1851,
+          "excerptSha256": "d78a86255769bc8d613e6965ceb1c31672443f84ad48404f89dbc45adf702ab8"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1818,
+          "endLine": 1818,
+          "excerptSha256": "9cf457f3e3b1c0c306e294804602d74eb908e4d6a1067ebec98292e9fc6169e3"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1954,
+          "endLine": 1954,
+          "excerptSha256": "08ca216afc98e7a3be842437ca84de7f0bec1fbb8ad12a4c5b4a6ad231a64960"
+        }
+      ],
+      "validationOrRequiredAction": "Keep long name/server validation/readiness/termination contracts where present; final exact-artifact live qualification remains parent work."
+    },
+    {
+      "id": "421-AUTH-ADMISSION",
+      "change": "Selector-aware authorization stable, authconfig/external tokensigners GA/Beta, VAP enforcement fixed forDC/BuildConfig",
+      "toolPaths": "preflight.go explicitSSARversions; constraints.go source admission; cutover.go:setSourceSpec; runtime.go opaquecredentials",
+      "disposition": "existing-exact-current-server-validation",
+      "assessment": "SSAR supplies actualresource API version. Selector-restricted authorizers may conservatively refuse broad inventory review, never grant an actual operation. No converter server auth configuration/token claim parsing. OpenShift VAP fix can now deny DC freeze/retire; preflight dry runs each plannedDC spec and setSourceSpec repeats exact dry run immediately before the actual update.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1636,
+          "endLine": 1636,
+          "excerptSha256": "ae722cf5247d1cc2415023794924ad45f53fd6195a459da4be231c9bb5445757"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1627,
+          "endLine": 1627,
+          "excerptSha256": "af66ba5ac5a04b795765bdeb722aec94e4f282819adeb78aa24fe7dfb6860464"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1738,
+          "endLine": 1738,
+          "excerptSha256": "2b58da911becaccd77066290b9aaf1dd4f08a8b6fb60101bc49c5e5f4ad5ca53"
+        },
+        {
+          "url": "https://github.com/openshift/openshift-docs/blob/dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16/modules/zstream-4-21-1.adoc",
+          "sha256": "078fd1df6cbf0800b37b98a89a05fbf5d1a42580202bed4dc90480546332fbda",
+          "bytes": 49386,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/modules__zstream-4-21-1.adoc",
+          "line": 116,
+          "endLine": 116,
+          "excerptSha256": "efe6c93439fa005ea034da456f5d5e430d8f039d19683080103ae2b78d6cab9d"
+        }
+      ],
+      "validationOrRequiredAction": "Keep version-sensitive authorizer profiles, source admissionrefusal and interrupted/expired credential contracts; current API errors remain authoritative."
+    },
+    {
+      "id": "421-NETWORK-LEASE",
+      "change": "EndpointSlices used by service proxy/kube-aggregator; legacy APF flow locks removed; topology spread matchLabelKeys merge",
+      "toolPaths": "cutover.go Endpoints/HTTP; tools singleton coordinationv1Lease; scheduling.go hardspreadguard; baseline.go",
+      "disposition": "existing-baseline-or-maintenance-prerequisite",
+      "assessment": "corev1Endpoints remains served; change to aggregatedAPIServer manual Service Endpoints config is outside inventory. Singleton fixture already uses Lease not endpointsleases/configmapsleases and own CAS, so APF lock migration does not change format. Topologyspread matchLabelKeys is absentbaseline and hard DoNotSchedule spread is manual; no false claim of full scheduler preemption or CNI traffic simulation.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1761,
+          "endLine": 1763,
+          "excerptSha256": "8250b4ca543ab53ab7efbda9213739f65ba8acae504ab75940da8dd0884c372a"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1765,
+          "endLine": 1765,
+          "excerptSha256": "7968517f63286d13eaf5a7ef0698f589dab21237258e8b8b80fccbce348c91f4"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1897,
+          "endLine": 1897,
+          "excerptSha256": "2c4b3a7c1f6efdfbf8a8ecc1b17e6740c6c6a8bc94640de0ae78877e116996e7"
+        }
+      ],
+      "validationOrRequiredAction": "Keep actual endpoint UID/HTTP and Lease ownership observations. EndpointSlice migration remains a maintenance follow-up; dynamic network failures are not prevented by selector comparison."
+    },
+    {
+      "id": "421-TAINT-ENUM",
+      "change": "No Gt/Lt tolerationoperators inreviewed1.34corecontract; scheduling/NoExecutetiming changes",
+      "toolPaths": "scheduling.go:nodeEligible; baseline.go schema",
+      "disposition": "no-new-in-range-enum-break-found",
+      "assessment": "Officialv1.34.9 coretypes lists only Exists/Equal. Newerclient0.37helper signature/optionalGtLt support postdates these target versions and is parent dependency work. CurrentNoExecutefinite expiry cannotprove durable placement and isnotaccepted; Node Ready/pressure/taints rechecked. Faster unreachable tainting isruntime availability, not permission to synthetically mark Ready.",
+      "evidence": [
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/v1.34.9/staging/src/k8s.io/api/core/v1/types.go",
+          "sha256": "7f239e9466a8594d51e8fbd4965735951b9d969b550da0e31140db766faddf48",
+          "bytes": 441323,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/v1.34.9-core-types.go",
+          "line": 4051,
+          "endLine": 4054,
+          "excerptSha256": "b0310032a46988eb8fb7c1ad36f70413cd325d25a3675d2662141b641c869e58"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/v1.34.9/staging/src/k8s.io/api/core/v1/types.go",
+          "sha256": "7f239e9466a8594d51e8fbd4965735951b9d969b550da0e31140db766faddf48",
+          "bytes": 441323,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/v1.34.9-core-types.go",
+          "line": 4074,
+          "endLine": 4079,
+          "excerptSha256": "c95a49c7c0a358d064001cc733b390c8bbef7168880f4ff091d1bbe56d7e5e10"
+        },
+        {
+          "url": "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.34.md",
+          "sha256": "c048c82278047c6891daeef98e26d9c2860104d64ce6605100ee17dfb4ef86f7",
+          "bytes": 451881,
+          "localSource": ".scratchpad/parallel-release-review-20261016/419-421/kubernetes-1.34.md",
+          "line": 1848,
+          "endLine": 1848,
+          "excerptSha256": "6fdfa6a1fbcdb62254896934a4337112a48a2c836b9b5b0ae4085e529478083e"
+        }
+      ],
+      "validationOrRequiredAction": "Recommended parent future-proofing: preservebaseline enum guard when upgrading SDK, since baseline field presence alone does not validate enum values. This review does not invent 4.21 Gt/Lt support."
+    }
+  ],
+  "conclusion": "No additional demonstrated unsafe acceptance in the conventional baseline feature path was established by this bounded source review. Existing guards preserve or refuse changed feature semantics, with named runtime/platform/storage/image/authorization prerequisites. This is input to the parent consolidated compatibility assumption; it is not a blanket per-patch support or integration pass.",
+  "additionalSourceManifest": {
+    "path": ".scratchpad/parallel-release-review-20261016/419-421/source-manifest.json",
+    "sha256": "b68b96d3e462bee748d5af9834c31b916e5fe67b8700fd77cdfeec58b75cd7d9",
+    "ocpCommit": "dd211777c6a4c1dd389d0a84edd6ac0b7cdf8a16",
+    "retrievedContentSources": 50,
+    "allReferencesFetchedWithoutError": true
+  }
+}

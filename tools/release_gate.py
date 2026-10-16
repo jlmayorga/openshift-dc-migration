@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate actual cluster evidence for every shipped binary and released minor."""
+"""Validate actual cluster evidence and explicitly approved source-review assumptions."""
 
 import argparse
 import datetime
@@ -48,7 +48,16 @@ def dependency_digest():
     ).hexdigest()
 
 
-def verify(matrix, evidence, artifacts, revision, fixture_hash, dependency_hash):
+def verify(
+    matrix,
+    evidence,
+    artifacts,
+    revision,
+    fixture_hash,
+    dependency_hash,
+    source_hash=None,
+    reviews=(),
+):
     required = {
         v["minor"]
         for v in matrix["targets"]
@@ -65,6 +74,42 @@ def verify(matrix, evidence, artifacts, revision, fixture_hash, dependency_hash)
             raise ValueError("Ambiguous evidence for " + str(key))
         rows[key] = item
     for minor in required:
+        target = next(v for v in matrix["targets"] if v["minor"] == minor)
+        if target.get("qualificationPolicy") == "review-assumption":
+            # This exception is limited to the unavailable versions explicitly
+            # authorized for source review. It never creates an integration pass.
+            if (
+                minor not in {"4." + str(n) for n in range(14, 21)}
+                or minor == matrix["newestGA"]
+            ):
+                raise ValueError("Review assumption is not authorized for " + minor)
+            matching = [
+                r for r in reviews if minor in r.get("assumedCompatibleReleases", [])
+            ]
+            if len(matching) != 1:
+                raise ValueError("Missing or ambiguous compatibility review: " + minor)
+            review = matching[0]
+            if (
+                review.get("kind") != "release-note-compatibility-review"
+                or review.get("result") != "assumed-compatible-with-prerequisites"
+                or review.get("reviewComplete") is not True
+                or review.get("unresolvedApplicableFindings") != []
+                or not review.get("scope")
+                or not review.get("prerequisites")
+            ):
+                raise ValueError("Incomplete compatibility review: " + minor)
+            if (
+                not source_hash
+                or review.get("productionSourceSHA256") != source_hash
+                or review.get("dependencySHA256") != dependency_hash
+                or review.get("fixtureSHA256") != fixture_hash
+            ):
+                raise ValueError("Stale compatibility review: " + minor)
+            if not any(a.get("minor") == minor for a in review.get("assessments", [])):
+                raise ValueError("Missing per-release assessment: " + minor)
+            continue
+        if target.get("qualificationPolicy", "actual-cluster") != "actual-cluster":
+            raise ValueError("Unknown qualification policy: " + minor)
         for artifact, sha in artifacts.items():
             row = rows.get((minor, sha), {})
             if row.get("result") != "passed":
@@ -116,6 +161,55 @@ def tree_digest(root):
     return h.hexdigest()
 
 
+def production_source_digest():
+    """Bind assumptions to all shipped Go code and the embedded field catalog."""
+    paths = [
+        p for p in pathlib.Path(".").glob("*.go") if not p.name.endswith("_test.go")
+    ]
+    paths.append(pathlib.Path("compatibility/baseline-1.27.json"))
+    h = hashlib.sha256()
+    for p in sorted(paths):
+        h.update(p.as_posix().encode() + b"\0" + p.read_bytes())
+    return h.hexdigest()
+
+
+def load_reviews(matrix):
+    reviews = []
+    for name in sorted(
+        {
+            v["reviewEvidence"]
+            for v in matrix["targets"]
+            if v.get("qualificationPolicy") == "review-assumption"
+        }
+    ):
+        path = pathlib.Path(name)
+        if (
+            path.parent != pathlib.Path("compatibility/evidence")
+            or path.suffix != ".json"
+        ):
+            raise ValueError("Invalid review evidence path")
+        review = json.loads(path.read_text())
+        for assessment in review.get("assessments", []):
+            p = pathlib.Path(assessment["path"])
+            if p.parent != pathlib.Path("compatibility/reviews") or p.suffix != ".json":
+                raise ValueError("Invalid assessment path")
+            if digest(p) != assessment["sha256"]:
+                raise ValueError("Changed release assessment: " + str(p))
+            content = json.loads(p.read_text())
+            minor = assessment["minor"]
+            identity = content.get(
+                "openshiftMinor", content.get("minor", content.get("openshift"))
+            )
+            if (
+                not re.fullmatch(r"4\.\d+", minor)
+                or p.name != minor + "-assessment.json"
+                or identity != minor
+            ):
+                raise ValueError("Release assessment identity mismatch: " + str(p))
+        reviews.append(review)
+    return reviews
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--artifacts", required=True)
@@ -140,8 +234,12 @@ def main():
         revision,
         tree_digest("testdata"),
         dependency_digest(),
+        production_source_digest(),
+        load_reviews(matrix),
     )
-    print("All required binary/version qualification rows passed")
+    print(
+        "Required actual-cluster evidence and explicit source-review assumptions validated"
+    )
 
 
 if __name__ == "__main__":

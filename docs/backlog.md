@@ -1,8 +1,8 @@
 # Maintenance backlog
 
-- [ ] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
+- [x] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
 
-  In progress: [review findings and API inventory](compatibility-review.md), with [structured source/progress evidence](../compatibility/evidence/2026-10-16-release-notes-review.json). Initial passes addressed legacy volume-plugin changes, raw SCC/Pod fields and required-SCC authorization, including a live revocation regression. Per-release assessment and compatibility assumptions remain unfinished.
+  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-parallel-release-review.json). Parallel review additionally covered 4.21. Source assumptions are separate from actual integrations; maintained-client adoption and final release qualification remain open.
 
   Scope and deliverables:
 
@@ -13,4 +13,4 @@
   - Document the compatibility conclusion in `docs/compatibility-review.md` and structured review evidence under `compatibility/evidence/`. A conclusion of “no identified applicable breaking changes” permits the requested compatibility assumption; unresolved applicable changes must remain explicit.
   - Update the compatibility matrix, operator support wording and release-gate policy to consume this review-based assumption for unavailable 4.14–4.20 targets. Preserve live-tested patch/artifact provenance and distinguish review-based assumptions from passing integration tests. Do not generate fictitious live-test records.
 
-  Acceptance: all seven OpenShift minors and their corresponding Kubernetes changes have a sourced assessment, every used resource/operation is covered, applicable breaking changes are addressed, and the resulting support claim clearly states its evidence basis. The initial findings do not yet meet these acceptance criteria.
+  Acceptance: all seven OpenShift minors and their corresponding Kubernetes changes have a sourced assessment, every used resource/operation is covered, applicable breaking changes are addressed, and the resulting support claim clearly states its evidence basis. The consolidated assessment, resolution overlay and hash-checked release policy record this scoped acceptance; runtime/platform prerequisites remain explicit.

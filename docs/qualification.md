@@ -1,6 +1,6 @@
 # OpenShift qualification and release checklist
 
-The [compatibility-review backlog](backlog.md) records the planned release-note review for unavailable OpenShift 4.14–4.20 clusters. Its outcome will support an explicitly labelled compatibility assumption and a corresponding qualification-policy update, while retaining actual integration results as separate evidence.
+The completed [parallel source review](compatibility-review.md) supports an explicitly labelled, source/dependency/fixture-bound compatibility assumption for unavailable OpenShift 4.14–4.20 clusters. The release gate consumes that record separately from actual integration results and rejects stale or unresolved reviews. Newer required targets still need full actual evidence for every shipped binary.
 
 OpenShift 4.14 / Kubernetes 1.27 remains the mandatory floor. The current released-minor inventory is 4.14 through 4.22, with a separate next-development smoke row. The newest GA inventory source is [Red Hat's 4.22 announcement](https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22). On 2026-10-15, Red Hat's public [stable-4.22 update graph](https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.22&arch=amd64) contained 4.22.18 and stable-4.23 had no nodes. This observes release availability, not tested support. Refresh the inventory before release; conversion discovers capabilities and imposes no maximum version.
 
@@ -58,7 +58,7 @@ Also run the supported fixture corpus through actual server dry run and exercise
 
 ## Trusted CI and release gate
 
-Protect the `openshift-qualification` environment and use trusted self-hosted runners labelled `openshift-qualification` and their platform (`linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64`, `windows-amd64`). There are no PR-triggered cluster jobs. Main pushes exercise floor/newest baseline targets; weekly/manual jobs cover all released minors/platforms and the next-development smoke target. No missing context or runner is counted as passing.
+Protect the `openshift-qualification` environment and use trusted self-hosted runners labelled `openshift-qualification` and their platform (`linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64`, `windows-amd64`). There are no PR-triggered cluster jobs. Main pushes exercise the newest-GA actual target; weekly/manual jobs cover required actual-cluster minors/platforms and the next-development smoke target. Explicit 4.14–4.20 review-assumption rows do not request unavailable clusters. No missing context or runner is counted as passing.
 
 Configure:
 
@@ -72,7 +72,7 @@ Before creating/publishing a release:
 
 - Local and CI race tests, vet, formatting, readonly builds, module verification/clean-module checks, Python gate tests and pinned security scanners must pass. Preserve scan artifacts; inspect dispositions.
 - Every required released-minor row must contain full passing **actual** results for each shipped binary hash. Record exact patches, actual Kubernetes version, aligned module versions, test dates, known limitations and provenance; 4.14 must report Kubernetes 1.27.
-- Fresh full-matrix qualification is mandatory after dependency/fixture/binary changes. The evaluated Kubernetes 0.37.1 candidate cannot replace 0.31.3 until 4.14 integration passes and the full matrix is refreshed.
+- Fresh qualification is mandatory after dependency/fixture/binary changes. For 4.14–4.20 this means refreshing the approved source review against exact source/dependency/fixture hashes; newer required rows need actual final-artifact integrations. The evaluated Kubernetes 0.37.1 candidate remains unadopted pending that complete refreshed qualification, without requesting an unavailable older cluster.
 - Review feature/RBAC/recovery docs and all variant evidence; refresh the released-minor inventory. Do not advertise an untested release or an untested feature as verified.
 - Release automation creates only a draft after gates pass, attaching binaries, checksums, build metadata, scans and compatibility results. A maintainer reviews before publishing; this work does not push tags or publish anything.
 

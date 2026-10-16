@@ -19,6 +19,7 @@ jobs:
     outputs:
       targets: ${{ steps.matrix.outputs.targets }}
     steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - id: matrix
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -26,7 +27,8 @@ jobs:
           python3 - <<'PY'
           import json,os
           full=os.environ['EVENT_NAME']!='push'
-          minors=['4.'+str(n) for n in range(14,23)] if full else ['4.14','4.22']
+          matrix=json.load(open('compatibility/matrix.json'))
+          minors=[v['minor'] for v in matrix['targets'] if v['releaseRequirement']!='development' and v.get('qualificationPolicy','actual-cluster')=='actual-cluster'] if full else [matrix['newestGA']]
           platforms=['linux-amd64','linux-arm64','darwin-amd64','darwin-arm64','windows-amd64'] if full else ['linux-amd64']
           rows=[{'minor':m,'platform':p} for m in minors for p in platforms]
           if full:rows.append({'minor':'next','platform':'linux-amd64'})

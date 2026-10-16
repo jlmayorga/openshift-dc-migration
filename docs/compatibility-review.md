@@ -1,8 +1,10 @@
-# OpenShift 4.14–4.20 compatibility review
+# OpenShift 4.14–4.21 compatibility review
 
-**Status: in progress; no review-based compatibility assumption has been approved by this assessment yet.** Older clusters are unavailable. The agreed alternative is to review official release notes against the actual tool, address applicable breaking changes, then record an explicit assumption for the reviewed range. This is separate from actual OpenShift integration results. Review started on 2026-10-16; see the [backlog and acceptance criteria](backlog.md).
+**Status: the parallel source-impact assessment is complete within the inventoried baseline scope. OpenShift 4.14–4.20 are assumed compatible from release-note review, subject to the manual feature guards and prerequisites below. This is not an actual integration pass.** OpenShift 4.21 also has a source assessment and separately recorded actual 4.21.36 results; full release qualification remains partial.
 
-The first pass found runtime storage changes despite continued availability of their API fields. Further review found raw admission-field loss, required-SCC authorization gaps and missing cluster admin-policy selection checks. [Feature guards](feature-mapping.md), [actual SCC revocation evidence](admission-scc-live-tests.md) and the [raw response tests](raw-response-live-tests.md) address those paths. The scheduling/accounting, controller, client-library and patch-advisory review still needs completion. Do not treat collecting a release's notes or establishing its Kubernetes version as a completed compatibility assessment.
+Three reviewers assessed 4.15/4.16, 4.17/4.18 and 4.19–4.21 concurrently, using immutable official OpenShift/Kubernetes notes, wider scans beyond the initial extraction, and primary patches for material changes. The parent consolidated those findings with the existing 4.14 assessment. The [source-bound consolidation](../compatibility/evidence/2026-10-16-parallel-release-review.json) records all eight per-release assessment hashes, resolutions, current source/dependency/fixture hashes and limitations. The historical review snapshots intentionally retain findings unresolved at their original revision; the consolidation supplies the final resolution overlay.
+
+The review found one additional production gap: PV zone/region labels constrain scheduling independently of PV node affinity. Commit `10f72e4` requires manual review for those labels before source retirement. Thirty-two contract variants reproduced acceptance before the fix; the final 330-test/subtest race suite passes. The same commit adds AppArmor raw-admission regressions; existing validation already rejects the newer field. Earlier storage, raw-response, SCC, admin-policy and access-review fixes remain in force.
 
 ## Version mapping and source provenance
 
@@ -10,17 +12,21 @@ Each mapping below comes from that release's official “About this release” t
 
 | OpenShift | Kubernetes | Official release-note source | Assessment |
 | --- | --- | --- | --- |
-| 4.14 | 1.27 | [4.14 source](https://github.com/openshift/openshift-docs/blob/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc) | 128 extracted candidates screened; admin-policy gap guarded; full assessment pending |
-| 4.15 | 1.28 | [4.15 source](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc) | Mapping verified; full assessment pending |
-| 4.16 | 1.29 | [4.16 source](https://github.com/openshift/openshift-docs/blob/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc) | Mapping verified; full assessment pending |
-| 4.17 | 1.30 | [4.17 source](https://github.com/openshift/openshift-docs/blob/6c0902cc63abcac6b44a6467ca42be285ec01aad/release_notes/ocp-4-17-release-notes.adoc) | Mapping verified; full assessment pending |
-| 4.18 | 1.31 | [4.18 source](https://github.com/openshift/openshift-docs/blob/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc) | CephFS/RBD removal addressed; remaining review pending |
-| 4.19 | 1.32 | [4.19 source](https://github.com/openshift/openshift-docs/blob/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc) | Earlier storage guard applies; remaining review pending |
-| 4.20 | 1.33 | [4.20 About this release](https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-about-this-release.adoc) | `gitRepo` default change addressed; remaining review pending |
+| 4.14 | 1.27 | [4.14 source](https://github.com/openshift/openshift-docs/blob/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.14-assessment.json), conditional review assumption |
+| 4.15 | 1.28 | [4.15 source](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.15-assessment.json), conditional review assumption |
+| 4.16 | 1.29 | [4.16 source](https://github.com/openshift/openshift-docs/blob/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.16-assessment.json), conditional review assumption |
+| 4.17 | 1.30 | [4.17 source](https://github.com/openshift/openshift-docs/blob/6c0902cc63abcac6b44a6467ca42be285ec01aad/release_notes/ocp-4-17-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.17-assessment.json), conditional review assumption |
+| 4.18 | 1.31 | [4.18 source](https://github.com/openshift/openshift-docs/blob/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.18-assessment.json), conditional review assumption |
+| 4.19 | 1.32 | [4.19 source](https://github.com/openshift/openshift-docs/blob/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc) | Assessed; [impact record](../compatibility/reviews/4.19-assessment.json), conditional review assumption |
+| 4.20 | 1.33 | [4.20 About this release](https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-about-this-release.adoc) | Assessed; [impact record](../compatibility/reviews/4.20-assessment.json), conditional review assumption |
 
-The [structured review record](../compatibility/evidence/2026-10-16-release-notes-review.json) preserves source revisions, hashes, inventory and unfinished items. Retrieved notes and 274 referenced modules are retained privately for reproducible analysis; a successful fetch is not a review result. This initial record does not establish that every relevant advisory or referenced guide has been assessed.
+The [4.21 / Kubernetes 1.34 assessment](../compatibility/reviews/4.21-assessment.json) includes immutable official source provenance. Actual 4.21.36 qualification remains tied to each recorded artifact, separately from this source review.
 
-The [4.14 candidate screen](../compatibility/reviews/4.14-candidates.json) records a disposition for all 128 entries from the initial extraction, with immutable source URLs, line numbers and text hashes. This completed candidate pass is narrower than a full release assessment: wider extraction coverage, referenced guidance, patch correlation, allocation/controller behavior and client validation remain pending. It does not authorize a compatibility assumption.
+The [structured review record](../compatibility/evidence/2026-10-16-release-notes-review.json) preserves source revisions, hashes, inventory and unfinished items. Retrieved notes and 274 referenced modules are retained privately for reproducible analysis; a successful fetch is not a review result. This historical record is superseded by the consolidated assessment for review conclusions; no assessment certifies every unrelated cluster advisory.
+
+The [4.14 candidate screen](../compatibility/reviews/4.14-candidates.json) records a disposition for all 128 entries from the initial extraction, with immutable source URLs, line numbers and text hashes. That earlier candidate pass was narrower than the subsequent impact assessment. The final source-bound assumption comes from the consolidation, not the initial extraction alone.
+
+The [4.15 candidate screen](../compatibility/reviews/4.15-candidates.json) covers all 117 extracted entries and the surrounding SELinux mount discussion. Commented-out removal tables are distinguished from active release notes. Two extraction entries combine scheduler and storage bullets; their full text was read and both topics dispositioned, and the subsequent wider impact assessment covers the material changes.
 
 ## Production API and operation inventory
 
@@ -41,7 +47,7 @@ This inventory follows `runtime.go`, `converter.go`, `baseline.go`, `planning.go
 | `quota.openshift.io/v1` | AppliedClusterResourceQuotas: read the namespace projection of shared quota usage; production does not create ClusterResourceQuotas |
 | `image.openshift.io/v1` | ImageStreamTag API capability discovery when triggers require it. Production generates `image.openshift.io/triggers`; the OpenShift image controller performs updates. The converter does not fetch or mutate ImageStreamTag objects itself |
 
-Live test drivers have additional dependencies. The following operations are fixture setup, observation or fault injection, and must not be advertised as ordinary converter RBAC requirements. This inventory covers the `tools/qualify_*.py` drivers and their shared helpers; their per-release behavioral assessment remains pending.
+Live test drivers have additional dependencies. The following operations are fixture setup, observation or fault injection, and must not be advertised as ordinary converter RBAC requirements. This inventory covers the `tools/qualify_*.py` drivers and their shared helpers; their source-based per-release dispositions are included in the impact records; actual fixture execution on older releases remains unavailable.
 
 | Additional API/resources | Qualification use |
 | --- | --- |
@@ -61,7 +67,7 @@ Deployment/ReplicaSet/RC/HPA/Service/Endpoint, NetworkPolicy, PDB, SCC review an
 
 ## API-version removals and Endpoints
 
-The [upstream migration guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) identifies the following removed versions within the reviewed Kubernetes range. Comparing those versions with the inventories above finds no direct call to a removed API. This conclusion concerns API serving only; field/default/controller/storage changes still need separate assessment.
+The [upstream migration guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) identifies the following removed versions within the reviewed Kubernetes range. Comparing those versions with the inventories above finds no direct call to a removed API. This conclusion concerns API serving only; field/default/controller/storage changes are assessed separately in the per-release impact records.
 
 | OpenShift / Kubernetes | Removed API version listed by the guide | Tool impact |
 | --- | --- | --- |
@@ -96,11 +102,50 @@ The [4.15 deployer-account change](https://github.com/openshift/openshift-docs/b
 
 These dispositions address the named token/capability changes; referenced authentication guidance, node-audience/storage interactions, patch advisories and the maintained-client decision remain part of the wider review.
 
-## Findings still requiring assessment
+## Kubernetes 1.28 field and default changes
 
-The raw SCC and Pod spec guards (`278d942`) reject newer security/volume/resource fields before typed conversion. Required-SCC handling (`618831f`) adds the optional namespaced access review and verifies the effective policy; the API/fields are present in [Kubernetes v1.27.16 source](https://github.com/kubernetes/kubernetes/blob/v1.27.16/staging/src/k8s.io/api/authorization/v1/types.go). Actual [4.21 regression evidence](admission-scc-live-tests.md) demonstrates old preflight acceptance, current refusal with an unchanged healthy source, then successful migration/recovery after authorization restoration. This does not complete the whole per-release assessment.
+The [4.15 notes remove NetworkPolicy status](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc#L1519); the converter only reads its spec and never infers CNI readiness from status. No status request or write needs replacement. Upstream [1.28 changes](https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md) also move host-network `hostPort` defaulting to actual Pod creation. Automatic host-namespace execution already requires manual review, and preflight validates the admitted Pod independently of the Deployment template. Namespace node-selector admission and explicit `nodeName` are checked together against actual node eligibility.
 
-- OpenShift 4.20 enables Linux user namespaces and introduces `restricted-v3`/`nested-container` SCCs. Review SCC defaults and raw-to-typed Pod handling, including newly added fields that an older client could discard. Source: [4.20 new features](https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-new-features-and-enhancements.adoc).
-- Finish all per-release removals, field/default/feature-gate changes, dry-run/admission behavior, controller/image semantics, resource accounting/scheduling, storage migration, and applicable patch advisories against the inventory. Review aligned client-library candidates against these contracts; SDK compatibility is separate from `kubectl` version-skew policy.
-- Add any required guards/tests and produce the final per-release/resource disposition. Only then update matrix/support/release policy to consume review-based assumptions for unavailable 4.14–4.20 targets. Preserve all actual artifact hashes and never synthesize integration passes.
-- Raw Deployment/HPA/ReplicaSet response guards supplement SCC/Pod validation. Contract tests reproduce formerly hidden fields and verify pre-retirement refusal, persisted-create identity retention and recovery without dropping unfamiliar destination fields. Their [recorded live session](raw-response-live-tests.md) remains tied to that exact artifact; broader final-artifact qualification still follows code/dependency stabilization.
+Native sidecars add a post-floor init-container `restartPolicy`; the raw baseline guard requires manual migration instead of dropping that field. For other running cluster Pods, allocation accounting includes restartable init sidecars. The PVC resize-status change does not affect the converter's Bound-phase/reference/topology checks; the tool does not resize or delete production claims. Driver-dependent SELinux mount optimizations and RWOP support retain their [4.15 storage prerequisites](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc#L815), and successful mounting/relabeling remains a runtime check.
+
+The webhook-authorizer access-review version default changes when unset, as confirmed by the [upstream implementation change](https://github.com/kubernetes/kubernetes/pull/116937). The converter now explicitly reviews the version used by its actual endpoint (`v1`, HPA `v2`, or optional admin-policy `v1alpha1`). Version-sensitive authorizer contracts reproduced incorrect refusal with omitted versions before the fix and pass with explicit versions under both empty/wildcard profiles. A preliminary SSAR still cannot grant a later operation: actual reads/dry runs enforce the exact endpoint. Required-SCC LocalSubjectAccessReview already sets `v1`. The final impact assessments additionally correlate PriorityClass quota, CSI/kernel and authorization changes; full runtime/client qualification remains a separate requirement.
+
+## Consolidated resource coverage
+
+| Resource/operation | Reviewed contract and disposition |
+| --- | --- |
+| DC/RC and Deployment/ReplicaSet | Stable APIs; DC deprecation/capability discovery; exact source and destination admission; controller ownership and readiness; unknown raw spec fields require manual review |
+| Pods, quotas, LimitRanges and placement | Baseline fields, native-sidecar/resize/Pod-budget accounting, PriorityClass patch, admitted defaults and cumulative headroom; unassessed placement semantics fail closed |
+| HPA | autoscaling/v2 full-spec preservation/retarget/recovery; post-baseline fields require manual review; metrics availability remains a controller prerequisite |
+| SCC and access reviews | Actual workload SA/defaults and required-SCC rights; explicit endpoint versions; namespace UID/user-namespace/SELinux policy evaluated by current admission |
+| Services/Endpoints and network policies | Endpoints retained despite deprecation; source/destination selector preservation including optional admin policies; external/protocol traffic needs application checks |
+| PDB | Stable policy/v1 and synchronized availability checked before direct controller retirement; no reliance on eviction enforcement alone |
+| PVC/PV/storage | Bound references and node affinity; removed plugins and independent PV topology labels guarded; CSI translation distinguished from removed plugins; runtime driver/mount limits remain prerequisites |
+| ImageStreams, builds and registry | Preserve images and trigger format; unresolved images refuse migration; fixture builds/imports require enabled capabilities, credentials, trust and functioning controllers |
+| Harness-only APIs | Stable Route, TokenRequest, RBAC, Lease, template/build and isolated quota/storage operations reviewed separately from production RBAC |
+
+PriorityClass quota fix PR117825 was backported in Kubernetes 1.27.2, before the official OpenShift 4.14.0 payload's Kubernetes 1.27.6. No extra floor guard is needed. The 4.16 eviction note OCPBUGS-61582 maps to HyperShift's IBM Cloud node-monitor grace-period fix, rather than a converter YAML-format change; the 4.16 assessment retains the primary correlation. AzureFile/Portworx CSI translation is not treated as the nonfunctional CephFS/RBD removal.
+
+## Conditional patch and runtime prerequisites
+
+These are documented fix releases, not proven earliest affected versions. For an affected workload, use a payload carrying the applicable vendor fix and validate its actual traffic/runtime behavior, or use a reviewed manual migration. Upstream patch numbers alone do not prove OpenShift backport status.
+
+| Workload condition | Documented fixes | Source assessment |
+| --- | --- | --- |
+| `shareProcessNamespace: true` with affected runc | 4.17.45 / 4.18.30 | [4.17](../compatibility/reviews/4.17-assessment.json), [4.18](../compatibility/reviews/4.18-assessment.json) |
+| UDP Service port differs from targetPort | 4.17.49 / 4.18.32 | Same records, with immutable z-stream links and issue IDs |
+| Remote UDP NodePort/LoadBalancer stale backends | 4.17.51 | [4.17](../compatibility/reviews/4.17-assessment.json) |
+| systemd entrypoint ConfigMap mount permissions | 4.17.52 / 4.18.34 | [4.17](../compatibility/reviews/4.17-assessment.json), [4.18](../compatibility/reviews/4.18-assessment.json) |
+| External-gateway stale routes after Pod deletion while node inactive | 4.18.38 | [4.18](../compatibility/reviews/4.18-assessment.json) |
+
+SCC readmission behavior on older payloads, SHA-1 Route certificate rejection, registry/build credential rotation, CSI driver/attachment limits, vSphere/vSAN platform fixes, ID-mapped filesystem support and image trust/signatures remain named prerequisites in the individual records. OpenShift 4.20 enabling user namespaces does not move every Pod into one: `hostUsers` defaults true; opting into false requires suitable SCCs, ID ranges and storage. Namespace SELinux defaults can inject newer fields and correctly require manual migration. The tool does not change SCCs, image policies or storage labels to bypass these requirements.
+
+HTTP health and Endpoint UID convergence do not prove UDP, secondary-network, external-gateway or every CNI path. API admission cannot pull an image, check node-local AppArmor profiles, reserve a CSI attachment slot or prove a successful mount. The assumption applies with these explicit prerequisites and existing manual guards; it is not a claim that every historical patch or arbitrary extension is safe.
+
+## Client decision and release policy
+
+The assumption binds the current aligned `v0.31.3` libraries, shipped Go source, embedded 1.27 field catalog and fixture tree by SHA-256. Metadata refreshed on 2026-10-16 identifies aligned `v0.37.1` as the candidate. Its unmodified build fails at the changed `ToleratesTaint` helper; an isolated adaptation retaining baseline operators passes 293 race tests/subtests. This is a concrete candidate result, not adoption or a permanent endorsement of the old libraries. Maintained-client adoption and broad final-artifact qualification remain separate maintenance work.
+
+The release gate accepts review assumptions only for explicitly configured 4.14–4.20 rows and only when the completed review's source/dependency/fixture hashes match and its assessment files retain their recorded hashes. Source, baseline, fixture or dependency changes invalidate that evidence until reassessment. Actual integration fields remain `not-run`. The gate still requires complete actual-cluster evidence for every shipped binary on newer required targets, including newest GA. Missing or partial actual results continue to block release.
+
+Remaining work is broader final-artifact qualification, maintained-client adoption, newest-GA/platform coverage and the final maintenance-plan audit. These are release requirements, not unfinished per-version source screening or a request for unavailable older clusters.

@@ -1,16 +1,24 @@
 {
   "schemaVersion": "v1",
   "kind": "release-note-compatibility-review",
-  "status": "in-progress",
-  "updatedAt": "2026-10-16T05:17:39.543319+00:00",
-  "codeRevisionAtInventory": "132542b489709012e98079ef9c5548eb5cf66bfa",
+  "status": "completed bounded source review; see parallel consolidation for final assumptions and resolution overlay",
+  "updatedAt": "2026-10-16T05:30:08.452503+00:00",
+  "codeRevisionAtInventory": "0dcf787d58c03c50a11275941881d73e57ebdf47",
   "range": {
     "minimum": "4.14",
     "maximum": "4.20"
   },
-  "assumedCompatibleReleases": [],
+  "assumedCompatibleReleases": [
+    "4.14",
+    "4.15",
+    "4.16",
+    "4.17",
+    "4.18",
+    "4.19",
+    "4.20"
+  ],
   "integrationResult": "not-run for all reviewed-range targets",
-  "reviewComplete": false,
+  "reviewComplete": true,
   "method": {
     "baseline": "Kubernetes 1.27.16 field catalog; JSON REST; capability discovery",
     "sourceCollection": "Official openshift-docs release notes and literal referenced release/z-stream modules; official upstream changelogs. Downloads are not completed assessments.",
@@ -513,6 +521,35 @@
       "scope": "Any namespace NetworkPolicy or applicable ANP/BANP Pod selector depending on pod-template-hash requires manual review before source/HPA mutation. No cross-version hash prediction.",
       "evidence": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template-hash-label",
       "liveEvidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json"
+    },
+    {
+      "id": "FIELD-128-01",
+      "change": "Kubernetes1.28/OpenShift4.15 NetworkPolicy status removal, host-network port defaulting, native sidecars and PVC resize-status changes",
+      "status": "Named field interactions assessed; no new production change required",
+      "evidence": [
+        "https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc#L1519",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md"
+      ],
+      "disposition": "NetworkPolicy status unused; host namespaces require manual placement and Pod dry run sees actual defaults; raw baseline validation blocks post-floor init restartPolicy; existing cluster accounting includes native sidecars; production PVC checks do not depend on resizeStatus.",
+      "remaining": "Detailed CSI/SELinux/RWOP prerequisites, quota/kernel patch correlation, referenced guidance and maintained-client validation remain pending."
+    },
+    {
+      "id": "AUTH-02",
+      "change": "Kubernetes1.28 defaults an omitted access-review resource version to wildcard; version-sensitive authorizers can disagree with actual endpoint permissions",
+      "status": "Explicit versions implemented; empty/wildcard contract failures reproduced before fix",
+      "guardCommit": "0dcf787d58c03c50a11275941881d73e57ebdf47",
+      "evidence": [
+        "https://github.com/kubernetes/kubernetes/pull/116937",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md"
+      ],
+      "disposition": "SSAR resource attributes now use v1 for baseline endpoints,v2 for autoscaling HPAs,and the assessed optional admin-policy version. Real operations retain their own authorization/admission checks.",
+      "upstreamPatchSource": {
+        "url": "https://api.github.com/repos/kubernetes/kubernetes/pulls/116937/files",
+        "sha256": "f0c10d218d54a6d17084d1baeb5485b457ad8dd55fb38e5f3354e4bd6abbfdc9",
+        "retrievedAt": "2026-10-16T05:34:46.737279+00:00",
+        "files": 4
+      },
+      "validationScope": "Local version-sensitive authorizer profiles and actual endpoint-version contracts; actual legacy server/webhook-authorizer integration unavailable."
     }
   ],
   "remaining": [
@@ -529,6 +566,14 @@
       "entries": 128,
       "record": "compatibility/reviews/4.14-candidates.json",
       "status": "candidate pass complete; wider release assessment pending"
+    },
+    {
+      "minor": "4.15",
+      "entries": 117,
+      "record": "compatibility/reviews/4.15-candidates.json",
+      "status": "candidate pass complete; wider release assessment pending"
     }
-  ]
+  ],
+  "consolidatedReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+  "historicalRecordNote": "Earlier findings below retain their initial review snapshot/status; final source-bound disposition is in consolidatedReview."
 }

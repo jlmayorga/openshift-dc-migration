@@ -1,6 +1,6 @@
 {
   "schemaVersion": "v1",
-  "updatedAt": "2026-10-16T05:17:39.543319+00:00",
+  "updatedAt": "2026-10-16T05:59:00.049278+00:00",
   "minimum": "4.14",
   "newestGA": "4.22",
   "newestGASource": "https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22",
@@ -16,11 +16,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.14-dc.yaml",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.27"
     },
     {
       "minor": "4.15",
@@ -33,11 +38,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.15-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.28"
     },
     {
       "minor": "4.16",
@@ -50,11 +60,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.16-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.29"
     },
     {
       "minor": "4.17",
@@ -67,11 +82,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.17-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.30"
     },
     {
       "minor": "4.18",
@@ -84,11 +104,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.18-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.31"
     },
     {
       "minor": "4.19",
@@ -101,11 +126,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.19-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.32"
     },
     {
       "minor": "4.20",
@@ -118,11 +148,16 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
+        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
+        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
       ],
       "fixture": "testdata/ocp-4.20-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
+      "compatibilityReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "qualificationPolicy": "review-assumption",
+      "reviewEvidence": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+      "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
+      "reviewedKubernetesMinor": "1.33"
     },
     {
       "minor": "4.21",
@@ -134,25 +169,25 @@
         "k8s.io/apimachinery": "v0.31.3",
         "k8s.io/client-go": "v0.31.3"
       },
-      "testedAt": "2026-10-16T05:17:39.543319+00:00",
+      "testedAt": "2026-10-16T05:59:14.689162+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "partial (actual cluster; see linked session evidence)",
       "limitations": [
-        "Only OpenShift4.21.36 and the recorded darwin/arm64 artifact were live-tested; full qualification remains partial.",
-        "Current admin-policy artifact passed one aggregate targeted case with six ANP/BANP variants,12 pre-retirement refusals, normal migration/recovery and13 automatic baseline scenario IDs.",
-        "Actual old read-only preflight accepted each policy; current preflight/cutover preserve original source Pod/HTTP/spec,HPAUID/spec and paused target before writes. All temporary policies removed.",
-        "Future Deployment hash selectors require manual review. Namespace NetworkPolicy hash refusal is locally tested; live final variants exercise ANP/BANP. No full priority/traffic/CNI simulation.",
-        "Earlier raw-response/SCC/storage/new-app/namespace/runtime/recovery evidence is historical for original hashes. Broader current-artifact variants remain pending.",
-        "Point-in-time checks do not reserve capacity or guarantee startup; no cross-node storage or restricted-v3 runtime qualification.",
-        "OpenShift4.14\u20134.20 review remains incomplete; no older-version compatibility assumption yet."
+        "Targeted label-refusal test, not an actual cross-zone scheduler execution or CSI attachment-limit qualification.",
+        "Full release qualification remains partial; nine automatic-runner supplemental scenario records remain absent for this exact artifact.",
+        "Earlier new-app/multiple-namespace/recovery/etc records retain their original hashes and are not transferred to this artifact.",
+        "No new namespace, storage provision or SCC grant for the PV case; baseline reuses an existing disposable namespace.",
+        "Only the recorded native platform was executed live. Source-review assumptions for4.14\u20134.20 are separate from actual integration results.",
+        "Current artifact passed four PV-label variants/eight refusals, positive regular-CSI cutover/recovery and13automatic baseline IDs across two namespaces."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json",
-      "artifactSHA256": "bf3664a031885ca341abe3102c5b45bd12a2f077dc020a5ca54dc812ce901eb9",
+      "evidence": "compatibility/evidence/2026-10-16-pv-topology-4.21.36.json",
+      "artifactSHA256": "811c3c6a8bc9ca63dcfc65920403d9718f48145eedf2dcddc780f0e15004b932",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json",
         "compatibility/evidence/2026-10-16-raw-responses-4.21.36.json",
         "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
         "compatibility/evidence/2026-10-16-storage-guard-4.21.36.json",
