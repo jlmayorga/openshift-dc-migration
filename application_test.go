@@ -18,6 +18,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -27,13 +28,15 @@ import (
 )
 
 type contractCluster struct {
-	networkPolicies    []networkingv1.NetworkPolicy
-	clusterQuotas      []unstructured.Unstructured
-	denyPodDryRun      bool
-	podDryRuns         int
-	quotas             []corev1.ResourceQuota
-	constraintNodes    []corev1.Node
-	denyConstraintRead string
+	hpaStatusChurn                bool
+	dropPodLabel, injectPodBudget bool
+	networkPolicies               []networkingv1.NetworkPolicy
+	clusterQuotas                 []unstructured.Unstructured
+	denyPodDryRun                 bool
+	podDryRuns                    int
+	quotas                        []corev1.ResourceQuota
+	constraintNodes               []corev1.Node
+	denyConstraintRead            string
 
 	extraReplicaSet                                                                   *unstructured.Unstructured
 	sourceReplicas                                                                    int64
@@ -103,7 +106,14 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 				}
 			}
 		}
-		jsonResponse(w, &pod)
+		object, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(&pod)
+		if c.dropPodLabel {
+			unstructured.RemoveNestedField(object, "metadata", "labels", migrationLabel)
+		}
+		if c.injectPodBudget {
+			_ = unstructured.SetNestedMap(object, map[string]interface{}{"requests": map[string]interface{}{"memory": "1Ti"}}, "spec", "resources")
+		}
+		jsonResponse(w, object)
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/replicasets") && req.Method == http.MethodPost {
@@ -252,6 +262,10 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 				if req.Method == http.MethodDelete {
 					var options metav1.DeleteOptions
 					_ = json.NewDecoder(req.Body).Decode(&options)
+					if options.Preconditions != nil && options.Preconditions.ResourceVersion != nil && *options.Preconditions.ResourceVersion != h.ResourceVersion {
+						http.Error(w, "HPA resource version conflict", 409)
+						return
+					}
 					if len(options.DryRun) > 0 {
 						jsonResponse(w, map[string]interface{}{"kind": "Status", "apiVersion": "v1", "status": "Success"})
 						return
@@ -260,6 +274,10 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 					c.mutations = append(c.mutations, "hpa:delete")
 					jsonResponse(w, map[string]interface{}{"kind": "Status", "apiVersion": "v1", "status": "Success"})
 					return
+				}
+				if c.hpaStatusChurn {
+					version, _ := strconv.Atoi(c.hpas[i].ResourceVersion)
+					c.hpas[i].ResourceVersion = strconv.Itoa(version + 1)
 				}
 				jsonResponse(w, &h)
 				return

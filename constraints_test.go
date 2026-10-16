@@ -14,12 +14,16 @@ import (
 )
 
 func TestConstraintFailureLeavesSourceAndAutoscalerUntouched(t *testing.T) {
-	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity"} {
+	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity", "pod-label", "pod-budget"} {
 		t.Run(scenario, func(t *testing.T) {
 			r, c, path := cutoverTest(t, "exclusive", true)
 			original := c.source.DeepCopy()
 			hpa := c.hpas[0].DeepCopy()
 			switch scenario {
+			case "pod-label":
+				c.dropPodLabel = true
+			case "pod-budget":
+				c.injectPodBudget = true
 			case "pod-admission":
 				c.denyPodDryRun = true
 			case "quota-headroom":
@@ -144,5 +148,17 @@ func TestObservedAllocationsIncludeResizeAndNewPodBudgets(t *testing.T) {
 	}
 	if memory := resources["memory"]; memory.Cmp(resource.MustParse("64Mi")) != 0 {
 		t.Fatal("Pod budget lost", memory.String())
+	}
+}
+
+func TestConstraintPreflightToleratesHPAStatusChurn(t *testing.T) {
+	r, c, _ := cutoverTest(t, "exclusive", true)
+	c.hpaStatusChurn = true
+	r.Options.Mode = "preflight"
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal("status-only HPA churn blocked read-only preflight", err)
+	}
+	if len(c.mutations) != 0 || *c.destination.Spec.Replicas != 0 {
+		t.Fatal("read-only assessment mutated workload")
 	}
 }

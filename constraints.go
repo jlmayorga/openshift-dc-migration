@@ -147,8 +147,8 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 			if current.UID != h.UID || !reflect.DeepEqual(current.Spec, h.Spec) {
 				return fmt.Errorf("HPA %s changed before preflight", h.Name)
 			}
-			uid, rv := current.UID, current.ResourceVersion
-			if err = r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).Delete(ctx, h.Name, metav1.DeleteOptions{DryRun: []string{metav1.DryRunAll}, Preconditions: &metav1.Preconditions{UID: &uid, ResourceVersion: &rv}}); err != nil {
+			uid := current.UID
+			if err = r.Kube.AutoscalingV2().HorizontalPodAutoscalers(ns).Delete(ctx, h.Name, metav1.DeleteOptions{DryRun: []string{metav1.DryRunAll}, Preconditions: &metav1.Preconditions{UID: &uid}}); err != nil {
 				return err
 			}
 			request := h.DeepCopy()
@@ -221,16 +221,33 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 	}); err != nil {
 		return err
 	}
-	pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "dcmig-check-" + p.ID, Namespace: ns, Labels: template.Labels, Annotations: template.Annotations, OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: rs.Name, UID: types.UID("dry-run-" + p.ID), Controller: &controller}}}, Spec: *template.Spec.DeepCopy()}
+	pod := &corev1.Pod{TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Pod"}, ObjectMeta: metav1.ObjectMeta{Name: "dcmig-check-" + p.ID, Namespace: ns, Labels: template.Labels, Annotations: template.Annotations, OwnerReferences: []metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "ReplicaSet", Name: rs.Name, UID: types.UID("dry-run-" + p.ID), Controller: &controller}}}, Spec: *template.Spec.DeepCopy()}
 	if err := check("pod-admission-and-limits", func() error {
 		if _, err := r.Kube.CoreV1().LimitRanges(ns).List(ctx, metav1.ListOptions{}); err != nil {
 			return err
 		}
-		admitted, err := r.Kube.CoreV1().Pods(ns).Create(ctx, pod, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+		request, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
 		if err != nil {
 			return err
 		}
-		pod = admitted
+		admitted, err := r.Dynamic.Resource(schema.GroupVersionResource{Version: "v1", Resource: "pods"}).Namespace(ns).Create(ctx, &unstructured.Unstructured{Object: request}, metav1.CreateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
+		if err != nil {
+			return err
+		}
+		// Older typed clients silently drop newer Pod budgets. Never estimate
+		// quota/capacity from a response that hides admission-added resources.
+		if _, found, _ := unstructured.NestedFieldNoCopy(admitted.Object, "spec", "resources"); found {
+			return errors.New("Pod admission added post-baseline Pod-level resource budgets; manual capacity review required")
+		}
+		expectedLabels := pod.Labels
+		if err = runtime.DefaultUnstructuredConverter.FromUnstructured(admitted.Object, pod); err != nil {
+			return err
+		}
+		for key, value := range expectedLabels {
+			if pod.Labels[key] != value {
+				return fmt.Errorf("Pod admission changed required policy/selector label %s", key)
+			}
+		}
 		return nil
 	}); err != nil {
 		return err
