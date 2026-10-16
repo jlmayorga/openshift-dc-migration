@@ -16,7 +16,7 @@ class ExpiredCredentials(unittest.TestCase):
             bad = pathlib.Path(directory) / "bad.json"
             good.write_text('{"totals":{"generated":1,"failed":0}}')
             bad.write_text(
-                '{"totals":{"generated":0,"failed":1},"error":"Unauthorized"}'
+                '{"totals":{"generated":0,"failed":1},"results":[{"error":"Unauthorized"}]}'
             )
 
             class Live:
@@ -39,7 +39,7 @@ class ExpiredCredentials(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             bad = pathlib.Path(directory) / "bad.json"
             bad.write_text(
-                '{"totals":{"generated":0,"failed":1},"error":"Unauthorized"}'
+                '{"totals":{"generated":0,"failed":1},"results":[{"error":"Unauthorized"}]}'
             )
 
             class Live:
@@ -47,6 +47,24 @@ class ExpiredCredentials(unittest.TestCase):
 
                 def tool(self, *args, **kwargs):
                     return bad
+
+            with patch("qualify_permissions.time.time", return_value=20):
+                with self.assertRaises(AssertionError):
+                    wait_for_expired_generation(Live(), 0, 100)
+
+    def test_namespace_named_credentials_cannot_mask_a_transport_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            failed = pathlib.Path(directory) / "report.json"
+            failed.write_text(
+                '{"totals":{"generated":0,"failed":1},"results":[{"source":'
+                '{"namespace":"expired-credentials"},"error":"TLS handshake timeout"}]}'
+            )
+
+            class Live:
+                last_binary_exit = 1
+
+                def tool(self, *args, **kwargs):
+                    return failed
 
             with patch("qualify_permissions.time.time", return_value=20):
                 with self.assertRaises(AssertionError):

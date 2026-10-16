@@ -25,11 +25,15 @@ def wait_for_expired_generation(live, expires, deadline):
     while time.time() < deadline:
         report_path = live.tool("generate", expected=None)
         report = json.loads(report_path.read_text())
-        diagnostic = report_path.read_text().lower()
         if report["totals"]["failed"] >= 1:
-            assert live.last_binary_exit != 0
+            assert isinstance(live.last_binary_exit, int) and live.last_binary_exit != 0
             assert report["totals"]["generated"] == 0
-            assert "unauthorized" in diagnostic or "credentials" in diagnostic
+            errors = [r.get("error", "").lower() for r in report.get("results", [])]
+            assert any(
+                "unauthorized" in error
+                or "the server has asked for the client to provide credentials" in error
+                for error in errors
+            )
             return report_path, accepted
         assert report["totals"]["generated"] == 1
         assert live.last_binary_exit == 0
