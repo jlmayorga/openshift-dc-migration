@@ -41,6 +41,7 @@ def main():
         "node-selector",
         "node-capacity",
         "network-policy",
+        "runtime-policy",
         "service-account",
         "scc",
         "shared-cluster-quota",
@@ -233,6 +234,35 @@ def main():
                 },
             )
             expected = "cluster-scheduling"
+        elif case == "runtime-policy":
+            pods = json.loads(
+                live.oc(
+                    "get", "pods", "-l", "deploymentconfig=web", "-o", "json"
+                ).stdout
+            )["items"]
+            runtime_label = next(
+                p["metadata"]["labels"]["deployment"]
+                for p in pods
+                if p.get("status", {}).get("phase") == "Running"
+            )
+            live.create(
+                "NetworkPolicy",
+                "networking.k8s.io/v1",
+                {
+                    "podSelector": {"matchLabels": {"deployment": runtime_label}},
+                    "policyTypes": ["Ingress"],
+                    "ingress": [{}],
+                },
+                name="source-rc",
+            )
+            live.create(
+                "NetworkPolicy",
+                "networking.k8s.io/v1",
+                {"podSelector": {}, "policyTypes": ["Ingress"], "ingress": []},
+                name="deny-all",
+            )
+            live.http(health)
+            expected = "network-policy-selection"
         elif case == "network-policy":
             migration_id = json.loads(plan.read_text())["id"]
             live.create(

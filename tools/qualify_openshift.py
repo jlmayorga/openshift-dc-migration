@@ -447,7 +447,7 @@ def main():
             cleanup()
             # Quota rejection must happen before any source/HPA mutation.
             # This is preflight evidence, not an actual failed rollout.
-            health = prepare()
+            health = prepare(hpa=True)
             before_source, before_hpa = obj("dc", "web"), obj("hpa", "web")
             create("ResourceQuota", "v1", "web", {"hard": {"pods": "1"}})
             plan = tool("plan", health=health, overlap=True)
