@@ -34,6 +34,6 @@ The [earlier source-conflict session](source-conflict-live-tests.md) separately 
 | 4.14–4.20 | Source-bound review assumptions with prerequisites; no actual integration pass |
 | Next development release | Untested; no authorized development cluster available |
 
-**The full release gate remains closed.** GitHub workflow execution and publication are not claimed. Qualification applies to the recorded candidate hashes; a release build with different source or build metadata requires evidence for its exact binaries. See the [release checklist](qualification.md).
+**The [scoped maintenance gate](release-scope.md) is open for the two verified 4.21 binaries.** Broader unavailable qualification is outside the revised goal. GitHub workflow execution and publication are not claimed. Qualification applies to the recorded candidate hashes; a release build with different source or build metadata requires evidence for its exact binaries. See the [release checklist](qualification.md).
 
 The private raw archive is `.scratchpad/linux-current-full-20261016/openshift-4.21.36-linux-current-full-evidence.tar.gz`, SHA-256 `8a5f7fa9de07873408b2075a6b046d0c2e851d05444aeda22693b631131bf080`. All 2400 manifest entries verified. Its exported source rebuilds the tested Linux executable byte for byte. Archive metadata was appended after sealing to avoid circular checksums.

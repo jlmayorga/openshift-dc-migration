@@ -1,8 +1,10 @@
-# Maintenance backlog
+# Maintenance follow-up backlog
+
+The owner narrowed the goal on 2026-10-16 to completed maintenance and available OpenShift 4.21 testing. That goal is complete and the [scoped release gate is open](release-scope.md). The unchecked items below are outside the revised goal and release scope; their actual results remain `not-run`.
 
 - [x] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
 
-  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-source-retry-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; final release qualification remains open.
+  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-source-retry-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; the two selected 4.21 candidates have completed actual qualification.
 
   Scope and deliverables:
 
@@ -21,6 +23,8 @@
 
 - [ ] **Complete actual execution on the unavailable native platforms.** Linux arm64, Darwin amd64 and Windows amd64 have current cross-builds but no native execution or actual OpenShift qualification. Complete their full 4.21 suite as well as the 4.22 work above when runners become available. Compile success is not a passing integration result.
 
-- [ ] **Validate the final release candidates through trusted CI.** Freeze the exact binaries, then run the qualification and release gate end to end with matching binary hashes, source revision, dependency and fixture hashes. Local gate checks accept the two available 4.21 results and reject missing 4.22 or platform evidence; an executed GitHub workflow and published release are not claimed. Rebuilding with different source or build metadata requires qualification of the resulting hashes. Keep the full release gate closed until all required evidence passes. Push, tagging and publication remain outside the existing authorization.
+- [x] **Freeze and validate the scoped release candidates locally.** The builder reproduces both qualified hashes byte for byte with the tested build metadata. The scoped gate validates canonical evidence, current source/dependency/fixture hashes and source assessments, while regression tests reject drift or missing evidence. Release and qualification workflows select the explicit scope. See the [release policy and commands](release-scope.md).
+
+- [ ] **Execute the configured GitHub release workflow when publication is authorized.** Local build/gate and workflow syntax checks passed; an executed GitHub workflow or published release is not claimed. Push, tagging and publication remain outside this session's authorization. Expanding versions/platforms or changing binaries requires new evidence and a reviewed policy update.
 
 - [ ] **Run the next-development discovery/conversion smoke test when an authorized target becomes available.** This is early regression detection, separate from GA qualification; it remains unrun and cannot establish verified support.

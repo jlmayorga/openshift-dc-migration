@@ -27,7 +27,7 @@ Local validation passed 381 Go tests/subtests with the race detector (83 top-lev
 
 The temporary Linux namespace/cluster grants, runner and account were removed after exporting the evidence, with UID checks and absence verification. Existing application storage and the earlier staging workload are preserved. No new storage or SCC modification is used. The older [4297 full Linux result](../compatibility/evidence/2026-10-16-linux-full-4.21.36.json) belongs to a different executable. The later [current full Linux result](linux-execution-tests.md) qualifies the recorded `cdbd5358…` artifact for all 22 scenarios.
 
-OpenShift 4.14–4.20 retain separately source-bound release-review assumptions, without actual older-cluster integration passes. OpenShift 4.22 and the remaining shipped platforms still require qualification; the full release gate remains closed.
+OpenShift 4.14–4.20 retain separately source-bound release-review assumptions, without actual older-cluster integration passes. The [scoped maintenance gate](release-scope.md) is open for the two verified 4.21 candidates. OpenShift 4.22 and the other platforms remain untested follow-up work outside this release scope.
 
 The private raw archive is `.scratchpad/source-conflicts-final-20261016/openshift-4.21.36-source-conflicts-evidence.tar.gz`, SHA-256 `2f6f4f85a529f45c2c546976a5d3dbe6c6d2153adac09f935b272ca6a1c0d7f7`. All 7134 manifest entries verified, and actual credential values were checked before export. Its saved Go source reproduces both tested binaries byte for byte. Archive/rebuild metadata was appended after sealing to avoid circular checksums.
 
