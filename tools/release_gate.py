@@ -7,6 +7,7 @@ import hashlib
 import json
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 
@@ -57,13 +58,20 @@ def verify(
     dependency_hash,
     source_hash=None,
     reviews=(),
+    required_minors=None,
 ):
     required = {
         v["minor"]
         for v in matrix["targets"]
         if v["releaseRequirement"] != "development"
     }
-    if "4.14" not in required or matrix["newestGA"] not in required:
+    if required_minors is not None:
+        if not set(required_minors).issubset(required):
+            raise ValueError("Scoped targets are absent from the inventory")
+        required = set(required_minors)
+    if "4.14" not in required or (
+        required_minors is None and matrix["newestGA"] not in required
+    ):
         raise ValueError("Missing floor or newest GA target")
     rows = {}
     for item in evidence:
@@ -210,15 +218,115 @@ def load_reviews(matrix):
     return reviews
 
 
+def load_scope(matrix):
+    """Load the explicit frozen-candidate exception, preserving the GA inventory."""
+    path = pathlib.Path(matrix["activeReleaseScope"])
+    if path != pathlib.Path("compatibility/release-scope.json"):
+        raise ValueError("Invalid release scope path")
+    scope = json.loads(path.read_text())
+    if (
+        scope.get("schemaVersion") != "v1"
+        or scope.get("kind") != "scoped-maintenance-release"
+        or scope.get("name") != "maintenance-4.21"
+        or not scope.get("authorization", {}).get("instruction")
+        or scope.get("requiredMinors") != ["4." + str(n) for n in range(14, 22)]
+        or scope.get("actualMinor") != "4.21"
+        or not re.fullmatch(r"[a-f0-9]{40}", scope.get("revision", ""))
+    ):
+        raise ValueError("Invalid scoped maintenance policy")
+    expected = {
+        "openshift-dc-converter-linux-amd64": "linux/amd64",
+        "openshift-dc-converter-darwin-arm64": "darwin/arm64",
+    }
+    if set(scope.get("artifacts", {})) != set(expected):
+        raise ValueError("Scoped policy must contain only the two qualified platforms")
+    for name, platform in expected.items():
+        item = scope["artifacts"][name]
+        path = pathlib.Path(item["evidence"])
+        if (
+            item["platform"] != platform
+            or not re.fullmatch(r"[a-f0-9]{64}", item.get("sha256", ""))
+            or path.parent != pathlib.Path("compatibility/evidence")
+            or path.suffix != ".json"
+        ):
+            raise ValueError("Invalid scoped artifact or evidence path")
+        if digest(path) != item["evidenceSHA256"]:
+            raise ValueError("Changed scoped evidence: " + str(path))
+    return scope
+
+
+def verify_scope(
+    matrix, scope, evidence, artifacts, fixture_hash, dependency_hash, source_hash
+):
+    """Allow documentation/policy commits while retaining exact tested bytes."""
+    for key, value in [
+        ("fixtureSHA256", fixture_hash),
+        ("dependencySHA256", dependency_hash),
+        ("productionSourceSHA256", source_hash),
+    ]:
+        if scope[key] != value:
+            raise ValueError("Stale release scope: " + key)
+    expected = {name: item["sha256"] for name, item in scope["artifacts"].items()}
+    if artifacts != expected:
+        raise ValueError("Release binaries differ from the exact scoped artifact set")
+    for item in scope["artifacts"].values():
+        rows = [
+            r
+            for r in evidence
+            if r.get("artifactSHA256") == item["sha256"]
+            and r.get("minor") == scope["actualMinor"]
+        ]
+        if len(rows) != 1:
+            raise ValueError("Missing or ambiguous scoped evidence")
+        row = rows[0]
+        for key in [
+            "openshiftPatch",
+            "kubernetesVersion",
+            "releaseImage",
+            "productionSourceSHA256",
+        ]:
+            if row.get(key) != scope[key]:
+                raise ValueError("Scoped evidence mismatch: " + key)
+        if row.get("nativeExecutionPlatform") != item["platform"]:
+            raise ValueError("Scoped execution platform mismatch")
+    return verify(
+        matrix,
+        evidence,
+        artifacts,
+        scope["revision"],
+        fixture_hash,
+        dependency_hash,
+        source_hash,
+        load_reviews(matrix),
+        required_minors=scope["requiredMinors"],
+    )
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--artifacts", required=True)
-    p.add_argument("--evidence", default="compatibility/results")
+    p.add_argument(
+        "--evidence", help="Override the scoped canonical records with a directory"
+    )
+    p.add_argument(
+        "--full-matrix", action="store_true", help="Require the entire GA inventory"
+    )
+    p.add_argument(
+        "--export-evidence", help="Export validated policy, records and gate result"
+    )
     a = p.parse_args()
     matrix = json.loads(pathlib.Path("compatibility/matrix.json").read_text())
-    evidence = [
-        json.loads(p.read_text()) for p in pathlib.Path(a.evidence).glob("*.json")
-    ]
+    scope = (
+        load_scope(matrix)
+        if matrix.get("activeReleaseScope") and not a.full_matrix
+        else None
+    )
+    evidence_paths = (
+        list(pathlib.Path(a.evidence or "compatibility/results").glob("*.json"))
+        if a.evidence or scope is None
+        else [pathlib.Path(item["evidence"]) for item in scope["artifacts"].values()]
+    )
+    evidence = [json.loads(path.read_text()) for path in evidence_paths]
     artifacts = {
         p.name: digest(p)
         for p in pathlib.Path(a.artifacts).glob("openshift-dc-converter-*")
@@ -227,19 +335,45 @@ def main():
     if not artifacts:
         raise ValueError("No release binaries")
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-    verify(
-        matrix,
-        evidence,
-        artifacts,
-        revision,
-        tree_digest("testdata"),
-        dependency_digest(),
-        production_source_digest(),
-        load_reviews(matrix),
-    )
-    print(
-        "Required actual-cluster evidence and explicit source-review assumptions validated"
-    )
+    hashes = (tree_digest("testdata"), dependency_digest(), production_source_digest())
+    if scope:
+        verify_scope(matrix, scope, evidence, artifacts, *hashes)
+    else:
+        verify(matrix, evidence, artifacts, revision, *hashes, load_reviews(matrix))
+    if a.export_evidence:
+        out = pathlib.Path(a.export_evidence)
+        out.mkdir(parents=True, exist_ok=True)
+        paths = evidence_paths + [pathlib.Path("compatibility/matrix.json")]
+        paths += [
+            pathlib.Path(t["reviewEvidence"])
+            for t in matrix["targets"]
+            if t.get("qualificationPolicy") == "review-assumption"
+        ]
+        for review in load_reviews(matrix):
+            paths += [pathlib.Path(r["path"]) for r in review["assessments"]]
+        if scope:
+            paths.append(pathlib.Path(matrix["activeReleaseScope"]))
+        for path in set(paths):
+            shutil.copyfile(path, out / path.name)
+        (out / "gate-result.json").write_text(
+            json.dumps(
+                {
+                    "kind": "release-gate-result",
+                    "result": "passed",
+                    "scope": scope["name"] if scope else "full-matrix",
+                    "policyRevision": revision,
+                    "testedRevision": scope["revision"] if scope else revision,
+                    "artifacts": artifacts,
+                    "fixtureSHA256": hashes[0],
+                    "dependencySHA256": hashes[1],
+                    "productionSourceSHA256": hashes[2],
+                    "limitations": scope["limitations"] if scope else [],
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+    print("Release gate passed: " + (scope["name"] if scope else "full-matrix"))
 
 
 if __name__ == "__main__":

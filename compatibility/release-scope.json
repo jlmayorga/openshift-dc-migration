@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "v1",
+  "kind": "scoped-maintenance-release",
+  "name": "maintenance-4.21",
+  "authorization": {
+    "date": "2026-10-16",
+    "instruction": "Narrow the goal to the completed maintenance and available 4.21 testing, then mark it complete. Open the release gate."
+  },
+  "requiredMinors": [
+    "4.14",
+    "4.15",
+    "4.16",
+    "4.17",
+    "4.18",
+    "4.19",
+    "4.20",
+    "4.21"
+  ],
+  "actualMinor": "4.21",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+  "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "build": {
+    "goVersion": "go1.27.2",
+    "version": "maintenance-source-retry",
+    "commit": "eb8fb9d",
+    "ldflags": "-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d"
+  },
+  "artifacts": {
+    "openshift-dc-converter-linux-amd64": {
+      "platform": "linux/amd64",
+      "sha256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "evidence": "compatibility/evidence/2026-10-16-linux-current-full-4.21.36.json",
+      "evidenceSHA256": "0f3039774d82709870c5e3609702b1102cbc96f49e1e2e2090ab412b5e20f684"
+    },
+    "openshift-dc-converter-darwin-arm64": {
+      "platform": "darwin/arm64",
+      "sha256": "158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17",
+      "evidence": "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
+      "evidenceSHA256": "534dfff032c95980e365919bb8cda5ec980430bb306ddf6fa525a1961f59c9e1"
+    }
+  },
+  "limitations": [
+    "4.14\u20134.20 are source-review assumptions with prerequisites, not actual integration passes.",
+    "Only Linux amd64 and Darwin arm64 on OpenShift 4.21.36 are live qualified.",
+    "4.22, Linux arm64, Darwin amd64, Windows amd64 and next-development smoke remain untested and outside this release scope.",
+    "Frozen tested build metadata is retained; a different binary requires new actual evidence."
+  ],
+  "followUpBacklog": "docs/backlog.md"
+}

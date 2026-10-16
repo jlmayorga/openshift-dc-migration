@@ -318,5 +318,6 @@
   "inventorySource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.22&arch=amd64",
   "nextChannelSource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.23&arch=amd64",
   "latestAvailablePatch": "4.22.18",
-  "inventoryNote": "2026-10-15: public stable-4.22 graph includes 4.22.18; stable-4.23 graph has no nodes. Metadata observation only; no cluster qualification."
+  "inventoryNote": "2026-10-15: public stable-4.22 graph includes 4.22.18; stable-4.23 graph has no nodes. Metadata observation only; no cluster qualification.",
+  "activeReleaseScope": "compatibility/release-scope.json"
 }
