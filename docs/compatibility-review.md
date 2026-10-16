@@ -38,7 +38,38 @@ This inventory follows `runtime.go`, `converter.go`, `baseline.go`, `planning.go
 | `quota.openshift.io/v1` | AppliedClusterResourceQuotas: read the namespace projection of shared quota usage; production does not create ClusterResourceQuotas |
 | `image.openshift.io/v1` | ImageStreamTag API capability discovery when triggers require it. Production generates `image.openshift.io/triggers`; the OpenShift image controller performs updates. The converter does not fetch or mutate ImageStreamTag objects itself |
 
-Live test drivers have additional dependencies, including Namespace labels/CRUD, Routes, ImageStreams/imports/tags, BuildConfigs/Builds, ConfigMaps/Secrets, service accounts and namespace RBAC, TokenRequests, and worker Leases. Authorized volume/quota/SCC cases add their own fixture operations. These harness operations must be assessed separately and must not be advertised as ordinary converter RBAC requirements. Completing that detailed harness inventory remains part of this review.
+Live test drivers have additional dependencies. The following operations are fixture setup, observation or fault injection, and must not be advertised as ordinary converter RBAC requirements. This inventory covers the `tools/qualify_*.py` drivers and their shared helpers; their per-release behavioral assessment remains pending.
+
+| Additional API/resources | Qualification use |
+| --- | --- |
+| core `v1` Namespaces, ConfigMaps, Secrets, ServiceAccounts | Labelled namespace creation; application configuration; scoped test identities; namespace-local credential material retained privately |
+| core `v1` Pods, `pods/exec`, `pods/log`, Events | Runtime/ownership observations; PVC marker writes/reads; application/worker logs; failure evidence; explicit orphan-Pod fixture creation/deletion |
+| core `v1` `serviceaccounts/token` (`authentication.k8s.io/v1` TokenRequest body) | Server-issued short-lived tokens for restricted-access and actual-expiry tests; not production credential minting |
+| `rbac.authorization.k8s.io/v1` Roles/RoleBindings | Namespace-scoped reader, worker Lease, required-SCC and deliberately denied permissions; references to existing SCC ClusterRoles where the fixture requires them |
+| `coordination.k8s.io/v1` Leases | Singleton fixture's Pod-UID owner heartbeat, resource-version compare-and-swap and sampled recovery evidence |
+| `route.openshift.io/v1` Routes | Expose test Services and independently verify HTTP responses during cutover/recovery |
+| `image.openshift.io/v1` ImageStreams, ImageStreamTags/imports | Immutable image imports, same/cross-namespace trigger updates and restored tags |
+| `build.openshift.io/v1` BuildConfigs/Builds and binary-build subresources; `template.openshift.io/v1` Templates | Real `oc new-app`, processed templates, Docker/S2I binary builds and rebuild-trigger observations |
+| `config.openshift.io/v1` ClusterVersions and `/version` | Observe exact release image, OpenShift patch, Kubernetes version and capabilities for provenance |
+| `quota.openshift.io/v1` ClusterResourceQuotas; core `v1` ResourceQuotas/LimitRanges | Isolated namespace/shared-quota and admission refusal fixtures; synchronized usage checks |
+| core `v1` PVs/PVCs; `security.openshift.io/v1` SCCs | Separately authorized regular CSI volume, or optional static hostPath fixture; existing-policy inspection and namespace-only SCC-use grants. No SCC modification or StorageClass/node creation |
+
+Deployment/ReplicaSet/RC/HPA/Service/Endpoint, NetworkPolicy, PDB, SCC review and access-review operations overlap the production inventory. CLI commands also use discovery and controller-generated resources; successful 4.21 fixture execution does not establish that every CLI/controller behavior is unchanged on older releases.
+
+## API-version removals and Endpoints
+
+The [upstream migration guide](https://kubernetes.io/docs/reference/using-api/deprecation-guide/) identifies the following removed versions within the reviewed Kubernetes range. Comparing those versions with the inventories above finds no direct call to a removed API. This conclusion concerns API serving only; field/default/controller/storage changes still need separate assessment.
+
+| OpenShift / Kubernetes | Removed API version listed by the guide | Tool impact |
+| --- | --- | --- |
+| 4.14 / 1.27 | `storage.k8s.io/v1beta1` CSIStorageCapacity | Neither production nor the qualification fixtures call this API |
+| 4.15 / 1.28 | No removal listed for this minor | No removal identified by this guide |
+| 4.16 / 1.29 | `flowcontrol.apiserver.k8s.io/v1beta2` FlowSchema/PriorityLevelConfiguration | Neither inventory configures API Priority and Fairness |
+| 4.17 / 1.30 and 4.18 / 1.31 | No removal listed for these minors | Storage-plugin removals are a separate runtime finding below |
+| 4.19 / 1.32 | `flowcontrol.apiserver.k8s.io/v1beta3` FlowSchema/PriorityLevelConfiguration | Neither inventory calls this version |
+| 4.20 / 1.33 | No removal listed for this minor | Endpoints deprecation is addressed separately below |
+
+Kubernetes [1.33 release notes](https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md) explicitly retain support for core `v1` Endpoints while deprecating it. The tool reads this API to match Service endpoint Pod UIDs during destination/source health verification. A deprecation warning does not change that request contract, and actual 4.21 runs exercise it. No API-removal mitigation is required for 4.20. Moving to EndpointSlice remains a maintenance follow-up; this finding does not certify all networking behavior, large endpoint sets or every release's controllers.
 
 ## Findings addressed in the first pass
 
@@ -52,7 +83,6 @@ The storage guard was introduced in `52c5386`; `4ce61e7` preserves explicit reco
 
 The raw SCC and Pod spec guards (`278d942`) reject newer security/volume/resource fields before typed conversion. Required-SCC handling (`618831f`) adds the optional namespaced access review and verifies the effective policy; the API/fields are present in [Kubernetes v1.27.16 source](https://github.com/kubernetes/kubernetes/blob/v1.27.16/staging/src/k8s.io/api/authorization/v1/types.go). Actual [4.21 regression evidence](admission-scc-live-tests.md) demonstrates old preflight acceptance, current refusal with an unchanged healthy source, then successful migration/recovery after authorization restoration. This does not complete the whole per-release assessment.
 
-- Kubernetes 1.33 deprecates core `v1` Endpoints while explicitly retaining support. The tool currently reads Endpoints; assess the impact and future EndpointSlice path without describing deprecation as API removal. Source: [1.33 changelog](https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md).
 - OpenShift 4.20 enables Linux user namespaces and introduces `restricted-v3`/`nested-container` SCCs. Review SCC defaults and raw-to-typed Pod handling, including newly added fields that an older client could discard. Source: [4.20 new features](https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-new-features-and-enhancements.adoc).
 - OpenShift 4.19 enables node-bound service-account tokens by default. Review authentication/revocation handling and distinguish this behavior from the actual signed-token expiry tests on 4.21. Source: [4.19 notes](https://github.com/openshift/openshift-docs/blob/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc).
 - OpenShift 4.15 stops creating the deployer service account when the DC capability is disabled. Verify disabled-capability discovery/offline behavior and associated controller/RBAC changes across all minors. Source: [4.15 notes](https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc).

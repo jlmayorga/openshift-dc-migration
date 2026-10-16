@@ -2,8 +2,8 @@
   "schemaVersion": "v1",
   "kind": "release-note-compatibility-review",
   "status": "in-progress",
-  "updatedAt": "2026-10-16T04:03:20.324756+00:00",
-  "codeRevisionAtInventory": "618831fe76f52bb382ea0163ebfd74d761927cb9",
+  "updatedAt": "2026-10-16T04:41:29.611704+00:00",
+  "codeRevisionAtInventory": "ba43309",
   "range": {
     "minimum": "4.14",
     "maximum": "4.20"
@@ -224,7 +224,8 @@
         "planning.go",
         "application.go",
         "cutover.go",
-        "constraints.go"
+        "constraints.go",
+        "raw_resources.go"
       ],
       "releaseAssessmentStatus": "pending"
     },
@@ -273,7 +274,8 @@
       "sourceFiles": [
         "planning.go",
         "constraints.go",
-        "cutover.go"
+        "cutover.go",
+        "raw_resources.go"
       ],
       "releaseAssessmentStatus": "pending"
     },
@@ -348,7 +350,7 @@
       "releaseAssessmentStatus": "pending"
     }
   ],
-  "harnessInventoryStatus": "additional dependencies listed in report; detailed per-operation assessment pending",
+  "harnessInventoryStatus": "Additional API/resource/operation inventory recorded in docs/compatibility-review.md from qualification-driver literals and helpers; per-release behavioral assessment pending.",
   "findings": [
     {
       "id": "STORAGE-01",
@@ -382,8 +384,9 @@
     {
       "id": "API-01",
       "change": "Endpoints deprecated but supported in Kubernetes1.33",
-      "status": "impact assessment pending",
-      "evidence": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md"
+      "status": "API serving impact assessed: deprecated, retained support; no removal mitigation required for 4.20",
+      "evidence": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md",
+      "scope": "Service Pod-UID verification reads core/v1 Endpoints. Actual4.21 behavior does not certify all older controller/networking behavior; EndpointSlice migration remains maintenance follow-up."
     },
     {
       "id": "SCC-01",
@@ -411,13 +414,17 @@
     {
       "id": "ADMISSION-01",
       "change": "Admission can add post-baseline volume/security fields absent from reviewed input; typed clients can discard newer fields or leave their semantics unassessed.",
-      "status": "SCC and Pod response guards implemented",
-      "guardCommit": "278d942",
-      "scope": "Raw SCC-defaulted and Pod-admitted specs only; Deployment/HPA typed response boundaries still need review.",
+      "status": "Raw SCC/Pod/Deployment/HPA/ReplicaSet spec guards implemented; broader release assessment pending",
+      "scope": "Forward raw spec validation before typed decode; recovery preserves unfamiliar owned Deployment fields and uses raw HPA ownership metadata. Live Deployment-read regression demonstrated; synthetic admission replies remain local-contract evidence.",
       "evidence": [
         "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
         "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.32.md",
         "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md"
+      ],
+      "guardCommits": [
+        "278d942",
+        "f41c0aa",
+        "ba43309"
       ]
     },
     {
@@ -433,15 +440,46 @@
         "bytes": 14523,
         "finding": "authorization.k8s.io/v1 LocalSubjectAccessReview and needed user/groups/namespaced resource attributes are present at the baseline source tag."
       }
+    },
+    {
+      "id": "API-02",
+      "change": "Removed API versions documented within Kubernetes1.27\u20131.33",
+      "status": "Inventory comparison complete for API-version removals listed by upstream migration guide",
+      "evidence": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+      "removedVersions": [
+        {
+          "kubernetes": "1.27",
+          "groupVersion": "storage.k8s.io/v1beta1",
+          "resources": [
+            "CSIStorageCapacity"
+          ]
+        },
+        {
+          "kubernetes": "1.29",
+          "groupVersion": "flowcontrol.apiserver.k8s.io/v1beta2",
+          "resources": [
+            "FlowSchema",
+            "PriorityLevelConfiguration"
+          ]
+        },
+        {
+          "kubernetes": "1.32",
+          "groupVersion": "flowcontrol.apiserver.k8s.io/v1beta3",
+          "resources": [
+            "FlowSchema",
+            "PriorityLevelConfiguration"
+          ]
+        }
+      ],
+      "disposition": "No production or qualification-fixture calls to these versions identified. This is an API-serving assessment, not a completed field/controller/runtime compatibility review."
     }
   ],
   "remaining": [
     "Complete each minor/resource/operation assessment, applicable advisories and referenced migration guidance.",
-    "Audit raw Deployment/HPA admission responses before typed decoding; current raw spec guard covers SCC and Pod responses, not every typed resource boundary.",
     "Review SCC/admission raw-to-typed fields, scheduling/accounting, controller and trigger behavior.",
-    "Complete detailed harness-only operation inventory.",
     "Decide aligned Kubernetes client version from compatibility evidence.",
     "Implement any further required guards and tests; requalify exact candidate artifacts.",
-    "Only after final review, update matrix/support/release policy for review-based assumptions; preserve integration not-run statuses."
+    "Only after final review, update matrix/support/release policy for review-based assumptions; preserve integration not-run statuses.",
+    "Finish per-release behavior assessment of the recorded harness operations and requalify the final exact artifact after dependency decisions."
   ]
 }
