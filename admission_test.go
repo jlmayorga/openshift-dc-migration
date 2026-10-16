@@ -21,6 +21,12 @@ func TestAdmissionFieldsCannotBypassBaselineOrPreRetirementChecks(t *testing.T) 
 		{"seLinuxChangePolicy", func(spec map[string]interface{}) {
 			spec["securityContext"] = map[string]interface{}{"seLinuxChangePolicy": "Recursive"}
 		}},
+		// Newer admission translates a legacy AppArmor annotation into this
+		// post-floor field. Validate the raw response before typed decoding.
+		{"appArmorProfile", func(spec map[string]interface{}) {
+			container := spec["containers"].([]interface{})[0].(map[string]interface{})
+			container["securityContext"] = map[string]interface{}{"appArmorProfile": map[string]interface{}{"type": "Localhost", "localhostProfile": "migration-fixture"}}
+		}},
 	}
 	for _, field := range fields {
 		for _, scope := range []string{"scc", "pod"} {

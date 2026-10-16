@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -198,5 +199,31 @@ func TestSupportedStorageStillPassesPreCutoverChecks(t *testing.T) {
 				t.Fatal("supported-volume recovery failed", err)
 			}
 		})
+	}
+}
+
+func TestPVTopologyLabelsCannotBypassPreRetirementChecks(t *testing.T) {
+	for _, key := range []string{"failure-domain.beta.kubernetes.io/zone", "failure-domain.beta.kubernetes.io/region", "topology.kubernetes.io/zone", "topology.kubernetes.io/region"} {
+		for _, value := range []string{"zone-a", "zone-a__zone-b", "", "zone-a+invalid"} {
+			for _, mode := range []string{"preflight", "cutover"} {
+				t.Run(key+"/"+value+"/"+mode, func(t *testing.T) {
+					r, c, path := cutoverTest(t, "exclusive", true)
+					r.Options.Mode = mode
+					c.injectedPodVolumes = []corev1.Volume{{Name: "data", VolumeSource: corev1.VolumeSource{PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: "data"}}}}
+					c.claims = map[string]corev1.PersistentVolumeClaim{"/api/v1/namespaces/example/persistentvolumeclaims/data": {ObjectMeta: metav1.ObjectMeta{Name: "data", Namespace: "example"}, Spec: corev1.PersistentVolumeClaimSpec{VolumeName: "zoned-pv"}, Status: corev1.PersistentVolumeClaimStatus{Phase: corev1.ClaimBound}}}
+					c.volumes = map[string]corev1.PersistentVolume{"/api/v1/persistentvolumes/zoned-pv": {ObjectMeta: metav1.ObjectMeta{Name: "zoned-pv", Labels: map[string]string{key: value}}, Spec: corev1.PersistentVolumeSpec{PersistentVolumeSource: corev1.PersistentVolumeSource{CSI: &corev1.CSIPersistentVolumeSource{Driver: "ebs.csi.aws.com", VolumeHandle: "fixture-only"}}}}}
+					// Source-zone capacity is exhausted; another zone has space.
+					// Ignoring the PV's independent labels would retire the source.
+					for _, zone := range []string{"zone-a", "zone-c"} {
+						capacity := "0"
+						if zone == "zone-c" {
+							capacity = "100"
+						}
+						c.constraintNodes = append(c.constraintNodes, corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: zone, Labels: map[string]string{key: zone}}, Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}}, Allocatable: corev1.ResourceList{"pods": resource.MustParse(capacity)}}})
+					}
+					assertStorageRefusal(t, r, c, path, "topology label")
+				})
+			}
+		}
 	}
 }

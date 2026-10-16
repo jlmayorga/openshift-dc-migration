@@ -159,6 +159,14 @@ func (r *Runner) checkScheduling(ctx context.Context, pod *corev1.Pod, replicas 
 			if err := checkLegacyPV(pv); err != nil {
 				return fmt.Errorf("PVC %q: %w", claim.Name, err)
 			}
+			// VolumeZone evaluates these independently of spec.nodeAffinity.
+			// Beta/GA node-label fallback changed after the 1.27 floor; do
+			// not count unverified volume-zone capacity as usable headroom.
+			for _, key := range []string{corev1.LabelFailureDomainBetaZone, corev1.LabelFailureDomainBetaRegion, corev1.LabelTopologyZone, corev1.LabelTopologyRegion} {
+				if _, found := pv.Labels[key]; found {
+					return fmt.Errorf("PVC %q: PV %q topology label %q requires manual scheduling review before source retirement; volume zone/region labels are not simulated", claim.Name, pv.Name, key)
+				}
+			}
 			if pv.Spec.NodeAffinity != nil && pv.Spec.NodeAffinity.Required != nil {
 				volumeAffinity = append(volumeAffinity, pv.Spec.NodeAffinity.Required)
 			}
