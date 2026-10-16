@@ -42,6 +42,8 @@ def main():
         "node-capacity",
         "network-policy",
         "runtime-policy",
+        "pdb",
+        "pdb-overlap",
         "service-account",
         "scc",
         "shared-cluster-quota",
@@ -234,6 +236,16 @@ def main():
                 },
             )
             expected = "cluster-scheduling"
+        elif case == "pdb":
+            live.create(
+                "PodDisruptionBudget",
+                "policy/v1",
+                {
+                    "minAvailable": 1,
+                    "selector": {"matchLabels": {"deploymentconfig": "web"}},
+                },
+            )
+            expected = "availability-budget"
         elif case == "runtime-policy":
             pods = json.loads(
                 live.oc(
@@ -377,6 +389,50 @@ def main():
         # Existing source stays healthy; new Pods no longer have a usable SCC.
         return refusal(source, plan, health, hpa, "service-account-scc")
 
+    def pdb_overlap():
+        live.app("pdb-overlap")
+        health = live.route()
+        live.http(health)
+        live.create(
+            "PodDisruptionBudget",
+            "policy/v1",
+            {
+                "minAvailable": 1,
+                "selector": {"matchLabels": {"deploymentconfig": "web"}},
+            },
+        )
+        live.wait(
+            lambda: live.get("pdb").get("status", {}).get("observedGeneration")
+            == live.get("pdb")["metadata"]["generation"]
+        )
+        original = live.get("dc")
+        plan = live.tool(
+            "plan",
+            health=health,
+            extra=(
+                "--cutover-mode",
+                "overlap",
+                "--overlap-justification",
+                "Stateless lab HTTP allows parallel replicas to preserve minAvailable=1",
+            ),
+        )
+        live.tool("stage", plan)
+        report = json.loads(live.tool("preflight", plan).read_text())
+        assert report["results"][0]["constraints"]["status"] == "passed"
+        live.tool("cutover", plan)
+        live.tool("cutover", plan)
+        live.http(health)
+        assert (
+            live.get("dc")["spec"]["replicas"] == 0
+            and live.get("deployment")["status"]["availableReplicas"] >= 1
+        )
+        return {
+            "sourceUID": original["metadata"]["uid"],
+            "absoluteBudgetPreservedByOverlap": True,
+            "destinationActiveAndHealthy": True,
+            "retainedAt": "completed cutover; no automatic rollback that would interrupt this availability budget",
+        }
+
     def shared():
         source, plan, health, hpa = setup("shared-cluster-quota", 2)
         ns = live.ns
@@ -447,6 +503,8 @@ def main():
     for name in selected:
         if name in {"positive", "zero"}:
             fn = lambda name=name: positive(name)
+        elif name == "pdb-overlap":
+            fn = pdb_overlap
         elif name == "scc":
             fn = scc
         elif name == "shared-cluster-quota":

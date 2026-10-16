@@ -14,6 +14,7 @@ import (
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,6 +29,7 @@ import (
 )
 
 type contractCluster struct {
+	disruptionBudgets             []policyv1.PodDisruptionBudget
 	hpaStatusChurn                bool
 	dropPodLabel, injectPodBudget bool
 	networkPolicies               []networkingv1.NetworkPolicy
@@ -123,6 +125,10 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		var rs appsv1.ReplicaSet
 		_ = json.NewDecoder(req.Body).Decode(&rs)
 		jsonResponse(w, &rs)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/poddisruptionbudgets") && req.Method == http.MethodGet {
+		jsonResponse(w, &policyv1.PodDisruptionBudgetList{Items: c.disruptionBudgets})
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/networkpolicies") && req.Method == http.MethodGet {

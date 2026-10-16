@@ -7,7 +7,7 @@ All live modes discover stable API resource lists and create `authorization.k8s.
 | Live plan | list core Services/RCs, apps Deployments/ReplicaSets/StatefulSets/DaemonSets, batch Jobs, autoscaling/v2 HPAs; get source DC and get known Services/HPAs during revalidation |
 | Dry run and stage | get source DC, get/create Deployments, all live-plan revalidation permissions; discover ImageStreamTag API if image triggers are used |
 | Cutover/recovery | get/update DCs and Deployments; list pods, RCs, ReplicaSets; get Services and Endpoints |
-| Nonzero preflight/cutover | create Pods and ReplicaSets for dry run; list ResourceQuotas, LimitRanges and networking.k8s.io NetworkPolicies; create security.openshift.io/v1 PodSecurityPolicySubjectReviews; list quota.openshift.io/v1 AppliedClusterResourceQuotas; get mounted PVCs |
+| Nonzero preflight/cutover | create Pods and ReplicaSets for dry run; list ResourceQuotas, LimitRanges and networking.k8s.io NetworkPolicies and policy/v1 PodDisruptionBudgets; create security.openshift.io/v1 PodSecurityPolicySubjectReviews; list quota.openshift.io/v1 AppliedClusterResourceQuotas; get mounted PVCs |
 | HPA cutover/recovery | get/delete/create HPAs, with original UID/version preconditions and retained snapshots |
 | Integration harness only | CRUD test DCs, Deployments, Services, Routes, ImageStreams/Tags, HPAs and ResourceQuotas; list pods/RCs/RS; get the pre-labelled test namespace and read ClusterVersion/server metadata |
 

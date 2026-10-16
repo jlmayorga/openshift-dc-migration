@@ -90,7 +90,7 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 	if err := check("permissions", func() error {
 		perms := [][4]string{{ns, "apps", "deployments", "update"}, {ns, "apps.openshift.io", "deploymentconfigs", "update"}}
 		if replicas > 0 {
-			perms = append(perms, [][4]string{{ns, "networking.k8s.io", "networkpolicies", "list"}, {ns, "", "pods", "create"}, {ns, "apps", "replicasets", "create"}, {ns, "", "resourcequotas", "list"}, {ns, "", "limitranges", "list"}, {ns, "security.openshift.io", "podsecuritypolicysubjectreviews", "create"}, {ns, "quota.openshift.io", "appliedclusterresourcequotas", "list"}, {"", "", "nodes", "list"}, {"", "", "pods", "list"}}...)
+			perms = append(perms, [][4]string{{ns, "policy", "poddisruptionbudgets", "list"}, {ns, "networking.k8s.io", "networkpolicies", "list"}, {ns, "", "pods", "create"}, {ns, "apps", "replicasets", "create"}, {ns, "", "resourcequotas", "list"}, {ns, "", "limitranges", "list"}, {ns, "security.openshift.io", "podsecuritypolicysubjectreviews", "create"}, {ns, "quota.openshift.io", "appliedclusterresourcequotas", "list"}, {"", "", "nodes", "list"}, {"", "", "pods", "list"}}...)
 		}
 		if len(p.HPAs) > 0 {
 			perms = append(perms, [][4]string{{ns, "autoscaling", "horizontalpodautoscalers", "create"}, {ns, "autoscaling", "horizontalpodautoscalers", "delete"}}...)
@@ -253,6 +253,53 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		return err
 	}
 	if err := check("namespace-and-cluster-quotas", func() error { return r.checkQuotas(ctx, ns, pod, capacity) }); err != nil {
+		return err
+	}
+	if err := check("availability-budget", func() error {
+		budgets, err := r.Kube.PolicyV1().PodDisruptionBudgets(ns).List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return err
+		}
+		if len(budgets.Items) == 0 {
+			return nil
+		}
+		sourceSelector, _, err := unstructured.NestedStringMap(p.Source.Object, "spec", "selector")
+		if err != nil || len(sourceSelector) == 0 {
+			return errors.New("cannot identify source Pods for availability budget")
+		}
+		sources, err := r.Kube.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{LabelSelector: labels.SelectorFromSet(sourceSelector).String()})
+		if err != nil {
+			return err
+		}
+		for _, budget := range budgets.Items {
+			selector, err := metav1.LabelSelectorAsSelector(budget.Spec.Selector)
+			if err != nil {
+				return err
+			}
+			affected := int32(0)
+			for _, source := range sources.Items {
+				if source.Status.Phase != corev1.PodSucceeded && source.Status.Phase != corev1.PodFailed && selector.Matches(labels.Set(source.Labels)) {
+					affected++
+				}
+			}
+			if affected == 0 {
+				continue
+			}
+			if budget.Status.ObservedGeneration != budget.Generation {
+				return fmt.Errorf("PodDisruptionBudget %s status is not synchronized; wait before source retirement", budget.Name)
+			}
+			if p.CutoverMode == "overlap" && selector.Matches(labels.Set(pod.Labels)) {
+				if budget.Spec.MinAvailable != nil && budget.Spec.MinAvailable.Type == intstr.Int && replicas >= affected {
+					continue
+				}
+				return fmt.Errorf("PodDisruptionBudget %s has controller-relative availability semantics during overlap; a reviewed migration procedure is required", budget.Name)
+			}
+			if budget.Status.DisruptionsAllowed < affected {
+				return fmt.Errorf("PodDisruptionBudget %s allows %d disruptions but source retirement removes %d selected Pods; scaling controllers bypasses eviction protection; choose a reviewed availability-preserving procedure", budget.Name, budget.Status.DisruptionsAllowed, affected)
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
 	if err := check("network-policy-selection", func() error {

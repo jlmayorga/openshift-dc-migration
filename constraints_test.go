@@ -8,13 +8,15 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func TestConstraintFailureLeavesSourceAndAutoscalerUntouched(t *testing.T) {
-	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity", "pod-label", "pod-budget", "runtime-policy", "runtime-peer"} {
+	for _, scenario := range []string{"pod-admission", "quota-headroom", "quota-read-denied", "cluster-inventory-denied", "no-nodes", "cluster-quota", "network-policy", "node-capacity", "pod-label", "pod-budget", "runtime-policy", "runtime-peer", "pdb"} {
 		t.Run(scenario, func(t *testing.T) {
 			r, c, path := cutoverTest(t, "exclusive", true)
 			original := c.source.DeepCopy()
@@ -32,6 +34,8 @@ func TestConstraintFailureLeavesSourceAndAutoscalerUntouched(t *testing.T) {
 				c.denyConstraintRead = "resourcequotas"
 			case "cluster-inventory-denied":
 				c.denyConstraintRead = "nodes"
+			case "pdb":
+				c.disruptionBudgets = []policyv1.PodDisruptionBudget{{ObjectMeta: metav1.ObjectMeta{Name: "keep-available", Generation: 1}, Spec: policyv1.PodDisruptionBudgetSpec{Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"deploymentconfig": "web"}}}, Status: policyv1.PodDisruptionBudgetStatus{ObservedGeneration: 1, DisruptionsAllowed: 0}}}
 			case "runtime-peer":
 				c.networkPolicies = []networkingv1.NetworkPolicy{{ObjectMeta: metav1.ObjectMeta{Name: "legacy-peer"}, Spec: networkingv1.NetworkPolicySpec{PodSelector: metav1.LabelSelector{}, Ingress: []networkingv1.NetworkPolicyIngressRule{{From: []networkingv1.NetworkPolicyPeer{{PodSelector: &metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{{Key: "deployment", Operator: metav1.LabelSelectorOpExists}}}}}}}}}}
 			case "runtime-policy":
@@ -164,5 +168,14 @@ func TestConstraintPreflightToleratesHPAStatusChurn(t *testing.T) {
 	}
 	if len(c.mutations) != 0 || *c.destination.Spec.Replicas != 0 {
 		t.Fatal("read-only assessment mutated workload")
+	}
+}
+
+func TestOverlapCanPreserveDisruptionBudget(t *testing.T) {
+	minimum := intstr.FromInt(1)
+	r, c, _ := cutoverTest(t, "overlap", true)
+	c.disruptionBudgets = []policyv1.PodDisruptionBudget{{ObjectMeta: metav1.ObjectMeta{Name: "keep-available", Generation: 1}, Spec: policyv1.PodDisruptionBudgetSpec{MinAvailable: &minimum, Selector: &metav1.LabelSelector{MatchLabels: map[string]string{"deploymentconfig": "web"}}}, Status: policyv1.PodDisruptionBudgetStatus{ObservedGeneration: 1, DisruptionsAllowed: 0}}}
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal("verified overlap rejected despite replacement budget membership", err)
 	}
 }
