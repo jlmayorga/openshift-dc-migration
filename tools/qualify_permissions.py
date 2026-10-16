@@ -283,8 +283,16 @@ def main():
         source, hpa = live.get("dc"), live.get("hpa")
         allowed = rules()
         allowed[0]["verbs"] = ["get", "list", "update"]
+        allowed[1]["resources"] = ["deployments", "replicasets"]
         allowed[1]["verbs"] = ["get", "list", "create", "update"]
         allowed[-1]["verbs"] = ["get", "list", "create"]
+        allowed.append(
+            {
+                "apiGroups": ["apps"],
+                "resources": ["statefulsets", "daemonsets"],
+                "verbs": ["get", "list"],
+            }
+        )
         path = credential(allowed)
         plan = live.tool("plan", health=health)
         live.tool("stage", plan)
