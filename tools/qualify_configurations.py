@@ -29,6 +29,7 @@ class Live:
         self.ns = None
         self.case = None
         self.cases = []
+        self.last_binary_exit = None
         self.base = ["oc", "--kubeconfig", args.kubeconfig, "--context", args.context]
 
     def command(self, argv, body=None, expected=0):
@@ -41,6 +42,8 @@ class Live:
             timeout=self.args.timeout + 90,
         )
         self.sequence += 1
+        if argv[0] == self.args.binary:
+            self.last_binary_exit = p.returncode
         record = dict(
             startedAt=started,
             argv=argv,

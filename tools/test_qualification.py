@@ -3,8 +3,54 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+from unittest.mock import patch
 from qualify_openshift import validate_target
 from qualify_recovery import persistent_mutation
+from qualify_permissions import wait_for_expired_generation
+
+
+class ExpiredCredentials(unittest.TestCase):
+    def test_waits_for_observed_authentication_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            good = pathlib.Path(directory) / "good.json"
+            bad = pathlib.Path(directory) / "bad.json"
+            good.write_text('{"totals":{"generated":1,"failed":0}}')
+            bad.write_text(
+                '{"totals":{"generated":0,"failed":1},"error":"Unauthorized"}'
+            )
+
+            class Live:
+                def __init__(self):
+                    self.calls = 0
+
+                def tool(self, *args, **kwargs):
+                    self.calls += 1
+                    self.last_binary_exit = 0 if self.calls == 1 else 1
+                    return good if self.calls == 1 else bad
+
+            with patch("qualify_permissions.time.time", return_value=20), patch(
+                "qualify_permissions.time.sleep"
+            ):
+                report, accepted = wait_for_expired_generation(Live(), 0, 100)
+            self.assertEqual(report, bad)
+            self.assertEqual(accepted, 1)
+
+    def test_failed_report_with_success_exit_does_not_qualify(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bad = pathlib.Path(directory) / "bad.json"
+            bad.write_text(
+                '{"totals":{"generated":0,"failed":1},"error":"Unauthorized"}'
+            )
+
+            class Live:
+                last_binary_exit = 0
+
+                def tool(self, *args, **kwargs):
+                    return bad
+
+            with patch("qualify_permissions.time.time", return_value=20):
+                with self.assertRaises(AssertionError):
+                    wait_for_expired_generation(Live(), 0, 100)
 
 
 class RecoveryFaults(unittest.TestCase):

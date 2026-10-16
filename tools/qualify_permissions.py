@@ -17,6 +17,29 @@ import time
 from qualify_configurations import Live
 
 
+def wait_for_expired_generation(live, expires, deadline):
+    """Require observed authentication refusal, allowing bounded server leeway."""
+    accepted = 0
+    while time.time() < expires + 5:
+        time.sleep(min(30, max(0.1, expires + 5 - time.time())))
+    while time.time() < deadline:
+        report_path = live.tool("generate", expected=None)
+        report = json.loads(report_path.read_text())
+        diagnostic = report_path.read_text().lower()
+        if report["totals"]["failed"] >= 1:
+            assert live.last_binary_exit != 0
+            assert report["totals"]["generated"] == 0
+            assert "unauthorized" in diagnostic or "credentials" in diagnostic
+            return report_path, accepted
+        assert report["totals"]["generated"] == 1
+        assert live.last_binary_exit == 0
+        accepted += 1
+        time.sleep(min(10, max(0.1, deadline - time.time())))
+    raise RuntimeError(
+        "Server still accepts token after bounded expiry wait; no pass claimed"
+    )
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     for key in (
@@ -36,7 +59,7 @@ def main():
     p.add_argument(
         "--expiry-wait-limit",
         type=int,
-        default=720,
+        default=900,
         help="Maximum seconds to wait for explicitly selected expired-credentials case",
     )
     args = p.parse_args()
@@ -295,7 +318,8 @@ def main():
             base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4))
         )
         expires = float(claims["exp"])
-        remaining = expires + 5 - time.time()
+        started_wait = time.time()
+        remaining = expires + 5 - started_wait
         if remaining <= 0 or remaining > args.expiry_wait_limit:
             raise RuntimeError(
                 f"Issued token requires {remaining:.0f}s until expiry; "
@@ -310,14 +334,9 @@ def main():
             json.dumps({"issuedAt": claims["iat"], "expiresAt": expires}, indent=2)
         )
         print(f"Waiting for actual signed-token expiry ({remaining:.0f}s)", flush=True)
-        while time.time() < expires + 5:
-            time.sleep(min(30, max(0.1, expires + 5 - time.time())))
-        denied = live.tool("generate", expected=1)
-        report = json.loads(denied.read_text())
-        assert report["totals"]["failed"] >= 1
-        assert report["totals"]["generated"] == 0
-        diagnostic = denied.read_text().lower()
-        assert "unauthorized" in diagnostic or "credentials" in diagnostic
+        _, accepted_after_expiry = wait_for_expired_generation(
+            live, expires, started_wait + args.expiry_wait_limit
+        )
         live.args.kubeconfig = original
         assert live.get("dc")["metadata"]["uid"] == source["metadata"]["uid"]
         assert live.get("dc")["spec"] == source["spec"]
@@ -332,6 +351,7 @@ def main():
             "validBeforeExpiry": True,
             "actualSignedTokenExpiration": expires,
             "observedAfterExpiry": time.time(),
+            "acceptedAfterJWTExpiryBeforeObservedRejection": accepted_after_expiry,
             "expiredCredentialsProduceFailedReportAndExit": True,
             "sourceUIDSpecAndHTTPUnchanged": True,
             "destinationPersisted": False,
