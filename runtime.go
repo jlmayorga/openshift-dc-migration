@@ -175,7 +175,7 @@ func (r *Runner) connect() error {
 	cfg.Timeout = r.Options.RequestTimeout
 	cfg.ContentType = "application/json"
 	cfg.AcceptContentTypes = "application/json"
-	r.Dynamic, err = dynamic.NewForConfig(cfg)
+	r.Dynamic, err = newJSONDynamicClient(cfg)
 	if err != nil {
 		return err
 	}

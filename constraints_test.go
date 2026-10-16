@@ -147,6 +147,36 @@ func TestNodeEligibilityRejectsHardPlacementConstraints(t *testing.T) {
 	}
 }
 
+func TestClientUpgradePreservesBaselineTaintMatching(t *testing.T) {
+	finite := int64(300)
+	for _, tc := range []struct {
+		name       string
+		toleration corev1.Toleration
+		effect     corev1.TaintEffect
+		eligible   bool
+	}{
+		{"equal", corev1.Toleration{Key: "generation", Operator: "Equal", Value: "3"}, "NoSchedule", true},
+		{"default-equal", corev1.Toleration{Key: "generation", Value: "3"}, "NoSchedule", true},
+		{"exists", corev1.Toleration{Key: "generation", Operator: "Exists"}, "NoSchedule", true},
+		{"wildcard", corev1.Toleration{Operator: "Exists"}, "NoSchedule", true},
+		{"wrong-value", corev1.Toleration{Key: "generation", Operator: "Equal", Value: "2"}, "NoSchedule", false},
+		{"wrong-key", corev1.Toleration{Key: "other", Operator: "Exists"}, "NoSchedule", false},
+		{"wrong-effect", corev1.Toleration{Key: "generation", Operator: "Exists", Effect: "NoExecute"}, "NoSchedule", false},
+		{"post-floor-gt", corev1.Toleration{Key: "generation", Operator: "Gt", Value: "2"}, "NoSchedule", false},
+		{"post-floor-lt", corev1.Toleration{Key: "generation", Operator: "Lt", Value: "5"}, "NoSchedule", false},
+		{"noexecute-unbounded", corev1.Toleration{Key: "generation", Operator: "Exists"}, "NoExecute", true},
+		{"noexecute-expires", corev1.Toleration{Key: "generation", Operator: "Exists", TolerationSeconds: &finite}, "NoExecute", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			node := corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "worker"}, Spec: corev1.NodeSpec{Taints: []corev1.Taint{{Key: "generation", Value: "3", Effect: tc.effect}}}, Status: corev1.NodeStatus{Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}}}}
+			pod := &corev1.Pod{Spec: corev1.PodSpec{Tolerations: []corev1.Toleration{tc.toleration}}}
+			if nodeEligible(node, pod) != tc.eligible {
+				t.Fatalf("client upgrade changed placement for %s", tc.name)
+			}
+		})
+	}
+}
+
 func TestObservedAllocationsIncludeResizeAndNewPodBudgets(t *testing.T) {
 	raw := &unstructured.Unstructured{Object: map[string]interface{}{"spec": map[string]interface{}{"containers": []interface{}{map[string]interface{}{"name": "web", "resources": map[string]interface{}{"requests": map[string]interface{}{"cpu": "100m", "memory": "16Mi"}}}}, "resources": map[string]interface{}{"requests": map[string]interface{}{"memory": "64Mi"}}}, "status": map[string]interface{}{"containerStatuses": []interface{}{map[string]interface{}{"name": "web", "allocatedResources": map[string]interface{}{"cpu": "500m"}}}}}}
 	resources, err := observedPodRequests(raw)

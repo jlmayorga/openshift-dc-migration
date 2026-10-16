@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/klog/v2"
 )
 
 func nodeTermsMatch(terms []corev1.NodeSelectorTerm, node corev1.Node) bool {
@@ -79,7 +80,8 @@ func nodeEligible(node corev1.Node, pod *corev1.Pod) bool {
 		}
 		tolerated := false
 		for _, t := range pod.Spec.Tolerations {
-			if t.ToleratesTaint(&taint) && (taint.Effect != corev1.TaintEffectNoExecute || t.TolerationSeconds == nil) {
+			// Keep numeric comparison operators disabled at the 1.27 floor.
+			if t.ToleratesTaint(klog.Background(), &taint, false) && (taint.Effect != corev1.TaintEffectNoExecute || t.TolerationSeconds == nil) {
 				tolerated = true
 			}
 		}

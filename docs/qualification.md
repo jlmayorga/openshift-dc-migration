@@ -72,7 +72,7 @@ Before creating/publishing a release:
 
 - Local and CI race tests, vet, formatting, readonly builds, module verification/clean-module checks, Python gate tests and pinned security scanners must pass. Preserve scan artifacts; inspect dispositions.
 - Every required released-minor row must contain full passing **actual** results for each shipped binary hash. Record exact patches, actual Kubernetes version, aligned module versions, test dates, known limitations and provenance; 4.14 must report Kubernetes 1.27.
-- Fresh qualification is mandatory after dependency/fixture/binary changes. For 4.14–4.20 this means refreshing the approved source review against exact source/dependency/fixture hashes; newer required rows need actual final-artifact integrations. The evaluated Kubernetes 0.37.1 candidate remains unadopted pending that complete refreshed qualification, without requesting an unavailable older cluster.
+- Fresh qualification is mandatory after dependency/fixture/binary changes. For 4.14–4.20 this means refreshing the approved source review against exact source/dependency/fixture hashes; newer required rows need actual final-artifact integrations. Aligned Kubernetes0.37.1 is now adopted in source with a refreshed, hash-bound delta assessment; full newer-target final-artifact qualification is still required.
 - Review feature/RBAC/recovery docs and all variant evidence; refresh the released-minor inventory. Do not advertise an untested release or an untested feature as verified.
 - Release automation creates only a draft after gates pass, attaching binaries, checksums, build metadata, scans and compatibility results. A maintainer reviews before publishing; this work does not push tags or publish anything.
 
