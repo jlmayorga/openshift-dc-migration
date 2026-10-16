@@ -111,6 +111,12 @@ def main():
             source = live.get("dc")
             assert source["spec"]["replicas"] == 0
             live.wait(no_application_pods)
+            # Compare with the admitted source, including server defaults such
+            # as RBD pool/user/keyring, rather than the pre-admission request.
+            volumes = source["spec"]["template"]["spec"]["volumes"]
+            assert len(volumes) == 1 and all(
+                volumes[0][plugin][key] == value for key, value in configuration.items()
+            )
             outputs = []
             for mode in ("generate", "plan"):
                 output = live.tool(mode, expected=1)
@@ -129,9 +135,7 @@ def main():
                 )
                 data = json.loads(plan.read_text())
                 assert data["desired"]["spec"]["paused"]
-                assert data["desired"]["spec"]["template"]["spec"]["volumes"] == [
-                    volume
-                ]
+                assert data["desired"]["spec"]["template"]["spec"]["volumes"] == volumes
                 outputs.append({"mode": mode, "diagnostic": result["error"]})
             stage = json.loads(live.tool("stage", plan, expected=1).read_text())
             assert plugin in stage["results"][0]["error"]
@@ -151,6 +155,7 @@ def main():
                 "stageRefusedWithoutDestination": True,
                 "applicationPodsCreated": 0,
                 "completedDeployerPodsAllowed": True,
+                "admittedSourceVolumes": volumes,
             }
 
         live.run_case(plugin, check)
