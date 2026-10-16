@@ -1,5 +1,7 @@
 # Linux execution and live migration tests
 
+The later [source-conflict retry follow-up](source-conflict-live-tests.md) changes production Go code. Its current Linux/amd64 artifact `cdbd5358…` passed seven targeted conflict/recovery cases and three regular CSI migrations. The full 22-group result below remains specific to historical artifact `4297f76e…`; it is not transferred to the newer executable.
+
 The Linux/amd64 candidate from `920dfc0` passed all **22 required scenario groups** on **OpenShift 4.21.36 / Kubernetes v1.34.9**. Its SHA-256 is `4297f76e3bb20a0d804cea86220aa82b288ba810920ee4b44d1d27d74e9f67f7`. The [structured full result](../compatibility/evidence/2026-10-16-linux-full-4.21.36.json) binds the exact executable, source, dependencies, fixtures, cluster release image and observed results. The [earlier complete Darwin arm64 run](client-upgrade-live-tests.md) remains a separate artifact result.
 
 | Actual Linux coverage | Evidence |
