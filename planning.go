@@ -41,6 +41,7 @@ type MigrationPlan struct {
 	Progress             Progress                                `json:"progress"`
 }
 type Progress struct {
+	Constraints    *ConstraintAssessment  `json:"constraints,omitempty"`
 	AdmittedSpec   *appsv1.DeploymentSpec `json:"admittedSpec,omitempty"`
 	Phase          string                 `json:"phase"`
 	Events         []string               `json:"events,omitempty"`
@@ -85,6 +86,7 @@ func (r *Runner) buildPlan(ctx context.Context, dc *unstructured.Unstructured, c
 	if !live {
 		return p, nil
 	}
+	p.Warnings = append(p.Warnings, "Staging at zero does not prove startup capacity. Run --mode preflight after staging; cutover repeats constraints before any source retirement.")
 	p.Blockers = append(p.Blockers, unresolvedImageTriggers(dc)...)
 	if dc.GetUID() == "" || dc.GetResourceVersion() == "" {
 		return nil, errors.New("live plan requires source UID and resourceVersion")

@@ -67,10 +67,10 @@ func (o Options) Validate() error {
 		}
 	}
 
-	if !contains([]string{"generate", "plan", "dry-run", "stage", "cutover", "rollback"}, o.Mode) {
+	if !contains([]string{"generate", "plan", "dry-run", "stage", "preflight", "cutover", "rollback"}, o.Mode) {
 		return fmt.Errorf("unsupported mode %q", o.Mode)
 	}
-	if o.Mode == "dry-run" || o.Mode == "stage" || o.Mode == "cutover" || o.Mode == "rollback" {
+	if o.Mode == "preflight" || o.Mode == "dry-run" || o.Mode == "stage" || o.Mode == "cutover" || o.Mode == "rollback" {
 		if o.PlanFile == "" || len(o.Inputs) > 0 || len(o.Projects) > 0 {
 			return errors.New("execution requires --plan-file and no --input or --projects")
 		}
@@ -107,16 +107,17 @@ type Identity struct {
 	ResourceVersion string `json:"resourceVersion,omitempty"`
 }
 type Result struct {
-	Source      Identity `json:"source"`
-	Destination Identity `json:"destination"`
-	Stage       string   `json:"stage"`
-	Outcome     string   `json:"outcome"`
-	Warnings    []string `json:"warnings,omitempty"`
-	Unsupported []string `json:"unsupported,omitempty"`
-	Error       string   `json:"error,omitempty"`
-	Generated   bool     `json:"generated"`
-	Applied     bool     `json:"applied"`
-	Ready       bool     `json:"ready"`
+	Constraints *ConstraintAssessment `json:"constraints,omitempty"`
+	Source      Identity              `json:"source"`
+	Destination Identity              `json:"destination"`
+	Stage       string                `json:"stage"`
+	Outcome     string                `json:"outcome"`
+	Warnings    []string              `json:"warnings,omitempty"`
+	Unsupported []string              `json:"unsupported,omitempty"`
+	Error       string                `json:"error,omitempty"`
+	Generated   bool                  `json:"generated"`
+	Applied     bool                  `json:"applied"`
+	Ready       bool                  `json:"ready"`
 }
 type Report struct {
 	SchemaVersion string   `json:"schemaVersion"`

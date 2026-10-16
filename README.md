@@ -37,6 +37,9 @@ A generated manifest describes intended replicas. Review it through the staged p
 /tmp/openshift-dc-converter --mode dry-run --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
 /tmp/openshift-dc-converter --mode stage --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
 
+# Check Pod admission, quota and node capacity while the source stays up.
+/tmp/openshift-dc-converter --mode preflight --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
+
 # After pausing other reconcilers/scalers and reviewing the plan:
 /tmp/openshift-dc-converter --mode cutover --plan-file ./review/example/web.plan.json \
   --context TEST_CONTEXT --automation-quiesced
@@ -44,6 +47,8 @@ A generated manifest describes intended replicas. Review it through the staged p
 # Explicit recovery after inspecting a failed/interrupted migration:
 /tmp/openshift-dc-converter --mode rollback --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
 ```
+
+Cutover reruns the constraint preflight before changing any HPA or source. A refusal leaves the source running and the destination paused at zero. See [pre-retirement constraints](docs/migration.md#constraints-before-source-retirement), including the extra read/dry-run permissions and point-in-time limits.
 
 The legacy `--apply-changes` now aliases **zero-replica staging** and requires a reviewed `--plan-file`. It cannot create an active duplicate. Exclusive cutover stops and verifies source pods before starting the destination. Overlap requires an explicit planning choice and justification and is blocked for volume/host-bound workloads. The DC is retained for recovery. See the [migration and recovery procedure](docs/migration.md) and [RBAC reference](docs/rbac.md).
 

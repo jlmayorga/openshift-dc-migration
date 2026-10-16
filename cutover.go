@@ -78,6 +78,9 @@ func (r *Runner) runMigration(ctx context.Context, p *MigrationPlan, result *Res
 	if p.Progress.AdmittedSpec == nil || !reflect.DeepEqual(staged.Spec, *p.Progress.AdmittedSpec) || staged.Spec.Replicas == nil || *staged.Spec.Replicas != 0 || !staged.Spec.Paused || staged.Annotations[imageTriggerAnnotation] != "" {
 		return errors.New("staged destination changed; refusing source retirement")
 	}
+	if err := r.assessConstraints(ctx, p, staged, result); err != nil {
+		return err
+	}
 	if err := r.checkpoint(p, "cutover-started", "begin cutover; failures require explicit rollback"); err != nil {
 		return err
 	}

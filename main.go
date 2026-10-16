@@ -31,7 +31,7 @@ func NewCommand() *cobra.Command {
 		return r.Run(ctx)
 	}
 	f := cmd.Flags()
-	f.StringVar(&o.Mode, "mode", o.Mode, "generate, plan, dry-run, stage, cutover or rollback")
+	f.StringVar(&o.Mode, "mode", o.Mode, "generate, plan, dry-run, stage, preflight, cutover or rollback")
 	f.BoolVar(&o.AutomationQuiesced, "automation-quiesced", false, "Acknowledge external reconcilers/scalers paused before cutover")
 	f.StringVar(&o.PlanFile, "plan-file", "", "Reviewed live migration plan")
 	f.StringVar(&o.CutoverMode, "cutover-mode", o.CutoverMode, "exclusive or overlap (recorded in plan)")

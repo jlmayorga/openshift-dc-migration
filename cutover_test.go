@@ -311,3 +311,17 @@ func TestOlderCompletedPlanWithUnresolvedImageCannotReportReady(t *testing.T) {
 		t.Fatal("unresolved plan mutated cluster or reported ready")
 	}
 }
+
+func TestCutoverRechecksPodAdmissionBeforeRetiringSource(t *testing.T) {
+	r, c, path := cutoverTest(t, "exclusive", true)
+	original := c.source.DeepCopy()
+	hpa := c.hpas[0].DeepCopy()
+	c.denyPodDryRun = true
+	if err := r.Run(context.Background()); err == nil {
+		t.Fatal("cutover accepted a policy that rejects destination Pods")
+	}
+	p, _ := loadPlan(path)
+	if !reflect.DeepEqual(c.source.Object["spec"], original.Object["spec"]) || !reflect.DeepEqual(c.hpas[0], *hpa) || len(c.mutations) != 0 || *c.destination.Spec.Replicas != 0 || p.Progress.Phase != "staged" {
+		t.Fatalf("preflight failure changed live workload: %v", c.mutations)
+	}
+}

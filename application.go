@@ -51,6 +51,29 @@ func (r *Runner) executePlan(ctx context.Context) (runErr error) {
 	if err = r.preflight(ctx); err != nil {
 		return err
 	}
+	if r.Options.Mode == "preflight" {
+		if p.Progress.Phase != "staged" {
+			return errors.New("constraint preflight requires a staged plan")
+		}
+		if err = r.validateStoredPlan(p); err != nil {
+			return err
+		}
+		if err = r.revalidatePlan(ctx, p); err != nil {
+			return err
+		}
+		staged, e := r.destination(ctx, p)
+		if e != nil {
+			return e
+		}
+		if p.Progress.AdmittedSpec == nil || !reflect.DeepEqual(staged.Spec, *p.Progress.AdmittedSpec) || staged.Spec.Replicas == nil || *staged.Spec.Replicas != 0 || !staged.Spec.Paused || staged.Annotations[imageTriggerAnnotation] != "" {
+			return errors.New("staged destination changed; cannot assess cutover")
+		}
+		if err = r.assessConstraints(ctx, p, staged, &result); err != nil {
+			return err
+		}
+		result.Outcome = "validated"
+		return nil
+	}
 	if r.Options.Mode == "cutover" || r.Options.Mode == "rollback" {
 		return r.runMigration(ctx, p, &result)
 	}

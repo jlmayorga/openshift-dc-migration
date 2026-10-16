@@ -13,6 +13,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -25,6 +27,14 @@ import (
 )
 
 type contractCluster struct {
+	networkPolicies    []networkingv1.NetworkPolicy
+	clusterQuotas      []unstructured.Unstructured
+	denyPodDryRun      bool
+	podDryRuns         int
+	quotas             []corev1.ResourceQuota
+	constraintNodes    []corev1.Node
+	denyConstraintRead string
+
 	extraReplicaSet                                                                   *unstructured.Unstructured
 	sourceReplicas                                                                    int64
 	orphanLabels                                                                      map[string]string
@@ -55,13 +65,74 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		jsonResponse(w, map[string]interface{}{"kind": "SelfSubjectAccessReview", "apiVersion": "authorization.k8s.io/v1", "status": map[string]interface{}{"allowed": true}})
 		return
 	}
-	resources := map[string][]string{"/apis/apps.openshift.io/v1": {"deploymentconfigs"}, "/apis/apps/v1": {"deployments", "replicasets", "statefulsets", "daemonsets"}, "/api/v1": {"pods", "services", "replicationcontrollers", "endpoints"}, "/apis/authorization.k8s.io/v1": {"selfsubjectaccessreviews"}, "/apis/autoscaling/v2": {"horizontalpodautoscalers"}, "/apis/image.openshift.io/v1": {"imagestreamtags"}}
+	resources := map[string][]string{"/apis/apps.openshift.io/v1": {"deploymentconfigs"}, "/apis/apps/v1": {"deployments", "replicasets", "statefulsets", "daemonsets"}, "/api/v1": {"pods", "services", "replicationcontrollers", "endpoints"}, "/apis/authorization.k8s.io/v1": {"selfsubjectaccessreviews"}, "/apis/autoscaling/v2": {"horizontalpodautoscalers"}, "/apis/image.openshift.io/v1": {"imagestreamtags"}, "/apis/security.openshift.io/v1": {"podsecuritypolicysubjectreviews"}, "/apis/quota.openshift.io/v1": {"appliedclusterresourcequotas"}}
 	if names, ok := resources[req.URL.Path]; ok {
 		items := []interface{}{}
 		for _, name := range names {
 			items = append(items, map[string]interface{}{"name": name, "kind": "Object", "verbs": []string{"get", "list", "create", "update"}})
 		}
 		jsonResponse(w, map[string]interface{}{"kind": "APIResourceList", "apiVersion": "v1", "resources": items})
+		return
+	}
+	if req.Method == http.MethodGet && c.denyConstraintRead != "" && strings.HasSuffix(req.URL.Path, "/"+c.denyConstraintRead) {
+		http.Error(w, "constraint inventory denied", 403)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/podsecuritypolicysubjectreviews") && req.Method == http.MethodPost {
+		var review map[string]interface{}
+		_ = json.NewDecoder(req.Body).Decode(&review)
+		template := review["spec"].(map[string]interface{})["template"]
+		jsonResponse(w, map[string]interface{}{"apiVersion": "security.openshift.io/v1", "kind": "PodSecurityPolicySubjectReview", "status": map[string]interface{}{"allowedBy": map[string]interface{}{"name": "restricted-v2", "kind": "SecurityContextConstraints"}, "template": map[string]interface{}{"spec": template.(map[string]interface{})["spec"]}}})
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/pods") && req.Method == http.MethodPost {
+		if req.URL.Query().Get("dryRun") != "All" {
+			t.Error("preflight persisted a Pod")
+		}
+		c.podDryRuns++
+		if c.denyPodDryRun {
+			http.Error(w, "Pod admission rejected by namespace policy", 403)
+			return
+		}
+		var pod corev1.Pod
+		_ = json.NewDecoder(req.Body).Decode(&pod)
+		if c.destination != nil {
+			for key, value := range c.destination.Spec.Template.Labels {
+				if pod.Labels[key] != value {
+					t.Errorf("SCC review lost destination policy label %s", key)
+				}
+			}
+		}
+		jsonResponse(w, &pod)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/replicasets") && req.Method == http.MethodPost {
+		if req.URL.Query().Get("dryRun") != "All" {
+			t.Error("preflight persisted a ReplicaSet")
+		}
+		var rs appsv1.ReplicaSet
+		_ = json.NewDecoder(req.Body).Decode(&rs)
+		jsonResponse(w, &rs)
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/networkpolicies") && req.Method == http.MethodGet {
+		jsonResponse(w, &networkingv1.NetworkPolicyList{Items: c.networkPolicies})
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/appliedclusterresourcequotas") && req.Method == http.MethodGet {
+		jsonResponse(w, &unstructured.UnstructuredList{Object: map[string]interface{}{"kind": "AppliedClusterResourceQuotaList", "apiVersion": "quota.openshift.io/v1"}, Items: c.clusterQuotas})
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/resourcequotas") && req.Method == http.MethodGet {
+		jsonResponse(w, &corev1.ResourceQuotaList{Items: c.quotas})
+		return
+	}
+	if strings.HasSuffix(req.URL.Path, "/nodes") && req.Method == http.MethodGet {
+		nodes := c.constraintNodes
+		if nodes == nil {
+			nodes = []corev1.Node{{ObjectMeta: metav1.ObjectMeta{Name: "worker"}, Status: corev1.NodeStatus{Allocatable: corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("100"), corev1.ResourceMemory: resource.MustParse("100Gi"), corev1.ResourcePods: resource.MustParse("1000"), corev1.ResourceEphemeralStorage: resource.MustParse("100Gi")}, Conditions: []corev1.NodeCondition{{Type: corev1.NodeReady, Status: corev1.ConditionTrue}}}}}
+		}
+		jsonResponse(w, &corev1.NodeList{Items: nodes})
 		return
 	}
 	if strings.HasSuffix(req.URL.Path, "/deploymentconfigs/web") {
@@ -179,6 +250,12 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		for i, h := range c.hpas {
 			if h.Name == name {
 				if req.Method == http.MethodDelete {
+					var options metav1.DeleteOptions
+					_ = json.NewDecoder(req.Body).Decode(&options)
+					if len(options.DryRun) > 0 {
+						jsonResponse(w, map[string]interface{}{"kind": "Status", "apiVersion": "v1", "status": "Success"})
+						return
+					}
 					c.hpas = append(c.hpas[:i], c.hpas[i+1:]...)
 					c.mutations = append(c.mutations, "hpa:delete")
 					jsonResponse(w, map[string]interface{}{"kind": "Status", "apiVersion": "v1", "status": "Success"})
