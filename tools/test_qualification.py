@@ -51,6 +51,36 @@ class NewAppAuthorization(unittest.TestCase):
         self.assertIn("Unknown or empty", proc.stderr)
 
 
+class NamespaceAuthorization(unittest.TestCase):
+    def test_invalid_target_or_missing_ack_fails_before_access(self):
+        script = pathlib.Path(__file__).with_name("qualify_namespaces.py")
+        with tempfile.TemporaryDirectory() as output:
+            for prefix, ack in [("dcmig-test", False), ("production", True)]:
+                command = [
+                    sys.executable,
+                    str(script),
+                    "--context",
+                    "test",
+                    "--kubeconfig",
+                    "/nonexistent",
+                    "--binary",
+                    "/nonexistent",
+                    "--image",
+                    "test@sha256:00",
+                    "--namespace-prefix",
+                    prefix,
+                    "--output",
+                    output,
+                ]
+                if ack:
+                    command.append("--allow-test-mutations")
+                proc = subprocess.run(
+                    command, capture_output=True, text=True, timeout=10
+                )
+                self.assertEqual(proc.returncode, 2)
+                self.assertIn("Explicit disposable target", proc.stderr)
+
+
 class StaticVolumeAuthorization(unittest.TestCase):
     def test_requires_explicit_scc_before_access(self):
         script = pathlib.Path(__file__).with_name("qualify_features.py")

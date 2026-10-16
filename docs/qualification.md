@@ -87,3 +87,19 @@ python3 tools/qualify_new_app.py \
 ```
 
 Apps awaiting their first binary build can generate read-only review artifacts, but cannot produce an executable live plan until the DC image controller has resolved their automatic ImageChange triggers. A new-app origin does not bypass unsupported hooks/test/custom behavior, selector/ownership checks or stale dependency checks.
+
+## Multiple namespaces in one invocation
+
+`--projects namespace-a,namespace-b,namespace-c` supports generation and live planning in one invocation. Artifacts are written under each namespace directory even when every DC has the same name. Duplicate names in the project list are processed once. Empty, skipped, failed and manual projects/workloads retain separate report entries; any failure still returns a nonzero aggregate exit while later namespaces are processed.
+
+Run `tools/qualify_namespaces.py` to verify this against actual `oc new-app --as-deployment-config` workloads. It creates six labelled namespaces: three same-named apps with distinct HTTP responses and replica counts 1/2/0, an unselected sentinel app, an unsupported test DC and an empty namespace. It checks multi-project generation/planning, nonpersistent dry runs of those plans, manual and RBAC partial failures, and isolated cutover/recovery in different orders. A test-only reader is granted DC-list permission in two namespaces and denied the third; its short-lived credential stays private.
+
+```sh
+python3 tools/qualify_namespaces.py \
+  --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
+  --binary "$CANDIDATE_BINARY" --image "$HTTP_8080_DIGEST" \
+  --namespace-prefix dcmig-namespaces-run --output ./private-namespace-evidence \
+  --allow-test-mutations --timeout 120
+```
+
+Dry run, stage, cutover and rollback each execute one reviewed `--plan-file`. The multi-namespace tests create separate health-bound plans for execution so every active app is checked through its own Route, and verify all other namespace states after every cutover/recovery. The runner retains resources and command/report/snapshot evidence, provisions no storage and grants no cluster role. Never publish its `*-credentials.json` file or kubeconfig.
