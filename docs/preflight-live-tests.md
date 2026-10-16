@@ -2,6 +2,8 @@
 
 The migration tool now checks admission, quotas, placement and availability constraints **before changing an HPA or stopping a DeploymentConfig**. A separate `--mode preflight --plan-file PATH` command assesses a staged migration. Cutover repeats the assessment immediately before its first source/HPA mutation, so an earlier successful assessment cannot authorize a later retirement.
 
+A [subsequent 15-case session](recovery-live-tests.md) tests actual runtime failure and recovery after each committed cutover write on this same binary; the 26 cases below retain their original session scope.
+
 The JSON report and plan progress contain a timestamped `constraints` assessment, desired/capacity replicas, individual checks, blockers and warnings. A refusal returns a nonzero exit and leaves the journal `staged`, the destination paused at zero, and the original source and HPA unchanged. Standalone preflight performs reads, access reviews and API dry runs; it does not start a test Pod or persist workload changes.
 
 ## Actual cluster results
