@@ -6,6 +6,8 @@ OpenShift 4.14 / Kubernetes 1.27 remains the mandatory floor. The current releas
 
 The [maintained-client qualification](client-upgrade-live-tests.md) is the current native artifact result: Kubernetes clients v0.37.1, OpenShift 4.21.36 / Kubernetes v1.34.9, all 22 required scenario IDs. It includes renewed new-app, multiple-namespace, access, worker, volume and fault-recovery tests. The earlier reports below retain their original artifact provenance. Full release qualification remains incomplete because OpenShift 4.22 and the other shipped platform binaries have no matching actual results.
 
+The additional [Linux execution](linux-execution-tests.md) passes 356 unit/contract tests, nine offline fixtures and actual namespace-scoped generation/dry-run/staging. Its result remains partial; it does not supply Linux cutover/recovery qualification.
+
 ## Earlier artifact evidence
 
 **Fully qualified versions: none.** Actual tests have now run on **OpenShift 4.21.36 / Kubernetes v1.34.9**; see the [live test evidence](live-tests-2026-10-15.md) and [actual new-app tests](new-app-live-tests.md) for exact scope, binary hashes, failures and retained artifacts. This tests its own version and cannot supply 4.14 evidence. The matrix records exact patches/Kubernetes versions only after observation. Synthetic fixtures for each target, the Kubernetes 1.27 baseline catalog and loopback JSON contracts are separate local evidence. None proves OpenShift admission, SCC defaults, image controllers or Service routing.
