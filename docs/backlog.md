@@ -2,7 +2,7 @@
 
 - [x] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
 
-  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-client-upgrade-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; final release qualification remains open.
+  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-source-retry-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; final release qualification remains open.
 
   Scope and deliverables:
 
@@ -14,3 +14,13 @@
   - Update the compatibility matrix, operator support wording and release-gate policy to consume this review-based assumption for unavailable 4.14–4.20 targets. Preserve live-tested patch/artifact provenance and distinguish review-based assumptions from passing integration tests. Do not generate fictitious live-test records.
 
   Acceptance: all seven OpenShift minors and their corresponding Kubernetes changes have a sourced assessment, every used resource/operation is covered, applicable breaking changes are addressed, and the resulting support claim clearly states its evidence basis. The consolidated assessment, resolution overlay and hash-checked release policy record this scoped acceptance; runtime/platform prerequisites remain explicit.
+
+- [x] **Qualify the available OpenShift 4.21.36 targets.** The recorded Darwin arm64 and current Linux amd64 candidates each passed all 22 required scenario groups. The Linux run additionally passed 381 unit/contract tests and six multi-namespace cases. See the [current Linux evidence](linux-execution-tests.md), [source-conflict evidence](source-conflict-live-tests.md) and [matrix](../compatibility/matrix.json). Temporary test grants and runner resources were removed; existing application storage and the earlier staging workload were preserved.
+
+- [ ] **Qualify OpenShift 4.22 on every shipped platform.** No authorized 4.22 cluster is available. Run the full suite against a representative patch for Linux amd64/arm64, Darwin amd64/arm64 and Windows amd64, recording the actual patch, Kubernetes version and exact artifact provenance. Every 4.22 platform remains `not-run`.
+
+- [ ] **Complete actual execution on the unavailable native platforms.** Linux arm64, Darwin amd64 and Windows amd64 have current cross-builds but no native execution or actual OpenShift qualification. Complete their full 4.21 suite as well as the 4.22 work above when runners become available. Compile success is not a passing integration result.
+
+- [ ] **Validate the final release candidates through trusted CI.** Freeze the exact binaries, then run the qualification and release gate end to end with matching binary hashes, source revision, dependency and fixture hashes. Local gate checks accept the two available 4.21 results and reject missing 4.22 or platform evidence; an executed GitHub workflow and published release are not claimed. Rebuilding with different source or build metadata requires qualification of the resulting hashes. Keep the full release gate closed until all required evidence passes. Push, tagging and publication remain outside the existing authorization.
+
+- [ ] **Run the next-development discovery/conversion smoke test when an authorized target becomes available.** This is early regression detection, separate from GA qualification; it remains unrun and cannot establish verified support.
