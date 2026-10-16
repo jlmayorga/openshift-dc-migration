@@ -1,0 +1,30 @@
+# Maintenance follow-up backlog
+
+The owner narrowed the goal on 2026-10-16 to completed maintenance and available OpenShift 4.21 testing. That goal is complete and the [scoped release gate is open](release-scope.md). The unchecked items below are outside the revised goal and release scope; their actual results remain `not-run`.
+
+- [x] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
+
+  Completed bounded inventory assessment: [consolidated findings and prerequisites](compatibility-review.md), with [source-bound review evidence](../compatibility/evidence/2026-10-16-source-retry-review.json). Parallel review additionally covered 4.21. The aligned maintained clients are adopted with baseline protocol/semantics guards. Source assumptions are separate from actual integrations; the two selected 4.21 candidates have completed actual qualification.
+
+  Scope and deliverables:
+
+  - Establish each OpenShift-to-Kubernetes version mapping from official release metadata. Read the relevant Red Hat and upstream Kubernetes release notes, API migration/deprecation guides and applicable patch advisories; retain source links and review dates.
+  - Inventory the tool's actual API groups, versions, resources, fields and operations, distinguishing conversion, staging, preflight, cutover, recovery and test-harness-only dependencies. Include DeploymentConfigs/RCs, Deployments/ReplicaSets, Pods, Services/Endpoints, HPAs, access reviews, SCC subject reviews, namespace/shared quotas, LimitRanges, NetworkPolicies, disruption budgets, PVC/PV topology and ImageStream triggers where used. Confirm the inventory from code rather than treating this list as exhaustive.
+  - Trace applicable API removals, schema/defaulting changes, feature gates, admission/SCC behavior, controller and image-trigger behavior, dry-run support, RBAC, resource accounting, scheduling and storage changes through every intervening release. Review client-library/server compatibility and the tool's JSON and baseline-field handling too.
+  - Produce a per-release/resource assessment with findings, affected operations, evidence, mitigations and unresolved questions. Add regression/contract fixtures for identified risks; implement fixes or explicit capability guards where needed.
+  - Document the compatibility conclusion in `docs/compatibility-review.md` and structured review evidence under `compatibility/evidence/`. A conclusion of “no identified applicable breaking changes” permits the requested compatibility assumption; unresolved applicable changes must remain explicit.
+  - Update the compatibility matrix, operator support wording and release-gate policy to consume this review-based assumption for unavailable 4.14–4.20 targets. Preserve live-tested patch/artifact provenance and distinguish review-based assumptions from passing integration tests. Do not generate fictitious live-test records.
+
+  Acceptance: all seven OpenShift minors and their corresponding Kubernetes changes have a sourced assessment, every used resource/operation is covered, applicable breaking changes are addressed, and the resulting support claim clearly states its evidence basis. The consolidated assessment, resolution overlay and hash-checked release policy record this scoped acceptance; runtime/platform prerequisites remain explicit.
+
+- [x] **Qualify the available OpenShift 4.21.36 targets.** The recorded Darwin arm64 and current Linux amd64 candidates each passed all 22 required scenario groups. The Linux run additionally passed 381 unit/contract tests and six multi-namespace cases. See the [current Linux evidence](linux-execution-tests.md), [source-conflict evidence](source-conflict-live-tests.md) and [matrix](../compatibility/matrix.json). Temporary test grants and runner resources were removed; existing application storage and the earlier staging workload were preserved.
+
+- [ ] **Qualify OpenShift 4.22 on every shipped platform.** No authorized 4.22 cluster is available. Run the full suite against a representative patch for Linux amd64/arm64, Darwin amd64/arm64 and Windows amd64, recording the actual patch, Kubernetes version and exact artifact provenance. Every 4.22 platform remains `not-run`.
+
+- [ ] **Complete actual execution on the unavailable native platforms.** Linux arm64, Darwin amd64 and Windows amd64 have current cross-builds but no native execution or actual OpenShift qualification. Complete their full 4.21 suite as well as the 4.22 work above when runners become available. Compile success is not a passing integration result.
+
+- [x] **Freeze and validate the scoped release candidates locally.** The builder reproduces both qualified hashes byte for byte with the tested build metadata. The scoped gate validates canonical evidence, current source/dependency/fixture hashes and source assessments, while regression tests reject drift or missing evidence. Release and qualification workflows select the explicit scope. See the [release policy and commands](release-scope.md).
+
+- [ ] **Execute the configured GitHub release workflow when publication is authorized.** Local build/gate and workflow syntax checks passed; an executed GitHub workflow or published release is not claimed. Push, tagging and publication remain outside this session's authorization. Expanding versions/platforms or changing binaries requires new evidence and a reviewed policy update.
+
+- [ ] **Run the next-development discovery/conversion smoke test when an authorized target becomes available.** This is early regression detection, separate from GA qualification; it remains unrun and cannot establish verified support.

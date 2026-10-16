@@ -1,297 +1,375 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
-	"time"
+	"maps"
+	"math"
+	"regexp"
+	"strings"
 
-	"github.com/spf13/cobra"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
-func runConverter(cmd *cobra.Command, args []string) error {
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+const migrationLabel = "migration.openshift-dc.io/id"
+const sourceAnnotation = "migration.openshift-dc.io/source-uid"
+const imageTriggerAnnotation = "image.openshift.io/triggers"
+
+type Conversion struct {
+	Deployment  *appsv1.Deployment
+	Warnings    []string
+	Unsupported []string
+}
+type dcSpec struct {
+	Replicas             *int32                 `json:"replicas"`
+	Selector             map[string]string      `json:"selector"`
+	Template             corev1.PodTemplateSpec `json:"template"`
+	Paused               bool                   `json:"paused"`
+	Test                 bool                   `json:"test"`
+	MinReadySeconds      int32                  `json:"minReadySeconds"`
+	RevisionHistoryLimit *int32                 `json:"revisionHistoryLimit"`
+	Strategy             struct {
+		Type          string `json:"type"`
+		RollingParams *struct {
+			MaxSurge       *intstr.IntOrString `json:"maxSurge"`
+			MaxUnavailable *intstr.IntOrString `json:"maxUnavailable"`
+		} `json:"rollingParams"`
+	} `json:"strategy"`
+	Triggers []struct {
+		Type              string `json:"type"`
+		ImageChangeParams *struct {
+			Automatic      bool                   `json:"automatic"`
+			ContainerNames []string               `json:"containerNames"`
+			From           corev1.ObjectReference `json:"from"`
+		} `json:"imageChangeParams"`
+	} `json:"triggers"`
+}
+type imageTrigger struct {
+	From      imageFrom `json:"from"`
+	FieldPath string    `json:"fieldPath"`
+	Paused    bool      `json:"paused"`
+}
+type imageFrom struct {
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"`
+}
+
+func migrationID(dc *unstructured.Unstructured) string {
+	sum := sha256.Sum256([]byte(dc.GetNamespace() + "/" + dc.GetName() + "/" + string(dc.GetUID())))
+	return hex.EncodeToString(sum[:12])
+}
+func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
+	c := Conversion{}
+	if dc == nil || dc.GetAPIVersion() != "apps.openshift.io/v1" || dc.GetKind() != "DeploymentConfig" {
+		return c, errors.New("expected apps.openshift.io/v1 DeploymentConfig")
+	}
+	if len(validation.IsDNS1123Subdomain(dc.GetName())) > 0 || len(validation.IsDNS1123Label(dc.GetNamespace())) > 0 {
+		return c, errors.New("source requires a valid name and explicit namespace")
+	}
+	raw, found, err := unstructured.NestedMap(dc.Object, "spec")
+	if err != nil || !found {
+		return c, errors.New("source spec must be an object")
+	}
+	pod, found, err := unstructured.NestedMap(raw, "template")
+	if err != nil || !found {
+		return c, errors.New("source spec.template must be an object")
+	}
+	if err = validateBaseline(pod, "io.k8s.api.core.v1.PodTemplateSpec"); err != nil {
+		return c, err
+	}
+	data, err := json.Marshal(raw)
 	if err != nil {
-		return fmt.Errorf("error building kubeconfig: %w", err)
+		return c, err
 	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return fmt.Errorf("error creating Kubernetes clientset: %w", err)
+	var s dcSpec
+	if err = json.Unmarshal(data, &s); err != nil {
+		return c, fmt.Errorf("invalid DC spec: %w", err)
 	}
-
-	// Perform preflight check
-	if err := preflightCheck(clientset); err != nil {
-		return fmt.Errorf("preflight check failed: %w", err)
+	if len(s.Selector) == 0 {
+		return c, errors.New("source selector must be nonempty")
 	}
-
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return fmt.Errorf("error creating dynamic client: %w", err)
-	}
-
-	validProjects, err := validateProjects(dynamicClient, openShiftProjects)
-	if err != nil {
-		return fmt.Errorf("error validating projects: %w", err)
-	}
-
-	for _, project := range validProjects {
-		if err := processProject(dynamicClient, project); err != nil {
-			return fmt.Errorf("error processing project %s: %w", project, err)
+	for k, v := range s.Selector {
+		if actual, found := s.Template.Labels[k]; !found || actual != v {
+			return c, fmt.Errorf("source selector %s=%s does not match pod labels", k, v)
 		}
 	}
-
-	if err := generatePDFReport(reportPath); err != nil {
-		return fmt.Errorf("error generating PDF report: %w", err)
-	}
-
-	return nil
-}
-
-func processProject(client dynamic.Interface, namespace string) error {
-	defer func() {
-		if r := recover(); r != nil {
-			err := logMessage(fmt.Sprintf("Panic occurred while processing project %s: %v", namespace, r))
-			if err != nil {
-				fmt.Printf("Failed to log message: %v\n", err)
-			}
+	for key, value := range s.Template.Labels {
+		if len(validation.IsQualifiedName(key)) > 0 || len(validation.IsValidLabelValue(value)) > 0 {
+			return c, errors.New("invalid pod label")
 		}
-	}()
-
-	dcList, err := getDCs(client, namespace)
-	if err != nil {
-		return fmt.Errorf("error getting DeploymentConfigs in project %s: %w", namespace, err)
 	}
-
-	for _, dc := range dcList.Items {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					err := logMessage(fmt.Sprintf("Panic occurred while processing DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, r))
-					if err != nil {
-						fmt.Printf("Failed to log message: %v\n", err)
-					}
-				}
-			}()
-
-			conversionInfo := ConversionInfo{
-				Timestamp:            time.Now().Format(time.RFC3339),
-				Namespace:            namespace,
-				DeploymentConfigName: dc.GetName(),
-				HasTriggers:          hasTriggers(&dc),
-				HasLifecycleHooks:    hasLifecycleHooks(&dc),
-				HasAutoRollbacks:     hasAutoRollbacks(&dc),
-				UsesCustomStrategies: usesCustomStrategies(&dc),
-			}
-
-			deployment, err := convertDCtoDeployment(&dc)
-			if err != nil {
-				logErr := logMessage(fmt.Sprintf("Error converting DeploymentConfig %s in project %s: %v", dc.GetName(), namespace, err))
-				if logErr != nil {
-					fmt.Printf("Failed to log message: %v\n", logErr)
-				}
-				return
-			}
-
-			if err := saveDeploymentYAML(deployment, namespace); err != nil {
-				logErr := logMessage(fmt.Sprintf("Error saving Deployment YAML for %s in project %s: %v", deployment.GetName(), namespace, err))
-				if logErr != nil {
-					fmt.Printf("Failed to log message: %v\n", logErr)
-				}
-				return
-			}
-
-			if applyChanges {
-				if err := applyDeployment(client, deployment); err != nil {
-					logErr := logMessage(fmt.Sprintf("Error applying Deployment %s in project %s: %v", deployment.GetName(), namespace, err))
-					if logErr != nil {
-						fmt.Printf("Failed to log message: %v\n", logErr)
-					}
-				}
-			}
-
-			conversionInfos = append(conversionInfos, conversionInfo)
-		}()
+	if s.Template.Spec.ActiveDeadlineSeconds != nil || len(s.Template.Spec.EphemeralContainers) > 0 {
+		return c, errors.New("Deployment templates cannot contain activeDeadlineSeconds or ephemeralContainers")
 	}
-
-	return nil
-}
-
-func convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	deployment := &unstructured.Unstructured{
-		Object: map[string]interface{}{
-			"apiVersion": "apps/v1",
-			"kind":       "Deployment",
-		},
+	if len(s.Template.Spec.Containers) == 0 {
+		return c, errors.New("source requires at least one container")
 	}
-
-	if err := copyMetadata(dc, deployment); err != nil {
-		return nil, fmt.Errorf("failed to copy metadata: %w", err)
+	names := map[string]bool{}
+	for _, ctr := range s.Template.Spec.Containers {
+		if len(validation.IsDNS1123Label(ctr.Name)) > 0 || names[ctr.Name] || ctr.Image == "" {
+			return c, errors.New("containers require distinct valid names and nonempty images")
+		}
+		names[ctr.Name] = true
 	}
-
-	if err := convertSpec(dc, deployment); err != nil {
-		return nil, fmt.Errorf("failed to convert spec: %w", err)
+	if s.Replicas == nil {
+		v := int32(0)
+		s.Replicas = &v
+		c.Warnings = append(c.Warnings, "Omitted DC replicas defaults to 0; destination remains scaled to zero.")
 	}
-
-	cleanupDeploymentConfig(deployment)
-
-	return deployment, nil
-}
-
-func copyMetadata(dc, deployment *unstructured.Unstructured) error {
-	metadata, found, err := unstructured.NestedMap(dc.Object, "metadata")
-	if err != nil {
-		return fmt.Errorf("error getting metadata: %w", err)
+	if *s.Replicas < 0 || s.MinReadySeconds < 0 || (s.RevisionHistoryLimit != nil && *s.RevisionHistoryLimit < 0) {
+		return c, errors.New("replicas, minReadySeconds and revisionHistoryLimit must be nonnegative")
 	}
-	if !found {
-		return fmt.Errorf("metadata not found in DeploymentConfig")
+	if s.Template.Spec.RestartPolicy != "" && s.Template.Spec.RestartPolicy != corev1.RestartPolicyAlways {
+		return c, errors.New("Deployment pods require restartPolicy Always")
 	}
-
-	newMetadata := make(map[string]interface{})
-	newMetadata["name"] = metadata["name"]
-	newMetadata["namespace"] = metadata["namespace"]
-
-	if preserveLabels {
-		if labels, ok := metadata["labels"].(map[string]interface{}); ok {
-			newLabels := make(map[string]interface{})
-			for k, v := range labels {
-				if !contains(dcSpecificLabels, k) {
-					newLabels[k] = v
-				}
-			}
-			if len(newLabels) > 0 {
-				newMetadata["labels"] = newLabels
+	deadline := int32(600)
+	if s.MinReadySeconds >= deadline {
+		if s.MinReadySeconds == math.MaxInt32 {
+			return c, errors.New("minReadySeconds leaves no valid Deployment progress deadline; manual migration required")
+		}
+		deadline = s.MinReadySeconds + 1
+		c.Warnings = append(c.Warnings, "Deployment progress deadline raised above preserved minReadySeconds.")
+	}
+	id := migrationID(dc)
+	dep := &appsv1.Deployment{TypeMeta: metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"}, ObjectMeta: metav1.ObjectMeta{Name: dc.GetName(), Namespace: dc.GetNamespace(), Annotations: map[string]string{sourceAnnotation: string(dc.GetUID())}}, Spec: appsv1.DeploymentSpec{Replicas: s.Replicas, Paused: s.Paused, MinReadySeconds: s.MinReadySeconds, ProgressDeadlineSeconds: &deadline, RevisionHistoryLimit: s.RevisionHistoryLimit, Selector: &metav1.LabelSelector{MatchLabels: map[string]string{migrationLabel: id}}, Template: *s.Template.DeepCopy()}}
+	if r.Options.PreserveLabels {
+		dep.Labels = maps.Clone(dc.GetLabels())
+		for _, k := range dcSpecificLabels {
+			delete(dep.Labels, k)
+		}
+	}
+	if r.Options.PreserveAnnotations {
+		for k, v := range dc.GetAnnotations() {
+			if !contains(dcSpecificAnnotations, k) && k != imageTriggerAnnotation && k != "kubectl.kubernetes.io/last-applied-configuration" {
+				dep.Annotations[k] = v
 			}
 		}
 	}
+	dep.Annotations[sourceAnnotation] = string(dc.GetUID())
+	delete(dep.Annotations, "openshift.io/migration-timestamp")
+	dep.Labels = ensureMap(dep.Labels)
+	dep.Labels[migrationLabel] = id
+	dep.Spec.Template.Labels = ensureMap(dep.Spec.Template.Labels)
+	if old := dep.Spec.Template.Labels[migrationLabel]; old != "" {
+		return c, errors.New("source uses reserved migration label")
+	}
+	dep.Spec.Template.Labels[migrationLabel] = id
 
-	newAnnotations := make(map[string]interface{})
-	if preserveAnnotations {
-		if annotations, ok := metadata["annotations"].(map[string]interface{}); ok {
-			for k, v := range annotations {
-				if !contains(dcSpecificAnnotations, k) {
-					newAnnotations[k] = v
-				}
-			}
+	for _, key := range dcSpecificAnnotations {
+		delete(dep.Spec.Template.Annotations, key)
+	}
+	if _, found := s.Template.Labels["pod-template-hash"]; found {
+		c.Unsupported = append(c.Unsupported, "pod-template-hash is replaced by Deployment controllers; review dependent selectors manually")
+	}
+	if len(s.Template.OwnerReferences) > 0 || len(s.Template.Finalizers) > 0 {
+		c.Unsupported = append(c.Unsupported, "pod template owner references/finalizers require a manual lifecycle review")
+	}
+	dep.Spec.Template.ObjectMeta = metav1.ObjectMeta{Labels: dep.Spec.Template.Labels, Annotations: dep.Spec.Template.Annotations}
+	c.Deployment = dep
+	storageProblems := unsupportedInlineVolumes(dep.Spec.Template.Spec.Volumes)
+	if r.Options.Mode == "rollback" {
+		// A newly introduced portability guard must not prevent explicit
+		// recovery of an older saved plan. Ownership, source semantics and
+		// restored readiness/health remain verified by the recovery procedure.
+		if len(storageProblems) > 0 {
+			c.Warnings = append(c.Warnings, "Legacy storage portability checks are bypassed for explicit recovery; restored source readiness and health are still required.")
+		}
+	} else {
+		c.Unsupported = append(c.Unsupported, storageProblems...)
+	}
+	for key := range raw {
+		if !contains([]string{"replicas", "selector", "template", "paused", "test", "minReadySeconds", "revisionHistoryLimit", "strategy", "triggers"}, key) {
+			c.Unsupported = append(c.Unsupported, "spec."+key+" needs a manual equivalent")
 		}
 	}
-
-	newAnnotations["openshift.io/generated-by"] = "deploymentconfig-to-deployment-migration"
-	newAnnotations["openshift.io/migration-timestamp"] = time.Now().Format(time.RFC3339)
-	newMetadata["annotations"] = newAnnotations
-
-	return unstructured.SetNestedMap(deployment.Object, newMetadata, "metadata")
-}
-
-func convertSpec(dc, deployment *unstructured.Unstructured) error {
-	spec, found, err := unstructured.NestedMap(dc.Object, "spec")
-	if err != nil {
-		return fmt.Errorf("error getting spec: %w", err)
-	}
-	if !found {
-		return fmt.Errorf("spec not found in DeploymentConfig")
-	}
-
-	if err := setReplicas(spec, deployment); err != nil {
-		return fmt.Errorf("failed to set replicas: %w", err)
-	}
-
-	if err := setSelector(spec, deployment); err != nil {
-		return fmt.Errorf("failed to set selector: %w", err)
-	}
-
-	if err := setTemplate(spec, deployment); err != nil {
-		return fmt.Errorf("failed to set template: %w", err)
-	}
-
-	if err := setStrategy(spec, deployment); err != nil {
-		return fmt.Errorf("failed to set strategy: %w", err)
-	}
-
-	return nil
-}
-
-func setReplicas(spec map[string]interface{}, deployment *unstructured.Unstructured) error {
-	replicas, found, err := unstructured.NestedInt64(spec, "replicas")
-	if err != nil {
-		return fmt.Errorf("error getting replicas: %w", err)
-	}
-	if !found {
-		replicas = 1 // Default to 1 if not specified
-	}
-	return unstructured.SetNestedField(deployment.Object, replicas, "spec", "replicas")
-}
-
-func setSelector(spec map[string]interface{}, deployment *unstructured.Unstructured) error {
-	selector, found, err := unstructured.NestedMap(spec, "selector")
-	if err != nil {
-		return fmt.Errorf("error getting selector: %w", err)
-	}
-	if !found {
-		return fmt.Errorf("selector not found in DeploymentConfig spec")
-	}
-
-	delete(selector, "deploymentconfig")
-
-	return unstructured.SetNestedMap(deployment.Object, map[string]interface{}{"matchLabels": selector}, "spec", "selector")
-}
-
-func setTemplate(spec map[string]interface{}, deployment *unstructured.Unstructured) error {
-	template, found, err := unstructured.NestedMap(spec, "template")
-	if err != nil {
-		return fmt.Errorf("error getting template: %w", err)
-	}
-	if !found {
-		return fmt.Errorf("template not found in DeploymentConfig spec")
-	}
-
-	if templateMetadata, ok := template["metadata"].(map[string]interface{}); ok {
-		if labels, ok := templateMetadata["labels"].(map[string]interface{}); ok {
-			delete(labels, "deploymentconfig")
+	strategy, _, _ := unstructured.NestedMap(raw, "strategy")
+	for key, val := range strategy {
+		if !contains([]string{"type", "rollingParams", "recreateParams", "resources", "activeDeadlineSeconds", "annotations", "labels"}, key) {
+			c.Unsupported = append(c.Unsupported, "strategy."+key+" needs manual migration")
+		}
+		if contains([]string{"resources", "annotations", "labels"}, key) && nonempty(val) {
+			c.Unsupported = append(c.Unsupported, "deployer "+key+" has no Deployment equivalent")
 		}
 	}
-
-	return unstructured.SetNestedMap(deployment.Object, template, "spec", "template")
-}
-
-func setStrategy(spec map[string]interface{}, deployment *unstructured.Unstructured) error {
-	strategy, found, err := unstructured.NestedMap(spec, "strategy")
-	if err != nil {
-		return fmt.Errorf("error getting strategy: %w", err)
-	}
-	if !found {
-		return nil // No strategy to set
-	}
-
-	deploymentStrategy := map[string]interface{}{}
-	strategyType, _, _ := unstructured.NestedString(strategy, "type")
-
-	switch strategyType {
-	case "Rolling":
-		deploymentStrategy["type"] = "RollingUpdate"
-		if rollingParams, ok := strategy["rollingParams"].(map[string]interface{}); ok {
-			updateStrategy := map[string]interface{}{}
-			if maxUnavailable, exists := rollingParams["maxUnavailable"]; exists {
-				updateStrategy["maxUnavailable"] = maxUnavailable
+	switch s.Strategy.Type {
+	case "", "Rolling":
+		dep.Spec.Strategy.Type = appsv1.RollingUpdateDeploymentStrategyType
+		dep.Spec.Strategy.RollingUpdate = &appsv1.RollingUpdateDeployment{MaxSurge: intstrPtr("25%"), MaxUnavailable: intstrPtr("25%")}
+		if p := s.Strategy.RollingParams; p != nil {
+			if p.MaxSurge != nil {
+				dep.Spec.Strategy.RollingUpdate.MaxSurge = p.MaxSurge
 			}
-			if maxSurge, exists := rollingParams["maxSurge"]; exists {
-				updateStrategy["maxSurge"] = maxSurge
+			if p.MaxUnavailable != nil {
+				dep.Spec.Strategy.RollingUpdate.MaxUnavailable = p.MaxUnavailable
 			}
-			deploymentStrategy["rollingUpdate"] = updateStrategy
+		}
+		for index, v := range []*intstr.IntOrString{dep.Spec.Strategy.RollingUpdate.MaxSurge, dep.Spec.Strategy.RollingUpdate.MaxUnavailable} {
+			if err := validateLimit(v, index == 1); err != nil {
+				return c, err
+			}
+		}
+		ru := dep.Spec.Strategy.RollingUpdate
+		if intstrValueZero(ru.MaxSurge) && intstrValueZero(ru.MaxUnavailable) {
+			return c, errors.New("maxSurge and maxUnavailable cannot both be zero")
 		}
 	case "Recreate":
-		deploymentStrategy["type"] = "Recreate"
+		dep.Spec.Strategy.Type = appsv1.RecreateDeploymentStrategyType
 	default:
-		deploymentStrategy["type"] = "RollingUpdate"
+		c.Unsupported = append(c.Unsupported, "strategy "+s.Strategy.Type+": replace custom deployer with an explicit supported strategy")
 	}
-
-	return unstructured.SetNestedMap(deployment.Object, deploymentStrategy, "spec", "strategy")
+	if hasLifecycleHooks(dc) {
+		c.Unsupported = append(c.Unsupported, "deployment hooks: migrate hooks to reviewed Jobs or application lifecycle handling")
+	}
+	for _, p := range []string{"rollingParams", "recreateParams"} {
+		params, _, _ := unstructured.NestedMap(strategy, p)
+		for key := range params {
+			if !contains([]string{"maxSurge", "maxUnavailable", "intervalSeconds", "updatePeriodSeconds", "timeoutSeconds", "pre", "mid", "post"}, key) {
+				c.Unsupported = append(c.Unsupported, "strategy."+p+"."+key+" has no supported equivalent")
+			}
+		}
+	}
+	if s.Test {
+		c.Unsupported = append(c.Unsupported, "test DeploymentConfig: use a separately reviewed Job")
+	}
+	c.Warnings = append(c.Warnings, "Deployment rollout failure does not guarantee DC automatic rollback; use the explicit recovery procedure.", "DC deployer timing and deadline behavior is not reproduced; Deployment readiness uses its own deadline.")
+	rawTriggers, _, _ := unstructured.NestedSlice(raw, "triggers")
+	for _, value := range rawTriggers {
+		tr, ok := value.(map[string]interface{})
+		if !ok {
+			return c, errors.New("trigger must be an object")
+		}
+		for key := range tr {
+			if !contains([]string{"type", "imageChangeParams"}, key) {
+				c.Unsupported = append(c.Unsupported, "trigger field "+key+" is unsupported")
+			}
+		}
+		if p, ok := tr["imageChangeParams"].(map[string]interface{}); ok {
+			for key := range p {
+				if !contains([]string{"automatic", "containerNames", "from", "lastTriggeredImage"}, key) {
+					c.Unsupported = append(c.Unsupported, "image trigger field "+key+" is unsupported")
+				}
+			}
+		}
+	}
+	configAuto := false
+	_, triggersPresent := raw["triggers"]
+	if !triggersPresent || raw["triggers"] == nil {
+		configAuto = true
+		c.Warnings = append(c.Warnings, "Omitted triggers uses the DC API ConfigChange default.")
+	}
+	var triggers []imageTrigger
+	targeted := map[string]bool{}
+	for _, tr := range s.Triggers {
+		switch tr.Type {
+		case "ConfigChange":
+			if tr.ImageChangeParams != nil {
+				c.Unsupported = append(c.Unsupported, "ConfigChange cannot carry ImageChange parameters")
+			}
+			configAuto = true
+		case "ImageChange":
+			p := tr.ImageChangeParams
+			if p == nil || p.From.Kind != "ImageStreamTag" || len(p.ContainerNames) == 0 || !validImageStreamTag(p.From.Name) {
+				c.Unsupported = append(c.Unsupported, "ImageChange requires ImageStreamTag name:tag and explicit containers")
+				continue
+			}
+			if p.From.UID != "" || p.From.ResourceVersion != "" || p.From.FieldPath != "" || (p.From.APIVersion != "" && p.From.APIVersion != "image.openshift.io/v1") {
+				c.Unsupported = append(c.Unsupported, "ImageChange has pinned/unsupported source reference fields")
+				continue
+			}
+			if p.From.Namespace != "" && len(validation.IsDNS1123Label(p.From.Namespace)) > 0 {
+				return c, errors.New("invalid ImageStream source namespace")
+			}
+			for _, name := range p.ContainerNames {
+				if !names[name] || targeted[name] {
+					c.Unsupported = append(c.Unsupported, "ImageChange container "+name+" is missing or targeted more than once")
+					continue
+				}
+				targeted[name] = true
+				triggers = append(triggers, imageTrigger{From: imageFrom{Kind: "ImageStreamTag", Name: p.From.Name, Namespace: p.From.Namespace}, FieldPath: fmt.Sprintf("spec.template.spec.containers[?(@.name==%q)].image", name), Paused: !p.Automatic || s.Paused})
+			}
+		default:
+			c.Unsupported = append(c.Unsupported, "trigger "+tr.Type+" needs manual migration")
+		}
+	}
+	if !configAuto {
+		dep.Spec.Paused = true
+		c.Unsupported = append(c.Unsupported, "ConfigChange is disabled: Deployment template edits roll out automatically; keep paused and design a manual rollout procedure")
+	}
+	if len(triggers) > 0 {
+		b, _ := json.Marshal(triggers)
+		dep.Annotations[imageTriggerAnnotation] = string(b)
+	}
+	if len(c.Unsupported) > 0 {
+		dep.Spec.Paused = true
+	}
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(dep)
+	if err != nil {
+		return c, err
+	}
+	if err = validateBaseline(obj, "io.k8s.api.apps.v1.Deployment"); err != nil {
+		return c, err
+	}
+	return c, nil
+}
+func (r *Runner) convertDCtoDeployment(dc *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+	c, err := r.Convert(dc)
+	if err != nil {
+		return nil, err
+	}
+	if len(c.Unsupported) > 0 {
+		return nil, fmt.Errorf("manual migration required: %s", strings.Join(c.Unsupported, "; "))
+	}
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(c.Deployment)
+	return &unstructured.Unstructured{Object: obj}, err
+}
+func ensureMap(m map[string]string) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return m
+}
+func nonempty(v interface{}) bool {
+	switch x := v.(type) {
+	case map[string]interface{}:
+		return len(x) > 0
+	case nil:
+		return false
+	default:
+		return true
+	}
+}
+func intstrPtr(s string) *intstr.IntOrString { v := intstr.FromString(s); return &v }
+func intstrValueZero(v *intstr.IntOrString) bool {
+	return v != nil && ((v.Type == intstr.Int && v.IntVal == 0) || (v.Type == intstr.String && v.StrVal == "0%"))
+}
+func validateLimit(v *intstr.IntOrString, unavailable bool) error {
+	if v.Type == intstr.Int {
+		if v.IntVal < 0 {
+			return errors.New("rolling limits must be nonnegative")
+		}
+		return nil
+	}
+	if !strings.HasSuffix(v.StrVal, "%") {
+		return errors.New("rolling limit must be an integer or percentage")
+	}
+	n, err := intstr.GetScaledValueFromIntOrPercent(v, 100, false)
+	if err != nil || n < 0 || (unavailable && n > 100) {
+		return errors.New("rolling percentage must be nonnegative; maxUnavailable cannot exceed 100%")
+	}
+	return nil
 }
 
-func cleanupDeploymentConfig(deployment *unstructured.Unstructured) {
-	unstructured.RemoveNestedField(deployment.Object, "spec", "triggers")
-	unstructured.RemoveNestedField(deployment.Object, "spec", "test")
-	unstructured.RemoveNestedField(deployment.Object, "spec", "paused")
+func validImageStreamTag(name string) bool {
+	stream, tag, found := strings.Cut(name, ":")
+	return found && len(validation.IsDNS1123Subdomain(stream)) == 0 && regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$`).MatchString(tag)
 }

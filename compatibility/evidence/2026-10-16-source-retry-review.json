@@ -1,0 +1,425 @@
+{
+  "schemaVersion": "v1",
+  "kind": "release-note-compatibility-review",
+  "reviewedAt": "2026-10-16T15:03:19.879083+00:00",
+  "result": "assumed-compatible-with-prerequisites",
+  "reviewComplete": true,
+  "scope": "Conventional Kubernetes1.27 baseline workload semantics and the inventoried converter/qualification resources, with explicit manual feature guards and platform/runtime prerequisites. Official OpenShift4.14\u20134.21 and Kubernetes1.27\u20131.34 source-impact review; not a blanket security, scheduler or arbitrary-extension certification. Refreshed for aligned Kubernetes0.37.1 and the narrowly assessed client/source changes below; prior0.31.3 results remain historical.",
+  "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "assumedCompatibleReleases": [
+    "4.14",
+    "4.15",
+    "4.16",
+    "4.17",
+    "4.18",
+    "4.19",
+    "4.20"
+  ],
+  "actualIntegrationResultsForAssumedReleases": "not-run; older clusters unavailable",
+  "unresolvedApplicableFindings": [],
+  "assessments": [
+    {
+      "minor": "4.14",
+      "kubernetes": "1.27",
+      "path": "compatibility/reviews/4.14-assessment.json",
+      "sha256": "d03db983462b18bfe9a196b9d4351e9c5940eb9672ed25048a7059ed591a38ae",
+      "findings": 10,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.15",
+      "kubernetes": "1.28",
+      "path": "compatibility/reviews/4.15-assessment.json",
+      "sha256": "2912e90d9382991054ef956e870e3a2894df8f342f7fa6f560d989598d690396",
+      "findings": 16,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.16",
+      "kubernetes": "1.29",
+      "path": "compatibility/reviews/4.16-assessment.json",
+      "sha256": "9bbfda711f4e15061f5b97494a42e82d9ef48885db82b4a2a9b4ab2e3e679248",
+      "findings": 19,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.17",
+      "kubernetes": "1.30",
+      "path": "compatibility/reviews/4.17-assessment.json",
+      "sha256": "d1afa8e4e56e058f58875b2602ed90d8d4573785fe3802132c14cf2d1d02ddfc",
+      "findings": 16,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.18",
+      "kubernetes": "1.31",
+      "path": "compatibility/reviews/4.18-assessment.json",
+      "sha256": "80dff4b11c1ae607f132e06ef5b6a8a133552cdfccb66112315bd433845ddfbf",
+      "findings": 18,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.19",
+      "kubernetes": "1.32",
+      "path": "compatibility/reviews/4.19-assessment.json",
+      "sha256": "06cdd29b9eb72c54b2b21672ea11c1d080c8d9ef6deb6de431a9ea4621db486b",
+      "findings": 9,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.20",
+      "kubernetes": "1.33",
+      "path": "compatibility/reviews/4.20-assessment.json",
+      "sha256": "d753474b6cee1d7c6ac28592f1ea735c90eb24fce65f3a23bd648734a1f9ee40",
+      "findings": 10,
+      "basis": "source review; no integration pass inferred"
+    },
+    {
+      "minor": "4.21",
+      "kubernetes": "1.34",
+      "path": "compatibility/reviews/4.21-assessment.json",
+      "sha256": "1cdaaf47994f3f406be54b0588ac2fcff9be8977e713c4e63f68047faa628b1e",
+      "findings": 10,
+      "basis": "source review; no integration pass inferred"
+    }
+  ],
+  "resolutionOverlay": [
+    {
+      "findings": [
+        "STORAGE-PV-TOPOLOGY-LABELS",
+        "PV-ZONE-TOPOLOGY"
+      ],
+      "resolution": "10f72e4 conservatively refuses PV metadata beta/GA zone/region labels before source/HPA changes; no cross-version scheduler fallback is assumed.",
+      "regression": "32 contract variants incorrectly passed before fix; fixed full330test/subtest race suite passed."
+    },
+    {
+      "findings": [
+        "APPARMOR"
+      ],
+      "resolution": "Existing raw response guard is sufficient;10f72e4 adds four SCC/Pod preflight/cutover field regressions. No unsupported-profile startup compatibility is promised."
+    },
+    {
+      "findings": [
+        "QUOTA-PRIORITYCLASS-FLOOR"
+      ],
+      "resolution": "Primary backport/payload evidence confirms fix in Kubernetes1.27.2 before OpenShift4.14.0 Kubernetes1.27.6. Existing scope semantics match; no additional guard needed."
+    },
+    {
+      "findings": [
+        "AUTH-ACCESS-REVIEW-VERSION"
+      ],
+      "resolution": "Explicit endpoint API versions implemented0dcf787 and version-sensitive local authorizer profiles pass."
+    },
+    {
+      "findings": [
+        "CLIENT-MAINTENANCE",
+        "421-TAINT-ENUM"
+      ],
+      "resolution": "Aligned0.37.1 adopted with baseline operator and strictJSON adapters;356race cases/subtests inclSDK JSONfeature/subprocess contracts pass. Prior isolated293-case result was candidate-only and is not final qualification."
+    }
+  ],
+  "prerequisites": [
+    "Use an appropriately vendor-patched cluster; conditional known fixes are tabulated below and in docs/compatibility-review.md.",
+    "Unsupported/post-baseline features require manual migration. PV topology labels require manual scheduling review; do not delete them to bypass the guard.",
+    "CSI drivers, attachment limits, mount/relabel/ID-mapped filesystem support and hardware/runtime profiles require operator validation.",
+    "Valid credentials, actual workload-SA SCC rights, working registry/mirrors/image trust and image-pull credentials are required.",
+    "HTTP and Endpoint UID checks do not prove UDP, external-gateway, secondary-network or every CNI traffic path; use application-specific checks.",
+    "Preflight is a point-in-time assessment; it reserves no quota/capacity and cannot guarantee later admission, image pull or startup."
+  ],
+  "conditionalPatchPrerequisites": [
+    {
+      "minor": "4.17",
+      "documentedFixRelease": "4.17.45",
+      "conditionalWorkload": "shareProcessNamespace=true with affected runc",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-65977",
+      "source": {
+        "source": "redhat-modules/ocp-4.17/modules/zstream-4-17-45.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/modules/zstream-4-17-45.adoc#L60",
+        "line": 60,
+        "endLine": 60,
+        "sourceSHA256": "8f6c29679bc000ad5319f341d08a506543ead82675998528beabe7ce67272c5f",
+        "excerptSHA256": "c6c82835a9ef8c804be0b38fbd529c9ab8804d67827c2d1713743a53cda2b9eb"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.17",
+      "documentedFixRelease": "4.17.49",
+      "conditionalWorkload": "OVN UDP Service port differs from targetPort",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-71985",
+      "source": {
+        "source": "redhat-modules/ocp-4.17/modules/zstream-4-17-49.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/modules/zstream-4-17-49.adoc#L26",
+        "line": 26,
+        "endLine": 26,
+        "sourceSHA256": "ee759abbf07512b59774378eff644423602f75138d1e40275924f73dbd4260ad",
+        "excerptSHA256": "6a3c38c416b2cec186d417a61b3a371e3f1dc38650237ec946c000e882ceed3b"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.17",
+      "documentedFixRelease": "4.17.51",
+      "conditionalWorkload": "OVN UDP remote-backend NodePort/LoadBalancer cleanup",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-77568",
+      "source": {
+        "source": "redhat-modules/ocp-4.17/modules/zstream-4-17-51.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/modules/zstream-4-17-51.adoc#L32",
+        "line": 32,
+        "endLine": 32,
+        "sourceSHA256": "6216d7969dc0cde2ce3c141de291df157a1084bea6ba169bd49798dd2e610322",
+        "excerptSHA256": "790a6937d1c79aa5ce7d7b7da1463e4490e383df9d12fc80fca5b42e8ac30399"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.17",
+      "documentedFixRelease": "4.17.52",
+      "conditionalWorkload": "systemd entrypoint ConfigMap mount permissions",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-69673",
+      "source": {
+        "source": "redhat-modules/ocp-4.17/modules/zstream-4-17-52.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/modules/zstream-4-17-52.adoc#L26",
+        "line": 26,
+        "endLine": 26,
+        "sourceSHA256": "a4c8cdf715b24937cb15331b18f97a5178d1d8e49cb4ad4fc891eca84df52553",
+        "excerptSHA256": "178595ec988bf1006997390c13e5ebf92e83e585f983eab9dc6a7af4b3f6b2fe"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.18",
+      "documentedFixRelease": "4.18.30",
+      "conditionalWorkload": "shareProcessNamespace=true with affected runc",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-65976",
+      "source": {
+        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-30-bug-fixes.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-30-bug-fixes.adoc#L29",
+        "line": 29,
+        "endLine": 29,
+        "sourceSHA256": "5f9f8010988c10c50dc50405d397618c18db31e19603f717e09d6eda5192a094",
+        "excerptSHA256": "478112f233f6cdf9e9008c6eb23188c9c9a4862ec85df926775c287139b3de31"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.18",
+      "documentedFixRelease": "4.18.32",
+      "conditionalWorkload": "OVN UDP Service port differs from targetPort",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-70346",
+      "source": {
+        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L14",
+        "line": 14,
+        "endLine": 14,
+        "sourceSHA256": "0a7428ad7703f5bfdc9e5cb20d46fc4c1ae02293811ebc38dbca7491cf26db2f",
+        "excerptSHA256": "c617962699e6d4c152957eedf042a451a1a5bb722ae92060b8a004626579f348"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.18",
+      "documentedFixRelease": "4.18.34",
+      "conditionalWorkload": "systemd entrypoint ConfigMap mount permissions",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-69672",
+      "source": {
+        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L28",
+        "line": 28,
+        "endLine": 28,
+        "sourceSHA256": "c87305ccff900be5a57497c91a10261f485b6d767066fa41f17e98ab2aac994b",
+        "excerptSHA256": "020ac9ddeb0b69c2c18d63bd1cd60f631b21bc1d305083296260abe3f9e598ba"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    },
+    {
+      "minor": "4.18",
+      "documentedFixRelease": "4.18.38",
+      "conditionalWorkload": "external-gateway stale route after Pod deletion while node inactive",
+      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-81329",
+      "source": {
+        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
+        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L30",
+        "line": 30,
+        "endLine": 30,
+        "sourceSHA256": "1c14f3baddd99aba9209a0683c3cc707b79cf251563c41ba23270eef45022673",
+        "excerptSHA256": "bc6dd42ed91a89dbcab6152569871d51b39f94dd39ba57bfdcf81336dea3351c"
+      },
+      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
+    }
+  ],
+  "clientDecision": {
+    "alignedVersions": "v0.37.1",
+    "adopted": true,
+    "minimumServer": "OpenShift4.14 / Kubernetes1.27 retained",
+    "metadataVerification": "Official module-proxy latest metadata verified2026-10-16; modules requireGo1.26, projectGo1.27.2 satisfies it.",
+    "upstreamSources": [
+      {
+        "module": "k8s.io/api",
+        "version": "v0.37.1",
+        "file": "go.mod",
+        "sha256": "bebe2bce11416d935416e9ecf19f4a618d29b443e3fbcbfb5724b9708804c3a7",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/api",
+        "version": "v0.37.1",
+        "file": "core/v1/toleration.go",
+        "sha256": "a9b8ef30d65736ba4ac61b8ab3ffde3915aa51b9406bafa7b4643030d3733979",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/apimachinery",
+        "version": "v0.37.1",
+        "file": "go.mod",
+        "sha256": "59934cc9649eabdcc4894b41ac5324b40fce31f827376d1b55258ce588963dc0",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/apimachinery",
+        "version": "v0.37.1",
+        "file": "pkg/runtime/serializer/cbor/direct/direct.go",
+        "sha256": "97053be737a01b5709d80d7ec4c89d7447756b9b85deb5963a203fba4ae580c0",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "go.mod",
+        "sha256": "789557b996c444fd08886cca24245f4e29a55388dfe4261409a5e0e7ff118f70",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "CHANGELOG.md",
+        "sha256": "3f3d5041f490c36d96534436ab060085e7dc08e688cf124510cd58da455faa21",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "dynamic/simple.go",
+        "sha256": "e0eac85a93eb7be8577e5ca053520eb9020de748e458d23e0aa0cec7a8516b10",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "dynamic/scheme.go",
+        "sha256": "fe7a87be185675f161081aaa98a4ad30daa9d60f760d0810aad626747c33cf94",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/client.go",
+        "sha256": "c1f88a8e78297b7982a3d2f7dd27ac0877c4b731e422593116eb12dfa0964cf3",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/config.go",
+        "sha256": "cae52f0a685c104d1af5b32cf8f95a6ff45366ed9db520a23116da64decef808",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/request.go",
+        "sha256": "d6c270a6b408fe9266a5e828c9d6033019742d511fb7e4c1433beaa67e37e044",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "features/known_features.go",
+        "sha256": "9932f4d23cf7da222206a0f3967f8fb49a3d21627e2c4c5eabf227fa3033a48b",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "kubernetes/clientset.go",
+        "sha256": "fbadabf9d19f73026f35922d055838066db0df41456f92cd95831166d35c4e72",
+        "source": "official Go module archive verified by go.sum and go mod verify"
+      }
+    ],
+    "assessment": [
+      "ToleratesTaint now needs logger/feature argument; numeric comparison remains explicitly disabled. Eleven placement cases preserve Equal/Exists/default/wildcard/NoExecute policy.",
+      "Swagger lacks enum values for Toleration.operator;263d70e explicitly retains1.27 values in source and SCC/Pod responses. Before-fix source/admission tests reproduced acceptance; guards pass.",
+      "Dynamic ConfigFor overrides explicitJSON when ambient CBOR flags are enabled. Reproduced nonJSONAccept and CBORbody; new per-client constructor reassertsJSON after upstream defaults and filters negotiation toJSON. Subprocess regression enables bothflags and checks dynamic reads/writes, typedSSAR, and rejection ofCBORresponses. No process-global feature state mutation.",
+      "Production discovery uses context-bounded exact/APIgroup-version REST paths, not removed aggregated v2beta1 discovery helpers. Generated clientset additions do not create requests until called.",
+      "No production informers/watchlist/cache APIs or removedTLS stop-channel API are called; pagination/readiness use existing explicit lists/polls. New unused generated types do not imply later server capabilities.",
+      "Client transport still uses normal kubeconfig loading/authentication; actual API errors and deadlines remain authoritative.",
+      "All postbaseline raw source/admission/resource fields continue to require manual review before typeddecode; SDK type knowledge does not widen automatic feature support."
+    ],
+    "limitations": [
+      "Review assumption is source/dependency/fixture-bound, not an old-server integration pass.",
+      "Broad live final-artifact qualification and newestGA/platform matrix remain separate release gates."
+    ]
+  },
+  "validation": {
+    "raceTestsIncludingSubtests": 381,
+    "topLevelTests": 83,
+    "coveragePercent": 77.6,
+    "vet": "passed",
+    "moduleVerify": "passed",
+    "tidyDiff": "empty",
+    "govulncheckFindings": 0,
+    "gosecProductionIssues": 0,
+    "gosecProductionFiles": 20,
+    "scope": "Changed current production source; fresh actual OpenShift qualification recorded separately.",
+    "SDKRetryAfterRegression": "Before guard, committed source update attempted11HTTP PUTs; with guard exactly1PUT and explicit recovery error. Same constructor used in production."
+  },
+  "remainingReleaseQualification": [
+    "Broader supplemental scenarios on the final exact artifact remain required.",
+    "Actual4.21 and newestGA4.22/native-platform qualification remain separate release requirements; review assumptions are authorized only for4.14\u20134.20.",
+    "Final maintenance-plan audit remains unfinished; maintained clients are adopted in source."
+  ],
+  "baseReviewEvidence": "compatibility/evidence/2026-10-16-client-upgrade-review.json",
+  "baseProductionSourceSHA256": "af50a884b9f560577c2b11696c23f130b3612b70d8bdc446771c463203f45e26",
+  "baseDependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "codeProvenance": "Current production source digest; bounded source-conflict retry implementation committed with this assessment.",
+  "baseReviewSHA256": "295bf8addaa737e70d71db5412b4fd6197d84346c7a87f4d092c2671583bafb5",
+  "sourceRetryDelta": {
+    "resources": [
+      "apps.openshift.io/v1 deploymentconfigs"
+    ],
+    "newResourcesOrFields": false,
+    "newPermissions": false,
+    "changes": [
+      "At most five attempts per source transition, with cancellation-aware100/200/400/800ms waits.",
+      "Only definite source Update conflict responses are retried. Each attempt refetches, checks original UID/deletion, and pins the entire initially observed spec; any spec drift stops even if it matches another migration state.",
+      "StrictJSON and baseline-field protections remain unchanged. Repeated server dry run uses the same baseline API and current resourceVersion. Initial staged-plan freshness is still strict.",
+      "Lost committed-write responses, EOF,504Timeout and503ServiceUnavailable are not retried; intent journal and explicit rollback path preserved.",
+      "No SDK/dependency/fixture change, optional discovery change, newer API dependency or server feature requirement. Existing4.14\u20134.20 assumptions and conditional prerequisites remain applicable to this bounded delta.",
+      "Dynamic PUT requests set MaxRetries(0) on the existing REST request. This prevents hidden SDK replays of503/504 responses with Retry-After. The source loop remains the sole retry owner; no API fields, permissions or dependency changes."
+    ],
+    "basis": "Task-directed current source/HTTP-contract review atop completed official4.14\u20134.21 release/Kubernetes assessments. No new old-server integration result inferred.",
+    "clientSourceEvidence": [
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/with_retry.go",
+        "sha256": "72f140a151ca1fa553644ab503b2148d09dff0c819892a5bc9952fe54874dd16"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/request.go",
+        "sha256": "d6c270a6b408fe9266a5e828c9d6033019742d511fb7e4c1433beaa67e37e044"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "dynamic/simple.go",
+        "sha256": "e0eac85a93eb7be8577e5ca053520eb9020de748e458d23e0aa0cec7a8516b10"
+      }
+    ]
+  },
+  "boundedRetryProductionSourceSHA256": "def725da76f7f50cdc0a18b5f689b57f53c4124940c3b2d11f67a5b70bc0f2ef"
+}

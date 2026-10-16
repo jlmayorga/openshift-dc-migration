@@ -1,0 +1,579 @@
+{
+  "schemaVersion": "v1",
+  "kind": "release-note-compatibility-review",
+  "status": "completed bounded source review; see parallel consolidation for final assumptions and resolution overlay",
+  "updatedAt": "2026-10-16T05:30:08.452503+00:00",
+  "codeRevisionAtInventory": "0dcf787d58c03c50a11275941881d73e57ebdf47",
+  "range": {
+    "minimum": "4.14",
+    "maximum": "4.20"
+  },
+  "assumedCompatibleReleases": [
+    "4.14",
+    "4.15",
+    "4.16",
+    "4.17",
+    "4.18",
+    "4.19",
+    "4.20"
+  ],
+  "integrationResult": "not-run for all reviewed-range targets",
+  "reviewComplete": true,
+  "method": {
+    "baseline": "Kubernetes 1.27.16 field catalog; JSON REST; capability discovery",
+    "sourceCollection": "Official openshift-docs release notes and literal referenced release/z-stream modules; official upstream changelogs. Downloads are not completed assessments.",
+    "publishedHTMLRetrieval": "Browser size limit/direct HTTP403; official immutable documentation-source fallback used.",
+    "graphVerification": "Tier2 path coverage and material source reads; API inventory is not proof of per-release behavior."
+  },
+  "targets": [
+    {
+      "openshiftMinor": "4.14",
+      "kubernetesMinor": "1.27",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.15",
+      "kubernetesMinor": "1.28",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.16",
+      "kubernetesMinor": "1.29",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.17",
+      "kubernetesMinor": "1.30",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/release_notes/ocp-4-17-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.18",
+      "kubernetesMinor": "1.31",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.19",
+      "kubernetesMinor": "1.32",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    },
+    {
+      "openshiftMinor": "4.20",
+      "kubernetesMinor": "1.33",
+      "mappingEvidence": "https://raw.githubusercontent.com/openshift/openshift-docs/08bc31a85b65f871838334f1cfd911ef08e77f69/release_notes/ocp-4-20-release-notes.adoc",
+      "assessmentStatus": "pending",
+      "compatibilityAssumption": null,
+      "actualIntegrationResult": "not-run"
+    }
+  ],
+  "sources": [
+    {
+      "name": "ocp-4.14",
+      "sourceCommit": "9e1779093c4cacdc324992e84c0b03900a3a9ffe",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.680936+00:00",
+      "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec",
+      "bytes": 392777
+    },
+    {
+      "name": "ocp-4.15",
+      "sourceCommit": "ed0612e21c09eafcc9492f79195fa38254c3e1f9",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.722351+00:00",
+      "sha256": "f66a33f7ccf7d8123b3b58b2715e6b3b2669760de75a3dce6baadc30d755d5bc",
+      "bytes": 363297
+    },
+    {
+      "name": "ocp-4.16",
+      "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.680521+00:00",
+      "sha256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
+      "bytes": 249716
+    },
+    {
+      "name": "ocp-4.17",
+      "sourceCommit": "6c0902cc63abcac6b44a6467ca42be285ec01aad",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/release_notes/ocp-4-17-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.680442+00:00",
+      "sha256": "57756df7b7ebea45274a747bb9cc1c50dff983145140f09197d84c25ef36b6aa",
+      "bytes": 297424
+    },
+    {
+      "name": "ocp-4.18",
+      "sourceCommit": "e3d56cca51bcae6fd417bde29798512fa5f40723",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.997575+00:00",
+      "sha256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
+      "bytes": 352348
+    },
+    {
+      "name": "ocp-4.19",
+      "sourceCommit": "eafb4a5cfd576aba7dd83307dd121274a52c4ab4",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:56.022947+00:00",
+      "sha256": "3a3818d20d59fbf1676979ed7ccc52c90dfab281486b79e4451f1996a58866b4",
+      "bytes": 296656
+    },
+    {
+      "name": "ocp-4.20",
+      "sourceCommit": "08bc31a85b65f871838334f1cfd911ef08e77f69",
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/08bc31a85b65f871838334f1cfd911ef08e77f69/release_notes/ocp-4-20-release-notes.adoc",
+      "retrievedAt": "2026-10-16T02:56:55.844552+00:00",
+      "sha256": "959f530de786077c34e7ddcb5b99b60e1e23e6dc482ac59cd19e9bef7b1e9ccf",
+      "bytes": 5153
+    },
+    {
+      "name": "kubernetes-1.27",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md",
+      "retrievedAt": "2026-10-16T02:55:21.916363+00:00",
+      "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c",
+      "bytes": 477502,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.28",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md",
+      "retrievedAt": "2026-10-16T02:55:21.951799+00:00",
+      "sha256": "56ac36a059f960dd61cb8c4bdbf443749cf1e33cd541029ad89dd8794c30fce9",
+      "bytes": 467915,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.29",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
+      "retrievedAt": "2026-10-16T02:55:22.001600+00:00",
+      "sha256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
+      "bytes": 439923,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.30",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md",
+      "retrievedAt": "2026-10-16T02:55:21.954159+00:00",
+      "sha256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
+      "bytes": 407670,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.31",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
+      "retrievedAt": "2026-10-16T02:55:22.316067+00:00",
+      "sha256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
+      "bytes": 462719,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.32",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.32.md",
+      "retrievedAt": "2026-10-16T02:55:22.169443+00:00",
+      "sha256": "20568d8771a44a51780f7d73855e2e21f34fc4b9e4fdb0506f93262edc7f7069",
+      "bytes": 481843,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    },
+    {
+      "name": "kubernetes-1.33",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md",
+      "retrievedAt": "2026-10-16T02:55:22.134664+00:00",
+      "sha256": "1d66bf92e7129d7424b3b27922447b9968388d0179ee0c2290e1ed913280be33",
+      "bytes": 413039,
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
+    }
+  ],
+  "referencedModuleCollection": {
+    "count": 274,
+    "manifestSHA256": "6c8d33cbd8926055b093bc19fa513224c2423dd43e29e9b052d6ccfb7f25e781",
+    "fetchErrors": 0,
+    "assessmentComplete": false
+  },
+  "productionAPIInventory": [
+    {
+      "groupVersion": "apps.openshift.io/v1",
+      "resources": [
+        "deploymentconfigs"
+      ],
+      "operations": "list/get; dry-run and actual update for retirement/restoration",
+      "sourceFiles": [
+        "runtime.go",
+        "planning.go",
+        "application.go",
+        "cutover.go",
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "apps/v1",
+      "resources": [
+        "deployments",
+        "replicasets",
+        "statefulsets",
+        "daemonsets"
+      ],
+      "operations": "Deployment get/create/update; ReplicaSet read/create-dry-run; StatefulSet/DaemonSet overlap inventory",
+      "sourceFiles": [
+        "planning.go",
+        "application.go",
+        "cutover.go",
+        "constraints.go",
+        "raw_resources.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "batch/v1",
+      "resources": [
+        "jobs"
+      ],
+      "operations": "controller overlap inventory only",
+      "sourceFiles": [
+        "planning.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "v1",
+      "resources": [
+        "pods",
+        "replicationcontrollers",
+        "services",
+        "endpoints",
+        "resourcequotas",
+        "limitranges",
+        "persistentvolumeclaims",
+        "persistentvolumes",
+        "nodes",
+        "namespaces"
+      ],
+      "operations": "read inventory/readiness/traffic/constraints; Pod create dry-run; target Namespace labels read only when optional cluster policies exist; no production storage provisioning",
+      "sourceFiles": [
+        "runtime.go",
+        "planning.go",
+        "cutover.go",
+        "constraints.go",
+        "quota.go",
+        "scheduling.go",
+        "storage.go",
+        "admin_policy.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "autoscaling/v2",
+      "resources": [
+        "horizontalpodautoscalers"
+      ],
+      "operations": "raw baseline validation, list/get, dry-run/actual delete/create freeze/retarget/restore",
+      "sourceFiles": [
+        "planning.go",
+        "constraints.go",
+        "cutover.go",
+        "raw_resources.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "networking.k8s.io/v1",
+      "resources": [
+        "networkpolicies"
+      ],
+      "operations": "read and compare selectors",
+      "sourceFiles": [
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "policy/v1",
+      "resources": [
+        "poddisruptionbudgets"
+      ],
+      "operations": "read synchronized availability budgets",
+      "sourceFiles": [
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "authorization.k8s.io/v1",
+      "resources": [
+        "selfsubjectaccessreviews",
+        "localsubjectaccessreviews"
+      ],
+      "operations": "ephemeral caller reviews; optional namespaced review of workload SA use of its required SCC when the subject review selected another policy",
+      "sourceFiles": [
+        "preflight.go",
+        "scc.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "security.openshift.io/v1",
+      "resources": [
+        "podsecuritypolicysubjectreviews"
+      ],
+      "operations": "ephemeral workload-service-account SCC review/defaulting; not upstream PSP",
+      "sourceFiles": [
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "quota.openshift.io/v1",
+      "resources": [
+        "appliedclusterresourcequotas"
+      ],
+      "operations": "read namespaced shared-quota usage; no CRQ creation",
+      "sourceFiles": [
+        "quota.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "image.openshift.io/v1",
+      "resources": [
+        "imagestreamtags"
+      ],
+      "operations": "capability discovery; generated trigger annotation consumed by OpenShift controller; no direct object read/write",
+      "sourceFiles": [
+        "planning.go",
+        "application.go",
+        "converter.go"
+      ],
+      "releaseAssessmentStatus": "pending"
+    },
+    {
+      "groupVersion": "policy.networking.k8s.io/v1alpha1 (optional discovered capability)",
+      "resources": [
+        "adminnetworkpolicies",
+        "baselineadminnetworkpolicies"
+      ],
+      "operations": "Read-only group/resource discovery and cluster list with pagination; target Namespace labels only when policies exist; subject/peer Pod-selection comparison; unknown versions/resources/fields require manual review",
+      "sourceFiles": [
+        "admin_policy.go",
+        "constraints.go"
+      ],
+      "releaseAssessmentStatus": "guard implemented and actual4.21 regression passed; full per-release capability/default assessment pending"
+    }
+  ],
+  "harnessInventoryStatus": "Additional API/resource/operation inventory recorded in docs/compatibility-review.md from qualification-driver literals and helpers; per-release behavioral assessment pending.",
+  "findings": [
+    {
+      "id": "STORAGE-01",
+      "change": "In-tree CephFS/RBD plugins and RBD CSI migration removed in Kubernetes1.31",
+      "affectedResources": [
+        "Pod volumes",
+        "PVC backing PVs"
+      ],
+      "status": "guard implemented",
+      "guardCommits": [
+        "52c5386",
+        "4ce61e7"
+      ],
+      "evidence": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
+      "validationScope": "Unit/request-contract tests and live API classification; not a legacy-driver mount test."
+    },
+    {
+      "id": "STORAGE-02",
+      "change": "gitRepo plugin disabled by default in Kubernetes1.33",
+      "affectedResources": [
+        "Pod volumes"
+      ],
+      "status": "guard implemented",
+      "guardCommits": [
+        "52c5386",
+        "4ce61e7"
+      ],
+      "evidence": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md",
+      "validationScope": "Unit/request-contract tests and live API classification; no feature gate changes."
+    },
+    {
+      "id": "API-01",
+      "change": "Endpoints deprecated but supported in Kubernetes1.33",
+      "status": "API serving impact assessed: deprecated, retained support; no removal mitigation required for 4.20",
+      "evidence": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md",
+      "scope": "Service Pod-UID verification reads core/v1 Endpoints. Actual4.21 behavior does not certify all older controller/networking behavior; EndpointSlice migration remains maintenance follow-up."
+    },
+    {
+      "id": "SCC-01",
+      "change": "OCP4.20 user namespaces and new SCCs; assess raw/typed default handling",
+      "status": "raw-field and pinned-SCC guards implemented; per-release assessment still pending",
+      "evidence": "https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-new-features-and-enhancements.adoc",
+      "mitigations": [
+        "278d942 validates complete raw SCC/Pod specs before typed decoding.",
+        "618831f verifies service-account use of a mismatched required SCC using namespaced LocalSubjectAccessReview, then uses pinned-policy Pod defaults."
+      ],
+      "liveEvidence": "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json"
+    },
+    {
+      "id": "AUTH-01",
+      "change": "OCP4.19 node-bound service-account tokens enabled by default",
+      "status": "Named token-binding/claim interaction assessed; no converter request-format change required",
+      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/eafb4a5cfd576aba7dd83307dd121274a52c4ab4/release_notes/ocp-4-19-release-notes.adoc",
+      "disposition": "Production kubeconfig client treats bearer tokens as opaque and does not mint/parse JWTs; standard token projection and service-account settings preserved. Revoked/expired API requests fail visibly with retained journals; prior actual expiry evidence is not node-deletion or old-server qualification.",
+      "remaining": "Referenced guidance, node-audience/storage interactions, affected patch levels and client-library assessment remain pending."
+    },
+    {
+      "id": "DC-01",
+      "change": "OCP4.15 does not create deployer SA when DC capability disabled",
+      "status": "Disabled-capability account change assessed; discovery/offline boundary already implemented",
+      "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc",
+      "disposition": "No deployer account creation or cluster capability enablement. Group/resource discovery distinguishes unavailable APIs from denied/authentication failure; exported offline input is usable but cannot execute incomplete-inventory plans. No automatic service-account Secret-name dependency.",
+      "validationScope": "Code review and HTTP/offline contracts; no old cluster or live disabled-capability reconfiguration."
+    },
+    {
+      "id": "ADMISSION-01",
+      "change": "Admission can add post-baseline volume/security fields absent from reviewed input; typed clients can discard newer fields or leave their semantics unassessed.",
+      "status": "Raw SCC/Pod/Deployment/HPA/ReplicaSet spec guards implemented; broader release assessment pending",
+      "scope": "Forward raw spec validation before typed decode; recovery preserves unfamiliar owned Deployment fields and uses raw HPA ownership metadata. Live Deployment-read regression demonstrated; synthetic admission replies remain local-contract evidence.",
+      "evidence": [
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.32.md",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md"
+      ],
+      "guardCommits": [
+        "278d942",
+        "f41c0aa",
+        "ba43309"
+      ]
+    },
+    {
+      "id": "SCC-02",
+      "change": "Actual SCC subject review may select a policy other than openshift.io/required-scc; caller Pod dry run is not workload SA authorization proof.",
+      "status": "implemented and actual regression verified",
+      "guardCommit": "618831f",
+      "evidence": "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
+      "authorizationFloorSource": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/staging/src/k8s.io/api/authorization/v1/types.go",
+        "sha256": "3511fb1e6fceca98829f7101c8d06e308e948ba09bf42ed50929e43c1965321b",
+        "retrievedAt": "2026-10-16T03:44:55.137376+00:00",
+        "bytes": 14523,
+        "finding": "authorization.k8s.io/v1 LocalSubjectAccessReview and needed user/groups/namespaced resource attributes are present at the baseline source tag."
+      }
+    },
+    {
+      "id": "API-02",
+      "change": "Removed API versions documented within Kubernetes1.27\u20131.33",
+      "status": "Inventory comparison complete for API-version removals listed by upstream migration guide",
+      "evidence": "https://kubernetes.io/docs/reference/using-api/deprecation-guide/",
+      "removedVersions": [
+        {
+          "kubernetes": "1.27",
+          "groupVersion": "storage.k8s.io/v1beta1",
+          "resources": [
+            "CSIStorageCapacity"
+          ]
+        },
+        {
+          "kubernetes": "1.29",
+          "groupVersion": "flowcontrol.apiserver.k8s.io/v1beta2",
+          "resources": [
+            "FlowSchema",
+            "PriorityLevelConfiguration"
+          ]
+        },
+        {
+          "kubernetes": "1.32",
+          "groupVersion": "flowcontrol.apiserver.k8s.io/v1beta3",
+          "resources": [
+            "FlowSchema",
+            "PriorityLevelConfiguration"
+          ]
+        }
+      ],
+      "disposition": "No production or qualification-fixture calls to these versions identified. This is an API-serving assessment, not a completed field/controller/runtime compatibility review."
+    },
+    {
+      "id": "NETWORK-01",
+      "change": "Optional cluster AdminNetworkPolicy/BaselineAdminNetworkPolicy can select DC runtime labels and migrated Pod labels differently, beyond namespace NetworkPolicy checks",
+      "status": "implemented; actual old read-only acceptance and current refusal/recovery verified",
+      "guardCommit": "93efcf3",
+      "evidence": [
+        "https://github.com/openshift/openshift-docs/blob/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L875",
+        "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/network_security/admin-network-policy",
+        "https://network-policy-api.sigs.k8s.io/reference/spec/"
+      ],
+      "scope": "Optional served v1alpha1 selectors; read-only inventory and exact source/namespace label comparison before HPA/source mutation. Unknown API/fields fail for manual review. Not a policy-priority or network reachability engine.",
+      "liveEvidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json"
+    },
+    {
+      "id": "NETWORK-02",
+      "change": "Deployment controller supplies pod-template-hash after Pod dry run; treating the future label as absent can hide namespace/admin policy changes",
+      "status": "guard implemented; unsafe acceptance reproduced locally and final actual ANP/BANP hash variants passed",
+      "guardCommit": "132542b",
+      "scope": "Any namespace NetworkPolicy or applicable ANP/BANP Pod selector depending on pod-template-hash requires manual review before source/HPA mutation. No cross-version hash prediction.",
+      "evidence": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template-hash-label",
+      "liveEvidence": "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json"
+    },
+    {
+      "id": "FIELD-128-01",
+      "change": "Kubernetes1.28/OpenShift4.15 NetworkPolicy status removal, host-network port defaulting, native sidecars and PVC resize-status changes",
+      "status": "Named field interactions assessed; no new production change required",
+      "evidence": [
+        "https://github.com/openshift/openshift-docs/blob/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc#L1519",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md"
+      ],
+      "disposition": "NetworkPolicy status unused; host namespaces require manual placement and Pod dry run sees actual defaults; raw baseline validation blocks post-floor init restartPolicy; existing cluster accounting includes native sidecars; production PVC checks do not depend on resizeStatus.",
+      "remaining": "Detailed CSI/SELinux/RWOP prerequisites, quota/kernel patch correlation, referenced guidance and maintained-client validation remain pending."
+    },
+    {
+      "id": "AUTH-02",
+      "change": "Kubernetes1.28 defaults an omitted access-review resource version to wildcard; version-sensitive authorizers can disagree with actual endpoint permissions",
+      "status": "Explicit versions implemented; empty/wildcard contract failures reproduced before fix",
+      "guardCommit": "0dcf787d58c03c50a11275941881d73e57ebdf47",
+      "evidence": [
+        "https://github.com/kubernetes/kubernetes/pull/116937",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md"
+      ],
+      "disposition": "SSAR resource attributes now use v1 for baseline endpoints,v2 for autoscaling HPAs,and the assessed optional admin-policy version. Real operations retain their own authorization/admission checks.",
+      "upstreamPatchSource": {
+        "url": "https://api.github.com/repos/kubernetes/kubernetes/pulls/116937/files",
+        "sha256": "f0c10d218d54a6d17084d1baeb5485b457ad8dd55fb38e5f3354e4bd6abbfdc9",
+        "retrievedAt": "2026-10-16T05:34:46.737279+00:00",
+        "files": 4
+      },
+      "validationScope": "Local version-sensitive authorizer profiles and actual endpoint-version contracts; actual legacy server/webhook-authorizer integration unavailable."
+    }
+  ],
+  "remaining": [
+    "Complete each minor/resource/operation assessment, applicable advisories and referenced migration guidance.",
+    "Review SCC/admission raw-to-typed fields, scheduling/accounting, controller and trigger behavior.",
+    "Decide aligned Kubernetes client version from compatibility evidence.",
+    "Implement any further required guards and tests; requalify exact candidate artifacts.",
+    "Only after final review, update matrix/support/release policy for review-based assumptions; preserve integration not-run statuses.",
+    "Finish per-release behavior assessment of the recorded harness operations and requalify the final exact artifact after dependency decisions."
+  ],
+  "candidateScreens": [
+    {
+      "minor": "4.14",
+      "entries": 128,
+      "record": "compatibility/reviews/4.14-candidates.json",
+      "status": "candidate pass complete; wider release assessment pending"
+    },
+    {
+      "minor": "4.15",
+      "entries": 117,
+      "record": "compatibility/reviews/4.15-candidates.json",
+      "status": "candidate pass complete; wider release assessment pending"
+    }
+  ],
+  "consolidatedReview": "compatibility/evidence/2026-10-16-parallel-release-review.json",
+  "historicalRecordNote": "Earlier findings below retain their initial review snapshot/status; final source-bound disposition is in consolidatedReview."
+}

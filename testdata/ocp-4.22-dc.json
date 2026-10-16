@@ -1,0 +1,95 @@
+{
+  "apiVersion": "apps.openshift.io/v1",
+  "kind": "DeploymentConfig",
+  "metadata": {
+    "name": "web",
+    "namespace": "example",
+    "annotations": {
+      "fixture.openshift-dc.io/provenance": "synthetic; no cluster result",
+      "fixture.openshift-dc.io/target": "4.22"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "paused": false,
+    "minReadySeconds": 7,
+    "revisionHistoryLimit": 0,
+    "selector": {
+      "deploymentconfig": "web",
+      "app": "web"
+    },
+    "strategy": {
+      "type": "Rolling"
+    },
+    "triggers": [
+      {
+        "type": "ConfigChange"
+      },
+      {
+        "type": "ImageChange",
+        "imageChangeParams": {
+          "automatic": true,
+          "containerNames": [
+            "web"
+          ],
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "web:current",
+            "namespace": "images"
+          }
+        }
+      }
+    ],
+    "template": {
+      "metadata": {
+        "labels": {
+          "deploymentconfig": "web",
+          "app": "web",
+          "service-label": "retain"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "web",
+            "image": "registry.example/web:v1",
+            "ports": [
+              {
+                "containerPort": 8080
+              }
+            ],
+            "env": [
+              {
+                "name": "CONFIG",
+                "valueFrom": {
+                  "configMapKeyRef": {
+                    "name": "web-config",
+                    "key": "config"
+                  }
+                }
+              }
+            ],
+            "resources": {
+              "requests": {
+                "cpu": "10m",
+                "memory": "32Mi"
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "scratch",
+                "mountPath": "/tmp/scratch"
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "scratch",
+            "emptyDir": {}
+          }
+        ]
+      }
+    }
+  }
+}

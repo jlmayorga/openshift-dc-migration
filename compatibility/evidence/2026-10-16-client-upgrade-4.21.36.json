@@ -1,0 +1,3093 @@
+{
+  "kind": "actual-openshift",
+  "schemaVersion": "v1",
+  "result": "passed",
+  "minor": "4.21",
+  "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+  "runner": "Mac-mini",
+  "runURL": "local:4f0fc2e2-073d-4ae0-b273-564db3f4d28b",
+  "testedAt": "2026-10-16T06:54:31.620564+00:00",
+  "scenarios": [
+    "admission-rejection",
+    "admission-scc",
+    "connectivity-loss",
+    "constraint-preflight",
+    "cross-namespace-image-triggers",
+    "cutover-exclusive",
+    "cutover-overlap",
+    "dry-run",
+    "exclusive-volume",
+    "failed-rollout",
+    "hpa-retarget",
+    "image-triggers",
+    "interruption",
+    "multi-container-image-triggers",
+    "per-mutation-recovery",
+    "restricted-rbac",
+    "rollback",
+    "safe-rerun",
+    "schema",
+    "service-routing",
+    "singleton-worker",
+    "stale-plan"
+  ],
+  "limitations": [
+    "Actual execution is limited to OpenShift4.21.36/Kubernetesv1.34.9 and the recorded native binary.",
+    "OpenShift4.14\u20134.20 use source-review assumptions, not actual integration passes.",
+    "OpenShift4.22 and other shipped platform binaries lack matching actual qualification; full release gate remains closed.",
+    "All six injected faults eventually recovered; write5 required explicit rollback rerun after a visible resourceVersion conflict. The helper observation error and original failure are retained.",
+    "Namespace isolation initially refused for actual Pod capacity before source retirement; existing plans passed after UID-audited completed-fixture retirement.",
+    "Volume/worker ownership checks combine source-drain checks and samples, not every-instant or cross-node/driver guarantees.",
+    "Selected completed isolated fixtures were retired after snapshots/UID checks; historical results are retained. RegularPVC/PV preserved."
+  ],
+  "openshiftPatch": "4.21.36",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.37.1",
+    "k8s.io/apimachinery": "v0.37.1",
+    "k8s.io/client-go": "v0.37.1"
+  },
+  "kubernetesVersion": "v1.34.9",
+  "sccEvidence": [
+    {
+      "uid": "f3b8a58d-2fb9-4904-9fb1-90c7c48d91a4",
+      "scc": "restricted-v2",
+      "securityContext": {
+        "fsGroup": 1003430000,
+        "seLinuxOptions": {
+          "level": "s0:c59,c4"
+        },
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      }
+    }
+  ],
+  "variantEvidence": [
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "admission-rejection",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.473696+00:00",
+      "runURL": "local:client-upgrade-20261016/admission-rejection",
+      "observations": {
+        "case": "quota-admission",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:58.565268+00:00",
+        "observations": {
+          "dryRunQuotaDenied": true,
+          "stageQuotaDenied": true,
+          "destinationPersisted": false,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-sdk-perm-20261016-quota-admission"
+      },
+      "evidenceFiles": [
+        {
+          "path": "permissions/cases.json",
+          "sha256": "734e3048b86c9cfe723c576de32a1b53bf8ee9397facd6151f996a6b1da1aece"
+        },
+        {
+          "path": "permissions-invocation.json",
+          "sha256": "a9ff578939179cf34bb0558e66027fd9064df91ad14b530aa7528095d92effc2"
+        }
+      ],
+      "nativeCommandCounts": {
+        "permissions": 13
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "restricted-rbac",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.480810+00:00",
+      "runURL": "local:client-upgrade-20261016/restricted-rbac",
+      "observations": {
+        "case": "restricted-rbac",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:33.978546+00:00",
+        "observations": {
+          "generationWithoutNamespaceRead": "passed",
+          "deniedDCList": "visible failure",
+          "deniedDeploymentCreate": "no persistence",
+          "deniedCutoverUpdate": "source unchanged"
+        },
+        "namespace": "dcmig-sdk-perm-20261016-rbac"
+      },
+      "evidenceFiles": [
+        {
+          "path": "permissions/cases.json",
+          "sha256": "734e3048b86c9cfe723c576de32a1b53bf8ee9397facd6151f996a6b1da1aece"
+        },
+        {
+          "path": "permissions-invocation.json",
+          "sha256": "a9ff578939179cf34bb0558e66027fd9064df91ad14b530aa7528095d92effc2"
+        }
+      ],
+      "nativeCommandCounts": {
+        "permissions": 13
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "multi-container-image-triggers",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.486092+00:00",
+      "runURL": "local:client-upgrade-20261016/multi-container-image-triggers",
+      "observations": {
+        "case": "multi-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:31.448499+00:00",
+        "observations": {
+          "crossNamespace": false,
+          "multiContainer": true,
+          "disabled": false,
+          "triggerUpdatesVerified": true,
+          "rollback": "verified"
+        },
+        "namespace": "dcmig-sdk-feat-20261016-multi-image"
+      },
+      "evidenceFiles": [
+        {
+          "path": "features/cases.json",
+          "sha256": "c555878a4d2f6da65d6dd90c1e92e910bdf0e6fbd9c0c8f7037f64b7e08748aa"
+        },
+        {
+          "path": "features-invocation.json",
+          "sha256": "c787f0e71b6b7d56ba3364e723e3c12815a37afdad1747cb7023161811a70e8a"
+        }
+      ],
+      "nativeCommandCounts": {
+        "features": 4
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "cross-namespace-image-triggers",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.488986+00:00",
+      "runURL": "local:client-upgrade-20261016/cross-namespace-image-triggers",
+      "observations": {
+        "case": "cross-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:31:27.958467+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "d27b9e7d-7ed2-4703-b52f-3e17c77c09d6",
+          "destinationUID": "a21a9c4e-3de1-434d-b4f4-01636a9b3a7f",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 0,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "newAppImageTriggerUpdatedDeployment": true,
+          "sourceRemainedRetired": true
+        },
+        "namespace": "dcmig-sdk-a-20261016-cross-image"
+      },
+      "evidenceFiles": [
+        {
+          "path": "newapp-a/cases.json",
+          "sha256": "39c6ca5ccdf1d1a0ba27826fd42506e1697c7a297b11cbc704340128fa62e222"
+        },
+        {
+          "path": "newapp-a/metadata.json",
+          "sha256": "bac6d284e3681701c523f29c391b10f7917596aa7e472bd1613ba512cb5a992c"
+        },
+        {
+          "path": "newapp-a-invocation.json",
+          "sha256": "88a65347fce7e43beba4a390b35d62829373beffe38032af526bcdbc2c7cfac6"
+        }
+      ],
+      "nativeCommandCounts": {
+        "newapp-a": 64
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "runner": "Mac-mini",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:34:19.360827+00:00",
+      "runURL": "local:regular-csi-9856ca96",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-e414af930075",
+      "sampledVolumePodExclusivity": {
+        "samples": 99,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision"
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "singleton-worker",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.510438+00:00",
+      "runURL": "local:client-upgrade-20261016/singleton-worker",
+      "observations": {
+        "cases": [
+          {
+            "case": "success",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:35:24.841154+00:00",
+            "observations": {
+              "sourceUID": "0115cc91-a449-43ff-b189-cd40dd47cc94",
+              "initialWorker": {
+                "uid": "4859bed7-3b55-4048-9b86-93e8e5efecd3",
+                "renewTime": "2026-10-16T06:35:50.000000Z",
+                "pod": "web-1-xfwmn"
+              },
+              "destinationWorker": {
+                "uid": "cbb25369-eb58-4a05-af52-b536e0cab5ce",
+                "renewTime": "2026-10-16T06:36:25.000000Z",
+                "pod": "web-6996677c7f-rnzbd"
+              },
+              "restoredWorker": {
+                "uid": "b2466947-3e05-4de6-8b07-f2ea75ceb5f1",
+                "renewTime": "2026-10-16T06:36:48.000000Z",
+                "pod": "web-1-5zlbp"
+              },
+              "heartbeatSamples": 95,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-sdk-worker-20261016-success"
+          },
+          {
+            "case": "startup-failure",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:36:53.750875+00:00",
+            "observations": {
+              "sourceUID": "ebf57f4e-7521-444e-a359-6f8a7689f813",
+              "initialWorker": {
+                "uid": "762bec4e-268f-4f3b-8ef1-17ba9f00907f",
+                "renewTime": "2026-10-16T06:37:18.000000Z",
+                "pod": "web-1-qcj2p"
+              },
+              "destinationWorker": null,
+              "restoredWorker": {
+                "uid": "09cb1e08-3d39-4b09-b29f-1b6b7758f7c0",
+                "renewTime": "2026-10-16T06:38:14.000000Z",
+                "pod": "web-1-745db"
+              },
+              "heartbeatSamples": 92,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-sdk-worker-20261016-startup-failure"
+          },
+          {
+            "case": "cancellation",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:38:19.895355+00:00",
+            "observations": {
+              "sourceUID": "216cd9d3-2b2b-4e58-aa88-cacfb537b11f",
+              "initialWorker": {
+                "uid": "c8c09d64-9780-4669-ba8a-7dd22a6b5205",
+                "renewTime": "2026-10-16T06:38:46.000000Z",
+                "pod": "web-1-qhb6w"
+              },
+              "destinationWorker": {
+                "uid": "34989719-9922-4e09-8b96-6c3c22b0cd10",
+                "renewTime": "2026-10-16T06:39:01.000000Z",
+                "pod": "web-5cdbb7c95-sfdln"
+              },
+              "restoredWorker": {
+                "uid": "56f751f0-3677-463b-9ad4-269e26ab805a",
+                "renewTime": "2026-10-16T06:39:25.000000Z",
+                "pod": "web-1-mcwzn"
+              },
+              "heartbeatSamples": 64,
+              "concurrentPodsObserved": 0,
+              "readErrors": 0,
+              "sourceSpecAndHTTPRecovered": true,
+              "recoveryRerun": true
+            },
+            "namespace": "dcmig-sdk-worker-20261016-cancellation"
+          }
+        ],
+        "scope": "Sampled actual Pod/Lease ownership and observed source drain; not a guarantee for all worker implementations"
+      },
+      "evidenceFiles": [
+        {
+          "path": "worker/cases.json",
+          "sha256": "ac680b4f72686dda5ae8814e1409dad1aa084ce357afd53bb8c61102553734d1"
+        },
+        {
+          "path": "worker/metadata.json",
+          "sha256": "c1ff4fb70fe377c9a5ad30c150ced29821ce628ebf7052bf3ccb563d16c66b4a"
+        },
+        {
+          "path": "worker-invocation.json",
+          "sha256": "5f36a43353136323c90bff1e12919c1706ba79cfc1c80bc3f655ef979a34f447"
+        }
+      ],
+      "nativeCommandCounts": {
+        "worker": 14
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "per-mutation-recovery",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.522708+00:00",
+      "runURL": "local:client-upgrade-20261016/per-mutation-recovery",
+      "observations": {
+        "originalCases": [
+          {
+            "case": "write-1",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:28:36.625321+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 1,
+              "mutation": {
+                "method": "DELETE",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-1/horizontalpodautoscalers/web?timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 1,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-freeze-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-1"
+          },
+          {
+            "case": "write-2",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:29:06.876120+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 2,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 2,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-2"
+          },
+          {
+            "case": "write-3",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:29:38.360565+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 3,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 3,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-3"
+          },
+          {
+            "case": "write-4",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:30:09.969596+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 4,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 4,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-4"
+          },
+          {
+            "case": "write-5",
+            "result": "failed",
+            "startedAt": "2026-10-16T06:30:45.310423+00:00",
+            "error": "Unexpected exit 1: ['--readiness-timeout', '180s', '--operation-timeout', '240s', '--plan-file', '/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016/recovery/write-5-plan-0157/dcmig-sdk-rec-20261016-write-5/web.plan.json']; command-0164.json",
+            "namespace": "dcmig-sdk-rec-20261016-write-5"
+          },
+          {
+            "case": "write-6",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:31:12.785233+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 6,
+              "mutation": {
+                "method": "POST",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+                "status": 201,
+                "mutation": true,
+                "mutationNumber": 6,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-create-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-6"
+          }
+        ],
+        "write5ExplicitCompletion": {
+          "kind": "actual-openshift-recovery-completion",
+          "result": "passed",
+          "namespace": "dcmig-sdk-rec-20261016-write-5",
+          "sourceUID": "3d19ca42-e64f-4b49-b85b-5b55a2684afc",
+          "destinationUID": "6bcf688e-4518-48b4-b607-ec145ca2fcd2",
+          "sourceSpecRecovered": true,
+          "hpaSpecRecovered": true,
+          "HTTPResponse": "qualified-write-5\n",
+          "rolledBackJournal": true,
+          "verifiedRollbackCommandRecords": [
+            ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0005.json",
+            ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0007.json"
+          ],
+          "retainedInitialFailure": "DeploymentresourceVersionconflict during stop-destination dryrun; initial recovery attempt not counted as success",
+          "retainedHelperFailure": "Initial completion helper used missing HTTP method after successful structural assertions; final readonly observation completes that verification",
+          "originalFault": {
+            "method": "PUT",
+            "path": "/apis/apps/v1/namespaces/dcmig-sdk-rec-20261016-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+            "status": 200,
+            "mutation": true,
+            "mutationNumber": 5,
+            "faultInjected": true
+          },
+          "completedBy": "Explicit rollback rerun and idempotent rerun after revalidation; followed by independent API/HTTP verification",
+          "testedAt": "2026-10-16T06:41:04.498760+00:00"
+        },
+        "resultScope": "All six final recoveries verified. Write5 first recovery attempt failed visibly for resourceVersion conflict; explicit rerun succeeded, helper observation error followed by independent HTTP/API verification. Original failures retained."
+      },
+      "evidenceFiles": [
+        {
+          "path": "recovery/cases.json",
+          "sha256": "6a3cc9277b319891bb6b6533ffae75f75f99adec0006c112d0ffe4c5ad07d5b2"
+        },
+        {
+          "path": "recovery-invocation.json",
+          "sha256": "0d98b3acb8bdddbf1cbf19e67df06b7d16f9cddd2bb1be6273f194ffca812b7c"
+        },
+        {
+          "path": "recovery-write5-verification/result.json",
+          "sha256": "0a00377448bf8b7ff1746f21a8dfcb3c9451e2d29260dc498820c197aa2a694f"
+        }
+      ],
+      "nativeCommandCounts": {
+        "recovery": 29,
+        "recovery-write5-completion": 2,
+        "recovery-write5-verification": 0
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "connectivity-loss",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.533431+00:00",
+      "runURL": "local:client-upgrade-20261016/connectivity-loss",
+      "observations": {
+        "originalCases": [
+          {
+            "case": "write-1",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:28:36.625321+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 1,
+              "mutation": {
+                "method": "DELETE",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-1/horizontalpodautoscalers/web?timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 1,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-freeze-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-1"
+          },
+          {
+            "case": "write-2",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:29:06.876120+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 2,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 2,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-2"
+          },
+          {
+            "case": "write-3",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:29:38.360565+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 3,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 3,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-3"
+          },
+          {
+            "case": "write-4",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:30:09.969596+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 4,
+              "mutation": {
+                "method": "PUT",
+                "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+                "status": 200,
+                "mutation": true,
+                "mutationNumber": 4,
+                "faultInjected": true
+              },
+              "interruptedPhase": "source-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-4"
+          },
+          {
+            "case": "write-5",
+            "result": "failed",
+            "startedAt": "2026-10-16T06:30:45.310423+00:00",
+            "error": "Unexpected exit 1: ['--readiness-timeout', '180s', '--operation-timeout', '240s', '--plan-file', '/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016/recovery/write-5-plan-0157/dcmig-sdk-rec-20261016-write-5/web.plan.json']; command-0164.json",
+            "namespace": "dcmig-sdk-rec-20261016-write-5"
+          },
+          {
+            "case": "write-6",
+            "result": "passed",
+            "startedAt": "2026-10-16T06:31:12.785233+00:00",
+            "observations": {
+              "lostResponseAfterMutation": 6,
+              "mutation": {
+                "method": "POST",
+                "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+                "status": 201,
+                "mutation": true,
+                "mutationNumber": 6,
+                "faultInjected": true
+              },
+              "interruptedPhase": "hpa-create-intent",
+              "recovery": "verified and rerun"
+            },
+            "namespace": "dcmig-sdk-rec-20261016-write-6"
+          }
+        ],
+        "write5ExplicitCompletion": {
+          "kind": "actual-openshift-recovery-completion",
+          "result": "passed",
+          "namespace": "dcmig-sdk-rec-20261016-write-5",
+          "sourceUID": "3d19ca42-e64f-4b49-b85b-5b55a2684afc",
+          "destinationUID": "6bcf688e-4518-48b4-b607-ec145ca2fcd2",
+          "sourceSpecRecovered": true,
+          "hpaSpecRecovered": true,
+          "HTTPResponse": "qualified-write-5\n",
+          "rolledBackJournal": true,
+          "verifiedRollbackCommandRecords": [
+            ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0005.json",
+            ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0007.json"
+          ],
+          "retainedInitialFailure": "DeploymentresourceVersionconflict during stop-destination dryrun; initial recovery attempt not counted as success",
+          "retainedHelperFailure": "Initial completion helper used missing HTTP method after successful structural assertions; final readonly observation completes that verification",
+          "originalFault": {
+            "method": "PUT",
+            "path": "/apis/apps/v1/namespaces/dcmig-sdk-rec-20261016-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+            "status": 200,
+            "mutation": true,
+            "mutationNumber": 5,
+            "faultInjected": true
+          },
+          "completedBy": "Explicit rollback rerun and idempotent rerun after revalidation; followed by independent API/HTTP verification",
+          "testedAt": "2026-10-16T06:41:04.498760+00:00"
+        },
+        "resultScope": "All six final recoveries verified. Write5 first recovery attempt failed visibly for resourceVersion conflict; explicit rerun succeeded, helper observation error followed by independent HTTP/API verification. Original failures retained."
+      },
+      "evidenceFiles": [
+        {
+          "path": "recovery/cases.json",
+          "sha256": "6a3cc9277b319891bb6b6533ffae75f75f99adec0006c112d0ffe4c5ad07d5b2"
+        },
+        {
+          "path": "recovery-invocation.json",
+          "sha256": "0d98b3acb8bdddbf1cbf19e67df06b7d16f9cddd2bb1be6273f194ffca812b7c"
+        },
+        {
+          "path": "recovery-write5-verification/result.json",
+          "sha256": "0a00377448bf8b7ff1746f21a8dfcb3c9451e2d29260dc498820c197aa2a694f"
+        }
+      ],
+      "nativeCommandCounts": {
+        "recovery": 29,
+        "recovery-write5-completion": 2,
+        "recovery-write5-verification": 0
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "openshiftPatch": "4.21.36",
+      "kubernetesVersion": "v1.34.9",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "runner": "Mac-mini",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "failed-rollout",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:54:31.542020+00:00",
+      "runURL": "local:client-upgrade-20261016/failed-rollout",
+      "observations": {
+        "case": "failed-initial-rollout",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:51:17.118934+00:00",
+        "observations": {
+          "preRetirementAssessmentPassed": true,
+          "destinationStartupExitCode": 42,
+          "failedJournalPhase": "destination-updated",
+          "failureNotReportedReady": true,
+          "sourceRemainedRetiredUntilExplicitRecovery": true,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": "verified",
+          "orphanBlockedRestorationUntilRemoved": false
+        },
+        "namespace": "dcmig-sdk-runtime-20261016-failed-initial-rollout"
+      },
+      "evidenceFiles": [
+        {
+          "path": "runtime/cases.json",
+          "sha256": "e4f3cc1426940e3e6cedf8aca3a0cfdfe56db6f02d1f87722147d519d4070cd8"
+        },
+        {
+          "path": "runtime/metadata.json",
+          "sha256": "6a5a67680d5c32652ce097d51eb45c5fed31586753a75cf04d0e7dc15cecaef5"
+        },
+        {
+          "path": "runtime-invocation.json",
+          "sha256": "8a4eb6a6bbb4a68780161bb1503df4a2ecb030ab82809d572361178a870bfd17"
+        }
+      ],
+      "nativeCommandCounts": {
+        "runtime": 11
+      },
+      "provenance": "Aggregated after observing completed actual commands on the explicit context; same unchanged binary verified against pre-run binary/build/baseline metadata. Older artifact results are excluded. Exact private drivers and logs are retained."
+    }
+  ],
+  "completedAt": "2026-10-16T07:07:34.998900+00:00",
+  "qualificationScope": "All22requiredscenarioIDs on one native Darwin/arm64 maintenance artifact, plus expanded actual edge cases. Not full release/multiple-platform qualification.",
+  "nativePlatform": "darwin/arm64",
+  "productionSourceSHA256": "af50a884b9f560577c2b11696c23f130b3612b70d8bdc446771c463203f45e26",
+  "sourceReview": "compatibility/evidence/2026-10-16-client-upgrade-review.json",
+  "expandedCases": {
+    "newapp-a": [
+      {
+        "case": "plain",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:27:11.186103+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "28aa41da-f61f-4aa4-812d-08c942bffb43",
+          "destinationUID": "56261886-dffe-4fb2-a2b3-ce65ee979851",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-a-20261016-plain"
+      },
+      {
+        "case": "env-labels",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:05.705067+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "415bb881-f9eb-4b0c-afe6-20595db54a2b",
+          "destinationUID": "1c21f3b7-ec33-42c2-a4cb-684fbe14fe59",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-a-20261016-env-labels"
+      },
+      {
+        "case": "metadata-off",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:29:15.614972+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "93364912-d250-4d04-9253-f138385dfb87",
+          "destinationUID": "d40de7ea-3636-4a3c-8b63-176c8af1bab3",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-a-20261016-metadata-off"
+      },
+      {
+        "case": "local-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:30:10.430471+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "5a1b80e2-c3ff-4d0b-88d8-8f33575af455",
+          "destinationUID": "89cfd130-5519-4376-b527-f0770e7a0ac0",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "newAppImageTriggerUpdatedDeployment": true,
+          "sourceRemainedRetired": true
+        },
+        "namespace": "dcmig-sdk-a-20261016-local-image"
+      },
+      {
+        "case": "cross-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:31:27.958467+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "d27b9e7d-7ed2-4703-b52f-3e17c77c09d6",
+          "destinationUID": "a21a9c4e-3de1-434d-b4f4-01636a9b3a7f",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 0,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "newAppImageTriggerUpdatedDeployment": true,
+          "sourceRemainedRetired": true
+        },
+        "namespace": "dcmig-sdk-a-20261016-cross-image"
+      },
+      {
+        "case": "grouped",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:32:22.959388+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "73eaa9a2-bd66-4e02-9222-d704c51dbee6",
+          "destinationUID": "b85c1fd4-2fb8-4b42-aad1-62d469e6f7e5",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 2,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-a-20261016-grouped"
+      },
+      {
+        "case": "config-secret",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:33:24.263095+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "e5016f5f-3434-4c4f-a11d-1e45d02bcd25",
+          "destinationUID": "39b9002c-cbd8-42fb-a8f5-460a8feb8954",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-a-20261016-config-secret"
+      },
+      {
+        "case": "multiple-services",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:34:28.429827+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "66225b62-1d36-49cb-8465-00a1f8684e8b",
+          "destinationUID": "0649b8af-bb63-45ee-a34b-6984f7ce3acb",
+          "replicas": 1,
+          "servicesPreserved": 3,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "bothExposedPortsHealthy": true
+        },
+        "namespace": "dcmig-sdk-a-20261016-multiple-services"
+      }
+    ],
+    "newapp-b": [
+      {
+        "case": "replicas-three",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:35:20.820551+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "70fd9ed5-cd9b-4f7c-8979-23df00925689",
+          "destinationUID": "82407f94-b615-492b-81de-ff5ba32f51a8",
+          "replicas": 3,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-replicas-three"
+      },
+      {
+        "case": "scaled-zero",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:36:28.159375+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "3498f4b7-5ca6-43eb-924c-ad2e36185682",
+          "destinationUID": "3678306c-9f65-4dac-bdd0-8c76f96de167",
+          "replicas": 0,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-scaled-zero"
+      },
+      {
+        "case": "recreate",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:37:12.402273+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "a1ffe042-ab83-4fda-9256-366bfd1e62bd",
+          "destinationUID": "2c0bce77-2e45-4b07-afbb-bd84e2acfefb",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-recreate"
+      },
+      {
+        "case": "zero-surge",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:38:13.048882+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "65da5b82-33b2-42e1-8bd6-23e338c7037e",
+          "destinationUID": "b9a08d61-e8b2-45c9-8ecf-30d677300a5d",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-zero-surge"
+      },
+      {
+        "case": "overlap",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:39:28.728869+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "8fa85319-c7d9-4033-bfa0-f0ea45e0e4e2",
+          "destinationUID": "9504fed7-c06e-4529-83db-8085366a58ad",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-overlap"
+      },
+      {
+        "case": "init-container",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:40:21.621061+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "9dc7169b-8d80-4d56-9087-2fbdae116358",
+          "destinationUID": "ea55b89c-478b-4571-900b-4db599d793b1",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-init-container"
+      },
+      {
+        "case": "long-name",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:41:29.321766+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "5dc7b9e6-fbc8-4404-8f77-7014e899be22",
+          "destinationUID": "befe8afc-f4ef-4d74-8ea8-920256654cf4",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun"
+        },
+        "namespace": "dcmig-sdk-b-20261016-long-name"
+      },
+      {
+        "case": "test-app",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:22.015982+00:00",
+        "observations": {
+          "expectedFailure": "test",
+          "sourceUnchanged": true,
+          "destinationActive": false
+        },
+        "namespace": "dcmig-sdk-b-20261016-test-app"
+      },
+      {
+        "case": "paused",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:26.025336+00:00",
+        "observations": {
+          "expectedFailure": "paused",
+          "sourceUnchanged": true,
+          "destinationActive": false
+        },
+        "namespace": "dcmig-sdk-b-20261016-paused"
+      },
+      {
+        "case": "manual-triggers",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:52.795939+00:00",
+        "observations": {
+          "expectedFailure": "ConfigChange",
+          "sourceUnchanged": true,
+          "destinationActive": false
+        },
+        "namespace": "dcmig-sdk-b-20261016-manual-triggers"
+      },
+      {
+        "case": "rolling-hook",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:43:13.986271+00:00",
+        "observations": {
+          "expectedFailure": "hook",
+          "sourceUnchanged": true,
+          "destinationActive": false
+        },
+        "namespace": "dcmig-sdk-b-20261016-rolling-hook"
+      },
+      {
+        "case": "new-pod-field",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:43:34.412944+00:00",
+        "observations": {
+          "expectedFailure": "resources",
+          "sourceUnchanged": true,
+          "destinationActive": false
+        },
+        "namespace": "dcmig-sdk-b-20261016-new-pod-field"
+      },
+      {
+        "case": "stale-source",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:44:04.343315+00:00",
+        "observations": {
+          "staleDependencyRejected": true,
+          "diagnostic": "stale source UID/resourceVersion; regenerate plan or inspect journal before recovery"
+        },
+        "namespace": "dcmig-sdk-b-20261016-stale-source"
+      },
+      {
+        "case": "stale-service",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:44:20.500520+00:00",
+        "observations": {
+          "staleDependencyRejected": true,
+          "diagnostic": "dependent resource inventory changed; regenerate plan"
+        },
+        "namespace": "dcmig-sdk-b-20261016-stale-service"
+      }
+    ],
+    "newapp-c": [
+      {
+        "case": "docker-build",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:40:10.634369+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "c4d1b9c5-3221-4f3f-9a30-b904e2631089",
+          "destinationUID": "a80900b3-f2aa-413e-9e73-7f20a7ff9aae",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 1,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "initialBuildUID": "a6f4ba06-5877-44b3-8d28-965870592b50",
+          "postCutoverBuildUID": "2b6c5aad-d5f8-48b1-b851-4dd2c0f7e5ae",
+          "postCutoverBuildResponse": "docker-build-second-d4d0c7d6\n",
+          "buildOutputContinuedUpdatingDeployment": true,
+          "sourceRemainedRetired": true,
+          "restoredSourceResponse": "docker-build-first-d4d0c7d6\n"
+        },
+        "namespace": "dcmig-sdk-c-20261016-docker-build"
+      },
+      {
+        "case": "s2i-build",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:41:39.812963+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "846af306-b8c1-45a3-9a26-588904b5925d",
+          "destinationUID": "d738850b-89c9-4cc0-b776-5b8bf023dc9a",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 1,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "initialBuildUID": "50b40acc-697d-4cc4-8a4b-aacd002f5357",
+          "postCutoverBuildUID": "a505ba1c-f1aa-42db-92a5-3761f3821aed",
+          "postCutoverBuildResponse": "<html><body>s2i-build-second-d4d0c7d6</body></html>\n",
+          "buildOutputContinuedUpdatingDeployment": true,
+          "sourceRemainedRetired": true,
+          "restoredSourceResponse": "<html><body>s2i-build-first-d4d0c7d6</body></html>\n"
+        },
+        "namespace": "dcmig-sdk-c-20261016-s2i-build"
+      },
+      {
+        "case": "unbuilt-binary",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:43:09.657140+00:00",
+        "observations": {
+          "readOnlyReviewGenerationAllowed": true,
+          "unresolvedImageLivePlanAndStageRejected": true,
+          "sourceUnchanged": true,
+          "buildConfigRetained": true
+        },
+        "namespace": "dcmig-sdk-c-20261016-unbuilt-binary"
+      }
+    ],
+    "newapp-d": [
+      {
+        "case": "template",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:40:11.897451+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "39b21098-d419-4791-8222-dee93d3c2eca",
+          "destinationUID": "c0ec2ac8-85c7-47e9-a57c-e9141f0858e9",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "templateResponse": "template-parameter-retained\n"
+        },
+        "namespace": "dcmig-sdk-d-20261016-template"
+      },
+      {
+        "case": "changed-target",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:41:20.691314+00:00",
+        "observations": {
+          "changedStagedSpecRejected": true,
+          "sourceUnchanged": true,
+          "explicitRecovery": "verified"
+        },
+        "namespace": "dcmig-sdk-d-20261016-changed-target"
+      },
+      {
+        "case": "foreign-name",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:41:44.906533+00:00",
+        "observations": {
+          "foreignUID": "a52e4304-a1bc-45d1-bf79-bf1b5a06363d",
+          "foreignSpecUnchanged": true,
+          "overlap": false
+        },
+        "namespace": "dcmig-sdk-d-20261016-foreign-name"
+      },
+      {
+        "case": "foreign-controller-overlap",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:00.452629+00:00",
+        "observations": {
+          "foreignUID": "a170652a-c005-4709-a111-3fb76ecedc20",
+          "foreignSpecUnchanged": true,
+          "overlap": true
+        },
+        "namespace": "dcmig-sdk-d-20261016-foreign-controller-overlap"
+      },
+      {
+        "case": "blocked-health",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:15.744326+00:00",
+        "observations": {
+          "blockedTargetTrafficNotReportedReady": true,
+          "recoveryAfterPolicyRemoval": "verified"
+        },
+        "namespace": "dcmig-sdk-d-20261016-blocked-health"
+      },
+      {
+        "case": "two-apps",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:42.558738+00:00",
+        "observations": {
+          "twoNewAppSourcesMigratedIndependently": true,
+          "sharedAppLabel": "shared",
+          "distinctServiceSelectors": true
+        },
+        "namespace": "dcmig-sdk-d-20261016-two-apps"
+      }
+    ],
+    "newapp-e": [
+      {
+        "case": "disabled-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:56.959956+00:00",
+        "observations": {
+          "createdBy": "oc new-app --as-deployment-config",
+          "sourceUID": "56022b30-8628-408c-a527-5cd128e82f43",
+          "destinationUID": "05106844-ab4d-4861-97d9-f9bc39fb64c6",
+          "replicas": 1,
+          "servicesPreserved": 1,
+          "buildConfigsPreserved": 0,
+          "imageStreamsPreserved": 1,
+          "protocol": "dry-run, stage, rerun, cutover, rerun, rollback, rerun",
+          "disabledNewAppImageTriggerPreserved": true,
+          "importedTagChangeIgnored": true
+        },
+        "namespace": "dcmig-sdk-e-20261016-disabled-image"
+      },
+      {
+        "case": "added-hpa",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:44:21.444468+00:00",
+        "observations": {
+          "newAutoscalerAfterPlanRejected": true,
+          "diagnostic": "dependent resource inventory changed; regenerate plan"
+        },
+        "namespace": "dcmig-sdk-e-20261016-added-hpa"
+      },
+      {
+        "case": "volume-overlap",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:44:39.202122+00:00",
+        "observations": {
+          "unsafeVolumeOverlapRejected": true,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-sdk-e-20261016-volume-overlap"
+      },
+      {
+        "case": "failed-image-rollout",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:47:47.047064+00:00",
+        "observations": {
+          "validImageWithFailedReadinessRejected": true,
+          "sourceRemainedRetiredUntilRecovery": true,
+          "rollbackAfterRestoringTag": "verified"
+        },
+        "namespace": "dcmig-sdk-e-20261016-failed-image-rollout"
+      },
+      {
+        "case": "recreate-hook",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:51:44.925084+00:00",
+        "observations": {
+          "unsupportedStrategyOrHookRejected": true,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-sdk-e-20261016-recreate-hook"
+      },
+      {
+        "case": "custom-deployer",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:52:05.302469+00:00",
+        "observations": {
+          "unsupportedStrategyOrHookRejected": true,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-sdk-e-20261016-custom-deployer"
+      }
+    ],
+    "runtime": [
+      {
+        "case": "failed-initial-rollout",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:51:17.118934+00:00",
+        "observations": {
+          "preRetirementAssessmentPassed": true,
+          "destinationStartupExitCode": 42,
+          "failedJournalPhase": "destination-updated",
+          "failureNotReportedReady": true,
+          "sourceRemainedRetiredUntilExplicitRecovery": true,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": "verified",
+          "orphanBlockedRestorationUntilRemoved": false
+        },
+        "namespace": "dcmig-sdk-runtime-20261016-failed-initial-rollout"
+      },
+      {
+        "case": "orphan-recovery",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:52:31.682766+00:00",
+        "observations": {
+          "preRetirementAssessmentPassed": true,
+          "destinationStartupExitCode": 42,
+          "failedJournalPhase": "destination-updated",
+          "failureNotReportedReady": true,
+          "sourceRemainedRetiredUntilExplicitRecovery": true,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": "verified",
+          "orphanBlockedRestorationUntilRemoved": true
+        },
+        "namespace": "dcmig-sdk-runtime-20261016-orphan-recovery"
+      }
+    ],
+    "constraints": [
+      {
+        "case": "aggregate-quota",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:52:18.148047+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "namespace-and-cluster-quotas",
+                "status": "blocked",
+                "detail": "quota dcmig-sdk-guard-20261016-aggregate-quota/constraints: pods used=2 additional=3 hard=3; insufficient full destination headroom while retaining source; request temporary capacity or use a reviewed maintenance procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "namespace-and-cluster-quotas",
+                "status": "blocked",
+                "detail": "quota dcmig-sdk-guard-20261016-aggregate-quota/constraints: pods used=2 additional=3 hard=3; insufficient full destination headroom while retaining source; request temporary capacity or use a reviewed maintenance procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-aggregate-quota"
+      },
+      {
+        "case": "changed-after-preflight",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:53:17.182708+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-1205b093aad28fd60fad04b5\" is forbidden: exceeded quota: constraints, requested: pods=1, used: pods=1, limited: pods=1"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-1205b093aad28fd60fad04b5\" is forbidden: exceeded quota: constraints, requested: pods=1, used: pods=1, limited: pods=1"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-changed-after-preflight"
+      },
+      {
+        "case": "limit-range",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:54:12.529227+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-a2dcffad9c49a70cc573e117\" is forbidden: minimum cpu usage per Container is 200m, but request is 100m"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-a2dcffad9c49a70cc573e117\" is forbidden: minimum cpu usage per Container is 200m, but request is 100m"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-limit-range"
+      },
+      {
+        "case": "network-policy",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:55:22.134233+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "network-policy-selection",
+                "status": "blocked",
+                "detail": "NetworkPolicy web selects current source Pods and proposed destination differently; review workload/peer selectors before source retirement"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "network-policy-selection",
+                "status": "blocked",
+                "detail": "NetworkPolicy web selects current source Pods and proposed destination differently; review workload/peer selectors before source retirement"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-network-policy"
+      },
+      {
+        "case": "node-capacity",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:56:13.133632+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "cluster-scheduling",
+                "status": "blocked",
+                "detail": "no verified node capacity/placement for 2 of 2 additional destination replicas while retaining source; inspect Ready/schedulable nodes, selectors, taints, host ports, PVC topology and CPU/memory/pod requests (unsupported observed allocations on 0 nodes)"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "cluster-scheduling",
+                "status": "blocked",
+                "detail": "no verified node capacity/placement for 2 of 2 additional destination replicas while retaining source; inspect Ready/schedulable nodes, selectors, taints, host ports, PVC topology and CPU/memory/pod requests (unsupported observed allocations on 0 nodes)"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-node-capacity"
+      },
+      {
+        "case": "node-selector",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:57:08.873690+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "cluster-scheduling",
+                "status": "blocked",
+                "detail": "no verified node capacity/placement for 2 of 2 additional destination replicas while retaining source; inspect Ready/schedulable nodes, selectors, taints, host ports, PVC topology and CPU/memory/pod requests (unsupported observed allocations on 0 nodes)"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "cluster-scheduling",
+                "status": "blocked",
+                "detail": "no verified node capacity/placement for 2 of 2 additional destination replicas while retaining source; inspect Ready/schedulable nodes, selectors, taints, host ports, PVC topology and CPU/memory/pod requests (unsupported observed allocations on 0 nodes)"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-node-selector"
+      },
+      {
+        "case": "pdb",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:58:02.248659+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "availability-budget",
+                "status": "blocked",
+                "detail": "PodDisruptionBudget web allows 0 disruptions but source retirement removes 1 selected Pods; scaling controllers bypasses eviction protection; choose a reviewed availability-preserving procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "availability-budget",
+                "status": "blocked",
+                "detail": "PodDisruptionBudget web allows 0 disruptions but source retirement removes 1 selected Pods; scaling controllers bypasses eviction protection; choose a reviewed availability-preserving procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-pdb"
+      },
+      {
+        "case": "pdb-overlap",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:58:53.970365+00:00",
+        "observations": {
+          "sourceUID": "67ac2235-627e-455c-83e4-18fdf3e878b1",
+          "absoluteBudgetPreservedByOverlap": true,
+          "destinationActiveAndHealthy": true,
+          "retainedAt": "completed cutover; no automatic rollback that would interrupt this availability budget"
+        },
+        "namespace": "dcmig-sdk-guard-20261016-pdb-overlap"
+      },
+      {
+        "case": "pod-quota",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:59:37.084610+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-7dfbcad4e8f8cee6ca980c05\" is forbidden: exceeded quota: constraints, requested: pods=1, used: pods=1, limited: pods=1"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-7dfbcad4e8f8cee6ca980c05\" is forbidden: exceeded quota: constraints, requested: pods=1, used: pods=1, limited: pods=1"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-pod-quota"
+      },
+      {
+        "case": "positive",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:00:27.673374+00:00",
+        "observations": {
+          "preflightPassedWithoutSourceMutation": true,
+          "freshAssessmentAtCutover": true,
+          "cutoverAndRecovery": "verified",
+          "replicas": 1
+        },
+        "namespace": "dcmig-sdk-guard-20261016-positive"
+      },
+      {
+        "case": "replicaset-quota",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:01:24.813008+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "replicaset-admission",
+                "status": "blocked",
+                "detail": "replicasets.apps \"dcmig-check-605b30036fe029291ca5ab3a\" is forbidden: exceeded quota: constraints, requested: count/replicasets.apps=1, used: count/replicasets.apps=0, limited: count/replicasets.apps=0"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "replicaset-admission",
+                "status": "blocked",
+                "detail": "replicasets.apps \"dcmig-check-605b30036fe029291ca5ab3a\" is forbidden: exceeded quota: constraints, requested: count/replicasets.apps=1, used: count/replicasets.apps=0, limited: count/replicasets.apps=0"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-replicaset-quota"
+      },
+      {
+        "case": "runtime-policy",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:02:15.441904+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "network-policy-selection",
+                "status": "blocked",
+                "detail": "NetworkPolicy source-rc selects current source Pods and proposed destination differently; review workload/peer selectors before source retirement"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "network-policy-selection",
+                "status": "blocked",
+                "detail": "NetworkPolicy source-rc selects current source Pods and proposed destination differently; review workload/peer selectors before source retirement"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-runtime-policy"
+      },
+      {
+        "case": "scc",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:03:06.832773+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "service-account-scc",
+                "status": "blocked",
+                "detail": "service account workload cannot admit destination SCC template: CantAssignSecurityContextConstraintProvider"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "service-account-scc",
+                "status": "blocked",
+                "detail": "service account workload cannot admit destination SCC template: CantAssignSecurityContextConstraintProvider"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-scc"
+      },
+      {
+        "case": "service-account",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:04:05.998038+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-07d411e4597e2a0dca0f94ae\" is forbidden: error looking up service account dcmig-sdk-guard-20261016-service-account/workload: serviceaccount \"workload\" not found"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "pod-admission-and-limits",
+                "status": "blocked",
+                "detail": "pods \"dcmig-check-07d411e4597e2a0dca0f94ae\" is forbidden: error looking up service account dcmig-sdk-guard-20261016-service-account/workload: serviceaccount \"workload\" not found"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ]
+        },
+        "namespace": "dcmig-sdk-guard-20261016-service-account"
+      },
+      {
+        "case": "shared-cluster-quota",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:05:15.961257+00:00",
+        "observations": {
+          "sourceSpecAndAvailabilityUnchanged": true,
+          "hpaUIDAndSpecUnchanged": true,
+          "destinationPausedAtZero": true,
+          "journalRemainsStaged": true,
+          "assessments": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "namespace-and-cluster-quotas",
+                "status": "blocked",
+                "detail": "quota cluster/dcmig-constraints-8cdecfd9: pods used=3 additional=3 hard=4; insufficient full destination headroom while retaining source; request temporary capacity or use a reviewed maintenance procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "namespace-and-cluster-quotas",
+                "status": "blocked",
+                "detail": "quota cluster/dcmig-constraints-8cdecfd9: pods used=3 additional=3 hard=4; insufficient full destination headroom while retaining source; request temporary capacity or use a reviewed maintenance procedure"
+              },
+              "totals": {
+                "requested": 1,
+                "generated": 0,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 0,
+                "failed": 1,
+                "empty": 0
+              }
+            }
+          ],
+          "sharedQuotaNamespaces": [
+            "dcmig-sdk-guard-20261016-shared-cluster-quota",
+            "dcmig-sdk-guard-20261016-shared-cluster-quota-other"
+          ],
+          "clusterQuotaRemoved": true
+        },
+        "namespace": "dcmig-sdk-guard-20261016-shared-cluster-quota"
+      },
+      {
+        "case": "zero",
+        "result": "passed",
+        "startedAt": "2026-10-16T07:06:35.543890+00:00",
+        "observations": {
+          "preflightPassedWithoutSourceMutation": true,
+          "freshAssessmentAtCutover": true,
+          "cutoverAndRecovery": "verified",
+          "replicas": 0
+        },
+        "namespace": "dcmig-sdk-guard-20261016-zero"
+      }
+    ],
+    "features": [
+      {
+        "case": "multi-image",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:31.448499+00:00",
+        "observations": {
+          "crossNamespace": false,
+          "multiContainer": true,
+          "disabled": false,
+          "triggerUpdatesVerified": true,
+          "rollback": "verified"
+        },
+        "namespace": "dcmig-sdk-feat-20261016-multi-image"
+      }
+    ],
+    "permissions": [
+      {
+        "case": "restricted-rbac",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:33.978546+00:00",
+        "observations": {
+          "generationWithoutNamespaceRead": "passed",
+          "deniedDCList": "visible failure",
+          "deniedDeploymentCreate": "no persistence",
+          "deniedCutoverUpdate": "source unchanged"
+        },
+        "namespace": "dcmig-sdk-perm-20261016-rbac"
+      },
+      {
+        "case": "quota-admission",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:28:58.565268+00:00",
+        "observations": {
+          "dryRunQuotaDenied": true,
+          "stageQuotaDenied": true,
+          "destinationPersisted": false,
+          "sourceUnchanged": true
+        },
+        "namespace": "dcmig-sdk-perm-20261016-quota-admission"
+      },
+      {
+        "case": "foreign-destination",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:29:18.781050+00:00",
+        "observations": {
+          "foreignDeploymentUID": "4aaa7b44-3640-40e0-859c-f44e25fbc451",
+          "overwritten": false
+        },
+        "namespace": "dcmig-sdk-perm-20261016-foreign"
+      },
+      {
+        "case": "denied-hpa-mutation",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:29:34.566048+00:00",
+        "observations": {
+          "HPADeleteDenied": true,
+          "HPAUnchanged": true,
+          "sourceUnchanged": true,
+          "destinationReplicas": 0
+        },
+        "namespace": "dcmig-sdk-perm-20261016-rbac-hpa"
+      }
+    ],
+    "worker": [
+      {
+        "case": "success",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:35:24.841154+00:00",
+        "observations": {
+          "sourceUID": "0115cc91-a449-43ff-b189-cd40dd47cc94",
+          "initialWorker": {
+            "uid": "4859bed7-3b55-4048-9b86-93e8e5efecd3",
+            "renewTime": "2026-10-16T06:35:50.000000Z",
+            "pod": "web-1-xfwmn"
+          },
+          "destinationWorker": {
+            "uid": "cbb25369-eb58-4a05-af52-b536e0cab5ce",
+            "renewTime": "2026-10-16T06:36:25.000000Z",
+            "pod": "web-6996677c7f-rnzbd"
+          },
+          "restoredWorker": {
+            "uid": "b2466947-3e05-4de6-8b07-f2ea75ceb5f1",
+            "renewTime": "2026-10-16T06:36:48.000000Z",
+            "pod": "web-1-5zlbp"
+          },
+          "heartbeatSamples": 95,
+          "concurrentPodsObserved": 0,
+          "readErrors": 0,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": true
+        },
+        "namespace": "dcmig-sdk-worker-20261016-success"
+      },
+      {
+        "case": "startup-failure",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:36:53.750875+00:00",
+        "observations": {
+          "sourceUID": "ebf57f4e-7521-444e-a359-6f8a7689f813",
+          "initialWorker": {
+            "uid": "762bec4e-268f-4f3b-8ef1-17ba9f00907f",
+            "renewTime": "2026-10-16T06:37:18.000000Z",
+            "pod": "web-1-qcj2p"
+          },
+          "destinationWorker": null,
+          "restoredWorker": {
+            "uid": "09cb1e08-3d39-4b09-b29f-1b6b7758f7c0",
+            "renewTime": "2026-10-16T06:38:14.000000Z",
+            "pod": "web-1-745db"
+          },
+          "heartbeatSamples": 92,
+          "concurrentPodsObserved": 0,
+          "readErrors": 0,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": true
+        },
+        "namespace": "dcmig-sdk-worker-20261016-startup-failure"
+      },
+      {
+        "case": "cancellation",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:38:19.895355+00:00",
+        "observations": {
+          "sourceUID": "216cd9d3-2b2b-4e58-aa88-cacfb537b11f",
+          "initialWorker": {
+            "uid": "c8c09d64-9780-4669-ba8a-7dd22a6b5205",
+            "renewTime": "2026-10-16T06:38:46.000000Z",
+            "pod": "web-1-qhb6w"
+          },
+          "destinationWorker": {
+            "uid": "34989719-9922-4e09-8b96-6c3c22b0cd10",
+            "renewTime": "2026-10-16T06:39:01.000000Z",
+            "pod": "web-5cdbb7c95-sfdln"
+          },
+          "restoredWorker": {
+            "uid": "56f751f0-3677-463b-9ad4-269e26ab805a",
+            "renewTime": "2026-10-16T06:39:25.000000Z",
+            "pod": "web-1-mcwzn"
+          },
+          "heartbeatSamples": 64,
+          "concurrentPodsObserved": 0,
+          "readErrors": 0,
+          "sourceSpecAndHTTPRecovered": true,
+          "recoveryRerun": true
+        },
+        "namespace": "dcmig-sdk-worker-20261016-cancellation"
+      }
+    ],
+    "expiry": [
+      {
+        "case": "expired-credentials",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:42:56.467649+00:00",
+        "observations": {
+          "validBeforeExpiry": true,
+          "actualSignedTokenExpiration": 1792133590.0,
+          "observedAfterExpiry": 1792133651.84478,
+          "acceptedAfterJWTExpiryBeforeObservedRejection": 5,
+          "expiredCredentialsProduceFailedReportAndExit": true,
+          "sourceUIDSpecAndHTTPUnchanged": true,
+          "destinationPersisted": false
+        },
+        "namespace": "dcmig-sdk-exp-20261016-expired-credentials"
+      }
+    ],
+    "admin-policy": [
+      {
+        "case": "admin-policy-selector-refusal-and-recovery",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:55:54.977441+00:00",
+        "observations": {
+          "sourceUID": "bd39ee83-323f-40be-8080-22845c5a91a6",
+          "originalPodUID": "620795f0-6045-416b-ad35-e863eab2ad46",
+          "policyVariants": [
+            {
+              "kind": "AdminNetworkPolicy",
+              "position": "subject",
+              "policyUID": "6bd2fad9-fbf8-483a-ac10-c53347639f26",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "AdminNetworkPolicy",
+              "position": "peer",
+              "policyUID": "2c05e779-d342-4aa1-98ce-aafd975fa087",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "AdminNetworkPolicy",
+              "position": "controller-hash",
+              "policyUID": "b73d1c6c-215e-4def-8ce9-03c8bedc32c2",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "AdminNetworkPolicy dcmig-b1627c85: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "BaselineAdminNetworkPolicy",
+              "position": "subject",
+              "policyUID": "0f8c0df7-3bee-45d7-9904-91c1008d9126",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "BaselineAdminNetworkPolicy",
+              "position": "peer",
+              "policyUID": "5cabc370-e5fb-4adf-bfc0-0469ca06c6ed",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: ingress peer: selects current source Pods and proposed destination differently; review cluster workload/peer selectors before source retirement"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "BaselineAdminNetworkPolicy",
+              "position": "controller-hash",
+              "policyUID": "94563e23-96c3-41bb-aa2b-9b53cd24b554",
+              "previousReadOnlyPreflightAccepted": null,
+              "refusals": [
+                {
+                  "mode": "preflight",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                  }
+                },
+                {
+                  "mode": "cutover",
+                  "blockedCheck": {
+                    "name": "admin-network-policy-selection",
+                    "status": "blocked",
+                    "detail": "BaselineAdminNetworkPolicy default: subject: policy depends on Deployment controller-added pod-template-hash; its future value is not established by Pod dry run; review this selector before source retirement"
+                  }
+                }
+              ]
+            }
+          ],
+          "allTestPoliciesRemoved": true,
+          "successfulCutoverAndRecoveryAfterRemoval": true,
+          "marker": "admin-policy-3c7f9336"
+        },
+        "namespace": "dcmig-sdk-bound-admin-20261016-admin-policy"
+      }
+    ],
+    "raw-fields": [
+      {
+        "case": "raw-deployment-field",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:58:54.910559+00:00",
+        "observations": {
+          "sourceUID": "b8bf0f47-d468-4bcc-9bf1-102a1c465e10",
+          "originalPodUID": "8f44c810-9876-4ed6-b746-01bfee53cc04",
+          "destinationUID": "f606c6a4-4822-4d80-a428-6085e69b4b93",
+          "field": "spec.template.spec.securityContext.seLinuxChangePolicy",
+          "value": "Recursive",
+          "previousReadOnlyPreflightAccepted": null,
+          "refusals": [
+            {
+              "mode": "preflight",
+              "error": "Deployment web raw spec needs manual review: $.template.spec.securityContext.seLinuxChangePolicy is not in Kubernetes 1.27 baseline"
+            },
+            {
+              "mode": "cutover",
+              "error": "Deployment web raw spec needs manual review: $.template.spec.securityContext.seLinuxChangePolicy is not in Kubernetes 1.27 baseline"
+            }
+          ],
+          "recoveredWithRawSpecPreserved": true,
+          "sourcePodAndSpecHPAUIDAndSpecUnchanged": true,
+          "marker": "raw-field-bb5de6b8"
+        },
+        "namespace": "dcmig-sdk-bound-raw-f-20261016-raw-field"
+      }
+    ],
+    "required-scc": [
+      {
+        "case": "required-scc-authorization",
+        "result": "passed",
+        "startedAt": "2026-10-16T06:59:44.585864+00:00",
+        "observations": {
+          "requiredSCC": "nonroot-v2",
+          "subjectReviewSelectedAfterRevocation": "restricted-v2",
+          "serviceAccount": "required-scc-worker",
+          "sourceUID": "bc7f263c-100d-4a87-aa95-2060529da7f2",
+          "originalPodUID": "d09f579e-a914-4547-b370-d5e69d8cec19",
+          "previousBinaryPreflightAcceptedWithoutSCCUse": null,
+          "refusals": [
+            {
+              "mode": "preflight",
+              "blockedCheck": {
+                "name": "service-account-scc",
+                "status": "blocked",
+                "detail": "service account required-scc-worker cannot be verified to use required SCC \"nonroot-v2\": allowed=false denied=false reason= evaluationError="
+              }
+            },
+            {
+              "mode": "cutover",
+              "blockedCheck": {
+                "name": "service-account-scc",
+                "status": "blocked",
+                "detail": "service account required-scc-worker cannot be verified to use required SCC \"nonroot-v2\": allowed=false denied=false reason= evaluationError="
+              }
+            }
+          ],
+          "grantRestoredPreflight": "passed",
+          "destinationPodUID": "954a3d6b-1fd7-4892-8c93-e24a8104e12d",
+          "restoredPodUID": "d36dfcdc-0137-4d09-beb0-dcea40d57fdb",
+          "sourceSpecHTTPAndHPASpecRecovered": true,
+          "destinationPausedAtZero": true,
+          "namespaceOnlySCCBindingRetained": true,
+          "newSCCOrClusterRoleOrStorage": false,
+          "marker": "required-scc-3daedfde"
+        },
+        "namespace": "dcmig-sdk-bound-requi-20261016-required-scc"
+      }
+    ],
+    "namespaces": {
+      "original": [
+        {
+          "case": "batch-generation",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:44:26.153022+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "singleInvocation": true,
+            "duplicateProcessedOnce": true,
+            "sameResourceName": "web",
+            "namespacedArtifactDirectories": [
+              "dcmig-sdk-ns-20261016-a",
+              "dcmig-sdk-ns-20261016-b",
+              "dcmig-sdk-ns-20261016-c"
+            ],
+            "emptyNamespaces": 1,
+            "reservedSkipped": 1,
+            "totals": {
+              "requested": 5,
+              "generated": 3,
+              "applied": 0,
+              "ready": 0,
+              "skipped": 1,
+              "manual": 0,
+              "failed": 0,
+              "empty": 1
+            }
+          }
+        },
+        {
+          "case": "batch-planning",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:44:33.057350+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "singleInvocation": true,
+            "independentMigrationIDs": [
+              "145d63c1cf9dbd47be39a310",
+              "327fe909bf394689a99e7daa",
+              "ed030292476197e3c4209abc"
+            ],
+            "planFiles": [
+              "batch-planning-plan-0121/dcmig-sdk-ns-20261016-a/web.plan.json",
+              "batch-planning-plan-0121/dcmig-sdk-ns-20261016-b/web.plan.json",
+              "batch-planning-plan-0121/dcmig-sdk-ns-20261016-c/web.plan.json"
+            ],
+            "totals": {
+              "requested": 4,
+              "generated": 3,
+              "applied": 0,
+              "ready": 0,
+              "skipped": 0,
+              "manual": 0,
+              "failed": 0,
+              "empty": 1
+            }
+          }
+        },
+        {
+          "case": "batch-plan-dry-runs",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:44:54.245429+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "allThreeBatchPlansServerValidated": true,
+            "destinationsPersisted": 0,
+            "sourceSpecsUnchanged": true
+          }
+        },
+        {
+          "case": "batch-manual-partial-failure",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:45:03.261895+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "failureDoesNotStopLaterNamespaces": true,
+            "aggregateExitNonzero": true,
+            "manualSourceUnchanged": true,
+            "totals": {
+              "generate": {
+                "requested": 5,
+                "generated": 4,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 1,
+                "failed": 0,
+                "empty": 1
+              },
+              "plan": {
+                "requested": 5,
+                "generated": 4,
+                "applied": 0,
+                "ready": 0,
+                "skipped": 0,
+                "manual": 1,
+                "failed": 0,
+                "empty": 1
+              }
+            }
+          }
+        },
+        {
+          "case": "batch-rbac-partial-failure",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:45:22.582623+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "allowedNamespaces": [
+              "dcmig-sdk-ns-20261016-a",
+              "dcmig-sdk-ns-20261016-c"
+            ],
+            "deniedNamespace": "dcmig-sdk-ns-20261016-b",
+            "laterAllowedNamespaceProcessed": true,
+            "totals": {
+              "requested": 3,
+              "generated": 2,
+              "applied": 0,
+              "ready": 0,
+              "skipped": 0,
+              "manual": 0,
+              "failed": 1,
+              "empty": 0
+            }
+          }
+        },
+        {
+          "case": "cutover-recovery-namespace-isolation",
+          "result": "failed",
+          "startedAt": "2026-10-16T06:45:30.565506+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "error": "Unexpected exit 1: ['180s', '--operation-timeout', '240s', '--plan-file', '/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016/namespaces/cutover-recovery-namespace-isolation-plan-0183/dcmig-sdk-ns-20261016-a/web.plan.json', '--automation-quiesced']; command-0205.json"
+        }
+      ],
+      "completion": [
+        {
+          "case": "cutover-recovery-namespace-isolation",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:51:17.087606+00:00",
+          "namespaces": [
+            "dcmig-sdk-ns-20261016-a",
+            "dcmig-sdk-ns-20261016-b",
+            "dcmig-sdk-ns-20261016-c",
+            "dcmig-sdk-ns-20261016-sentinel",
+            "dcmig-sdk-ns-20261016-manual",
+            "dcmig-sdk-ns-20261016-empty"
+          ],
+          "observations": {
+            "sameNamedApplicationsMigrated": 3,
+            "replicas": [
+              1,
+              2,
+              0
+            ],
+            "destinationUIDs": [
+              "7050fa58-def9-4ca4-b31b-01e5124dff90",
+              "37a019a2-8a7c-4ee3-8c26-9b0d366b1f07",
+              "7c17822c-89eb-4382-a5a4-4cbe6a2c0961"
+            ],
+            "migrationIDs": [
+              "145d63c1cf9dbd47be39a310",
+              "327fe909bf394689a99e7daa",
+              "ed030292476197e3c4209abc"
+            ],
+            "cutoverOrder": [
+              "a",
+              "b",
+              "c"
+            ],
+            "recoveryOrder": [
+              "b",
+              "c",
+              "a"
+            ],
+            "otherNamespaceStateVerifiedAfterEveryStep": true,
+            "distinctHTTPResponsesVerified": true,
+            "sentinelAndManualSourcesUnchanged": true
+          }
+        }
+      ]
+    },
+    "recovery": {
+      "original": [
+        {
+          "case": "write-1",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:28:36.625321+00:00",
+          "observations": {
+            "lostResponseAfterMutation": 1,
+            "mutation": {
+              "method": "DELETE",
+              "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-1/horizontalpodautoscalers/web?timeout=30s",
+              "status": 200,
+              "mutation": true,
+              "mutationNumber": 1,
+              "faultInjected": true
+            },
+            "interruptedPhase": "hpa-freeze-intent",
+            "recovery": "verified and rerun"
+          },
+          "namespace": "dcmig-sdk-rec-20261016-write-1"
+        },
+        {
+          "case": "write-2",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:29:06.876120+00:00",
+          "observations": {
+            "lostResponseAfterMutation": 2,
+            "mutation": {
+              "method": "PUT",
+              "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-2/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+              "status": 200,
+              "mutation": true,
+              "mutationNumber": 2,
+              "faultInjected": true
+            },
+            "interruptedPhase": "source-intent",
+            "recovery": "verified and rerun"
+          },
+          "namespace": "dcmig-sdk-rec-20261016-write-2"
+        },
+        {
+          "case": "write-3",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:29:38.360565+00:00",
+          "observations": {
+            "lostResponseAfterMutation": 3,
+            "mutation": {
+              "method": "PUT",
+              "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-3/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+              "status": 200,
+              "mutation": true,
+              "mutationNumber": 3,
+              "faultInjected": true
+            },
+            "interruptedPhase": "source-intent",
+            "recovery": "verified and rerun"
+          },
+          "namespace": "dcmig-sdk-rec-20261016-write-3"
+        },
+        {
+          "case": "write-4",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:30:09.969596+00:00",
+          "observations": {
+            "lostResponseAfterMutation": 4,
+            "mutation": {
+              "method": "PUT",
+              "path": "/apis/apps.openshift.io/v1/namespaces/dcmig-sdk-rec-20261016-write-4/deploymentconfigs/web?fieldValidation=Strict&timeout=30s",
+              "status": 200,
+              "mutation": true,
+              "mutationNumber": 4,
+              "faultInjected": true
+            },
+            "interruptedPhase": "source-intent",
+            "recovery": "verified and rerun"
+          },
+          "namespace": "dcmig-sdk-rec-20261016-write-4"
+        },
+        {
+          "case": "write-5",
+          "result": "failed",
+          "startedAt": "2026-10-16T06:30:45.310423+00:00",
+          "error": "Unexpected exit 1: ['--readiness-timeout', '180s', '--operation-timeout', '240s', '--plan-file', '/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016/recovery/write-5-plan-0157/dcmig-sdk-rec-20261016-write-5/web.plan.json']; command-0164.json",
+          "namespace": "dcmig-sdk-rec-20261016-write-5"
+        },
+        {
+          "case": "write-6",
+          "result": "passed",
+          "startedAt": "2026-10-16T06:31:12.785233+00:00",
+          "observations": {
+            "lostResponseAfterMutation": 6,
+            "mutation": {
+              "method": "POST",
+              "path": "/apis/autoscaling/v2/namespaces/dcmig-sdk-rec-20261016-write-6/horizontalpodautoscalers?fieldValidation=Strict&timeout=30s",
+              "status": 201,
+              "mutation": true,
+              "mutationNumber": 6,
+              "faultInjected": true
+            },
+            "interruptedPhase": "hpa-create-intent",
+            "recovery": "verified and rerun"
+          },
+          "namespace": "dcmig-sdk-rec-20261016-write-6"
+        }
+      ],
+      "write5ExplicitCompletion": {
+        "kind": "actual-openshift-recovery-completion",
+        "result": "passed",
+        "namespace": "dcmig-sdk-rec-20261016-write-5",
+        "sourceUID": "3d19ca42-e64f-4b49-b85b-5b55a2684afc",
+        "destinationUID": "6bcf688e-4518-48b4-b607-ec145ca2fcd2",
+        "sourceSpecRecovered": true,
+        "hpaSpecRecovered": true,
+        "HTTPResponse": "qualified-write-5\n",
+        "rolledBackJournal": true,
+        "verifiedRollbackCommandRecords": [
+          ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0005.json",
+          ".scratchpad/client-upgrade-20261016/recovery-write5-completion/command-0007.json"
+        ],
+        "retainedInitialFailure": "DeploymentresourceVersionconflict during stop-destination dryrun; initial recovery attempt not counted as success",
+        "retainedHelperFailure": "Initial completion helper used missing HTTP method after successful structural assertions; final readonly observation completes that verification",
+        "originalFault": {
+          "method": "PUT",
+          "path": "/apis/apps/v1/namespaces/dcmig-sdk-rec-20261016-write-5/deployments/web?fieldValidation=Strict&timeout=30s",
+          "status": 200,
+          "mutation": true,
+          "mutationNumber": 5,
+          "faultInjected": true
+        },
+        "completedBy": "Explicit rollback rerun and idempotent rerun after revalidation; followed by independent API/HTTP verification",
+        "testedAt": "2026-10-16T06:41:04.498760+00:00"
+      }
+    },
+    "csi": {
+      "minor": "4.21",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+      "runner": "Mac-mini",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T06:34:19.360827+00:00",
+      "runURL": "local:regular-csi-9856ca96",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-e414af930075",
+      "sampledVolumePodExclusivity": {
+        "samples": 99,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision"
+    },
+    "pv-labels": {
+      "kind": "actual-openshift-pv-topology-regression",
+      "result": "passed",
+      "priorAttempt": null,
+      "testedAt": "2026-10-16T06:59:18.829723+00:00",
+      "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "variants": [
+        {
+          "key": "failure-domain.beta.kubernetes.io/zone",
+          "currentPreflight": "blocked before writes",
+          "currentCutover": "blocked before writes",
+          "sourcePodUIDPreserved": "b78d5502-47c3-443f-87ac-402f3d6b6d03"
+        },
+        {
+          "key": "failure-domain.beta.kubernetes.io/region",
+          "currentPreflight": "blocked before writes",
+          "currentCutover": "blocked before writes",
+          "sourcePodUIDPreserved": "b78d5502-47c3-443f-87ac-402f3d6b6d03"
+        },
+        {
+          "key": "topology.kubernetes.io/zone",
+          "currentPreflight": "blocked before writes",
+          "currentCutover": "blocked before writes",
+          "sourcePodUIDPreserved": "b78d5502-47c3-443f-87ac-402f3d6b6d03"
+        },
+        {
+          "key": "topology.kubernetes.io/region",
+          "currentPreflight": "blocked before writes",
+          "currentCutover": "blocked before writes",
+          "sourcePodUIDPreserved": "b78d5502-47c3-443f-87ac-402f3d6b6d03"
+        }
+      ],
+      "canaryBeforeDuringAfter": "pv-label-canary-23ca39fbcf",
+      "pvLabelsRestored": true,
+      "positiveCutoverAndRecovery": "passed",
+      "newNamespaceOrStorage": false,
+      "scope": "Four actual PV metadata-label variants and source-preserving refusals, followed by regular CSI cutover/recovery; not a cross-zone scheduler runtime integration."
+    }
+  },
+  "localValidation": {
+    "observedAt": "2026-10-16T07:00:29.968565+00:00",
+    "sourceRevision": "7eac1da107f30917170ab9ba96f5273ea23e69e9",
+    "race": {
+      "passedTestsAndSubtests": 356,
+      "topLevelTests": 79,
+      "statementCoveragePercent": 77.3
+    },
+    "goVet": "passed",
+    "goModVerify": "passed",
+    "goModTidyDiff": "empty",
+    "govulncheckFindings": 0,
+    "gosec": {
+      "files": 20,
+      "lines": 4171,
+      "nosec": 2,
+      "found": 0
+    },
+    "pythonTests": 24,
+    "crossBuilds": {
+      "linux/amd64": "compiled only; no actual cluster execution",
+      "linux/arm64": "compiled only; no actual cluster execution",
+      "darwin/amd64": "compiled only; no actual cluster execution",
+      "windows/amd64": "compiled only; no actual cluster execution"
+    },
+    "logHashes": {
+      "race-final.jsonl": "c25d8d3705300271f6a587a6a2379df9ff502373822b0e41ea1b6bc7bef2f0b9",
+      "coverage-final.out": "7b0bc19ebdf340152468f4c61d2251d9ae75a0865405d837ca0a4b3c0d29e9b3",
+      "govulncheck-final.json": "fadb6db8d96a6f64b0f415a3216034b1443c2254d55addc9c0a6717c89c86ca6",
+      "gosec-final.json": "e2d8590db21d19e5e14feffdebc16c0756857367cd687ed06cb97ecd79d5bdcc"
+    },
+    "scope": "Final-source commands completed in this session; exact commands/results retained in task transcript and named logs. Native Darwin/arm64 actual results are separate."
+  },
+  "evidenceFiles": [
+    {
+      "path": "newapp-a/cases.json",
+      "sha256": "39c6ca5ccdf1d1a0ba27826fd42506e1697c7a297b11cbc704340128fa62e222"
+    },
+    {
+      "path": "newapp-b/cases.json",
+      "sha256": "88b0c7fd06c1d9806fc6a003ca3b59c088b3dc9d07698841689ce4a44ec7dc1a"
+    },
+    {
+      "path": "newapp-c/cases.json",
+      "sha256": "265dab4f2aa566d88205f098a681eaad8e657a9db7956637ebde25a1252a9e98"
+    },
+    {
+      "path": "newapp-d/cases.json",
+      "sha256": "a2f077c3115eb735d4cf67aa2d40953a8570129fb92a90d266c1682fb1c87450"
+    },
+    {
+      "path": "newapp-e/cases.json",
+      "sha256": "fbac217f88cab3e223320b299b2d78d163d0a53a58142dcf2a833f94c698da85"
+    },
+    {
+      "path": "runtime/cases.json",
+      "sha256": "e4f3cc1426940e3e6cedf8aca3a0cfdfe56db6f02d1f87722147d519d4070cd8"
+    },
+    {
+      "path": "constraints/cases.json",
+      "sha256": "4bf351890dc7c06db1140164ef2c885b497228a593a094d3373b67b7d5c8d4ab"
+    },
+    {
+      "path": "features/cases.json",
+      "sha256": "c555878a4d2f6da65d6dd90c1e92e910bdf0e6fbd9c0c8f7037f64b7e08748aa"
+    },
+    {
+      "path": "permissions/cases.json",
+      "sha256": "734e3048b86c9cfe723c576de32a1b53bf8ee9397facd6151f996a6b1da1aece"
+    },
+    {
+      "path": "worker/cases.json",
+      "sha256": "ac680b4f72686dda5ae8814e1409dad1aa084ce357afd53bb8c61102553734d1"
+    },
+    {
+      "path": "expiry/cases.json",
+      "sha256": "4a8fa4ca830e49051851066f05baa95436cc824bd9b03b773af98c2e009f9838"
+    },
+    {
+      "path": "admin-policy/cases.json",
+      "sha256": "7d09d5b76284b07f4adea072576620f6b9cb52b94acc28410d649c76fd438e01"
+    },
+    {
+      "path": "raw-fields/cases.json",
+      "sha256": "6dd9fee9e62c304bc7989d02fb0226fd0362a26e4da0bc733792aa26d4f65446"
+    },
+    {
+      "path": "required-scc/cases.json",
+      "sha256": "49e85b772f7fb20d43e8a83f9c18fcf00458e94bd7d58bea8bc31f304c1c8269"
+    },
+    {
+      "path": "qualification-final.json",
+      "sha256": "629616fef0d779640b3d2f33d115ce4ba2bddd1035ce0a7d75f006dcf00caa33"
+    },
+    {
+      "path": "supplemental-evidence.json",
+      "sha256": "0301325343b05275b690026d0fecf8cac4f01fdc53b78d5786c3f2033fccec1a"
+    },
+    {
+      "path": "namespaces/cases.json",
+      "sha256": "507cbd996efa767760b58ad112aa3ee85a00fe79c8dc9dd6a5f0780979f5f084"
+    },
+    {
+      "path": "namespaces-completion/cases.json",
+      "sha256": "e36053907208663995648e6dd74563240da6152377ac54c316accd2a1545fbf7"
+    },
+    {
+      "path": "recovery/cases.json",
+      "sha256": "6a3cc9277b319891bb6b6533ffae75f75f99adec0006c112d0ffe4c5ad07d5b2"
+    },
+    {
+      "path": "recovery-write5-verification/result.json",
+      "sha256": "0a00377448bf8b7ff1746f21a8dfcb3c9451e2d29260dc498820c197aa2a694f"
+    },
+    {
+      "path": "csi/variant.json",
+      "sha256": "3847ac71cbec889a500809b17e5a259cc88183a98a3a0c2bbcb1a2058deefa21"
+    },
+    {
+      "path": "pv-labels/result.json",
+      "sha256": "7e161c06a41ee4be178d6b0da3f58bb5db86bfa203d6c59c43de37f232c6d7de"
+    },
+    {
+      "path": "local-validation.json",
+      "sha256": "4ef0c91a11defdbfcdc482cbe46708f10eaa5ea4d27a41e3efd516ecc0f47347"
+    }
+  ],
+  "privateEvidenceRoot": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016",
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/client-upgrade-20261016/openshift-4.21.36-client-upgrade-evidence.tar.gz",
+    "archiveSHA256": "476b644be9f39ebe0d318ad5fd08a022210589d2af518abee5fdd0d656019618",
+    "manifestSHA256": "35f9ea0e79c7d9938ed3c30fcb41f530150985aaa53ba3ea72419dd3615d1e58",
+    "files": 5824,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "allManifestEntriesVerified": true,
+    "generatedAt": "2026-10-16T07:08:18.694235+00:00",
+    "snapshotScope": "Public docs/evidence at sealing, before appending this archive metadata and rebuild proof, avoiding circular checksums"
+  },
+  "archiveSourceRebuild": {
+    "result": "passed",
+    "archiveSource": "export-complete/source",
+    "rebuiltArtifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+    "originalLiveTestedArtifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
+    "byteIdentical": true,
+    "flags": [
+      "CGO_ENABLED=0",
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=false",
+      "-ldflags=-s -w -X main.version=maintenance-client-upgrade"
+    ],
+    "testedAt": "2026-10-16T07:09:11.345184+00:00"
+  }
+}

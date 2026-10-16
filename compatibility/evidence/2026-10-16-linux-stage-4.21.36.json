@@ -1,0 +1,231 @@
+{
+  "kind": "actual-openshift",
+  "schemaVersion": "v1",
+  "minor": "4.21",
+  "result": "partial",
+  "scenarios": [
+    "schema",
+    "dry-run"
+  ],
+  "artifactSHA256": "f042f4119fc533377ea8ba671ddb4b77d8a2ca99ca70791dd2f7780025300d8e",
+  "revision": "0b644652b892232a3aaf804fd4cfbbd8c08d1ff1",
+  "testedAt": "2026-10-16T07:26:30.392565+00:00",
+  "runURL": "local:linux-stage-only-20261016",
+  "nativeExecutionPlatform": "linux/amd64",
+  "namespace": "dcmig-linux-runner-20261016",
+  "sourceUID": "19a2102f-7bae-4470-8f37-bb137918ff65",
+  "sourcePodUID": "a08c1931-50b1-4c58-9c22-29e18f98555c",
+  "destinationUID": "ea0ec324-5011-4bf9-a885-946674b6409b",
+  "liveOutcomes": {
+    "generation": "passed",
+    "planning": "passed after missing namespaced controller-read grant was added",
+    "serverDryRunWithoutPersistence": "passed",
+    "stageAtPausedZero": "passed",
+    "stageIdempotentRerun": "passed",
+    "preflightWithMissingPermissions": "failed visibly before source mutation",
+    "sourceUIDPodUIDAndFullSpecUnchanged": true,
+    "hpaInventoryAndServicesUnchanged": true
+  },
+  "preflightReport": {
+    "schemaVersion": "v1",
+    "timestamp": "2026-10-16T07:26:28Z",
+    "context": "dcmig-linux-qualifier",
+    "results": [
+      {
+        "constraints": {
+          "desiredReplicas": 1,
+          "capacityReplicas": 2,
+          "checkedAt": "2026-10-16T07:26:28Z",
+          "status": "blocked",
+          "checks": [
+            {
+              "name": "permissions",
+              "status": "blocked",
+              "detail": "cannot verify constraints; grant required read/dry-run permission: denied update deploymentconfigs in dcmig-linux-runner-20261016:  "
+            }
+          ],
+          "blockers": [
+            "pre-cutover permissions: cannot verify constraints; grant required read/dry-run permission: denied update deploymentconfigs in dcmig-linux-runner-20261016:  "
+          ],
+          "warnings": [
+            "Point-in-time checks do not reserve quota or node capacity. Concurrent changes, image/runtime/storage failures and controller-identity or generated-name-specific admission can still prevent startup.",
+            "Quota and scheduling checks require headroom for destination replicas plus configured rolling surge while retaining the source; source retirement is never credited as available capacity.",
+            "Scheduler plugins, CSI attachment limits, volume mounting and external network dependencies are not simulated; review these before exclusive cutover."
+          ]
+        },
+        "source": {
+          "namespace": "dcmig-linux-runner-20261016",
+          "name": "web",
+          "uid": "19a2102f-7bae-4470-8f37-bb137918ff65"
+        },
+        "destination": {
+          "namespace": "dcmig-linux-runner-20261016",
+          "name": "web"
+        },
+        "stage": "preflight",
+        "outcome": "failed",
+        "warnings": [
+          "Point-in-time checks do not reserve quota or node capacity. Concurrent changes, image/runtime/storage failures and controller-identity or generated-name-specific admission can still prevent startup.",
+          "Quota and scheduling checks require headroom for destination replicas plus configured rolling surge while retaining the source; source retirement is never credited as available capacity.",
+          "Scheduler plugins, CSI attachment limits, volume mounting and external network dependencies are not simulated; review these before exclusive cutover."
+        ],
+        "error": "pre-cutover permissions: cannot verify constraints; grant required read/dry-run permission: denied update deploymentconfigs in dcmig-linux-runner-20261016:  ",
+        "generated": false,
+        "applied": false,
+        "ready": false
+      }
+    ],
+    "totals": {
+      "requested": 1,
+      "generated": 0,
+      "applied": 0,
+      "ready": 0,
+      "skipped": 0,
+      "manual": 0,
+      "failed": 1,
+      "empty": 0
+    }
+  },
+  "retainedInitialFailure": "First plan refused missing namespaced StatefulSet read; after adding documented read-only controller inventory permissions, fresh planning succeeded. No global grant or source-write permission added.",
+  "limitations": [
+    "Namespace-only account; no cluster-scoped grant was applied.",
+    "No Linux cutover, readiness, controller, volume or recovery qualification inferred.",
+    "Unit/loopback/offline tests remain distinct from actual generation/staging outcomes.",
+    "Full Linux suite requires explicit approval of proposed-cluster-rbac.json; OpenShift4.22 and other platform results remain missing."
+  ],
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "productionSourceSHA256": "af50a884b9f560577c2b11696c23f130b3612b70d8bdc446771c463203f45e26",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.37.1",
+    "k8s.io/apimachinery": "v0.37.1",
+    "k8s.io/client-go": "v0.37.1"
+  },
+  "runner": "OpenShift Pod 53bfd173-c232-4801-9c73-6f3827090ad8",
+  "fixtureResults": [
+    {
+      "fixture": "testdata/ocp-4.14-dc.yaml",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.15-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.16-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.17-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.18-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.19-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.20-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.21-dc.json",
+      "result": "passed"
+    },
+    {
+      "fixture": "testdata/ocp-4.22-dc.json",
+      "result": "passed"
+    }
+  ],
+  "unitContractExecution": {
+    "kind": "linux-unit-contract-execution",
+    "result": "passed",
+    "testsAndSubtestsPassed": 356,
+    "topLevelTestsPassed": 79,
+    "failed": 0,
+    "skipped": 0,
+    "raceEnabled": false,
+    "platform": "linux/amd64",
+    "artifact": "converter-linux-tests",
+    "scope": "Actual execution of fixtures/unit/loopback API contracts in a Linux Pod, not OpenShift integration for those tests."
+  },
+  "executionVerification": {
+    "result": "passed",
+    "podUID": "53bfd173-c232-4801-9c73-6f3827090ad8",
+    "node": "ip-10-0-12-137.us-east-2.compute.internal",
+    "platform": "Linux x86_64",
+    "uid": 1001,
+    "remoteArtifactSHA256": "f042f4119fc533377ea8ba671ddb4b77d8a2ca99ca70791dd2f7780025300d8e",
+    "remoteTestArtifactSHA256": "d1a4ae0a5d0f9a413685d1bd6d45cceb689407226b03b21a7492e7fba52d663f",
+    "authenticatedIdentity": "system:serviceaccount:dcmig-linux-runner-20261016:qualifier",
+    "clusterScopedProposal": {
+      "clusterrole": "absent",
+      "clusterrolebinding": "absent"
+    },
+    "images": [
+      {
+        "name": "runner",
+        "image": "registry.redhat.io/ubi9/python-312@sha256:b1ed2928e5c7de1a4308e68386f1372f8503d1c0506305fde3a35c252ae53a64",
+        "imageID": "registry.redhat.io/ubi9/python-312@sha256:b1ed2928e5c7de1a4308e68386f1372f8503d1c0506305fde3a35c252ae53a64",
+        "ready": true
+      }
+    ],
+    "limits": "Namespaced staging-only token; source-write and global inventories denied. Actual Linux unit/fixture/contracts and partial live generation/staging only."
+  },
+  "build": {
+    "sourceRevision": "0b644652b892232a3aaf804fd4cfbbd8c08d1ff1",
+    "productionSourceUnchangedFrom": "7eac1da",
+    "goVersion": "go version go1.27.2 darwin/arm64",
+    "artifacts": {
+      "converter-linux-amd64": {
+        "sha256": "f042f4119fc533377ea8ba671ddb4b77d8a2ca99ca70791dd2f7780025300d8e",
+        "bytes": 29352096
+      },
+      "converter-linux-tests": {
+        "sha256": "d1a4ae0a5d0f9a413685d1bd6d45cceb689407226b03b21a7492e7fba52d663f",
+        "bytes": 42987567
+      }
+    },
+    "scope": "Cross-built locally for actual Linux execution; not yet a live integration pass."
+  },
+  "driverScope": "Private namespace-scoped runner helpers retained with evidence; actual binaries from committed0b64465 source. No production source changed.",
+  "approvalStatus": "Cluster-scoped full-suite proposal NOT applied; explicit approval pending",
+  "retainedAttemptNotes": [
+    "First planning attempt failed visibly for missing namespaced StatefulSet list permission; subsequent read-only inventory grant enabled fresh planning.",
+    "Initial completion helper failed locally while selecting its helper source; no cluster command executed in that attempt. Its original file is retained."
+  ],
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/linux-qualification-20261016/openshift-4.21.36-linux-stage-evidence.tar.gz",
+    "archiveSHA256": "d49a77bc1c4d84cb8b9bf3e7f3c55870d488d1081360af550eba43abef0f72e7",
+    "files": 237,
+    "manifestSHA256": "deebd8ec18bbb3c1847bf8f426d1b33b6aaf916576d9dddf1f5b7f96f5b5bcdc",
+    "allManifestEntriesVerified": true,
+    "credentialScan": "passed; actual admin and limited-runner credentials absent",
+    "excluded": "Credential profiles, kubeconfigs, private upload payload, binary executables",
+    "sealedAt": "2026-10-16T07:30:17.867740+00:00",
+    "scope": "Public evidence snapshot precedes appending archive/rebuild metadata, avoiding circular checksums. Proposed cluster-scoped grant remains unapplied."
+  },
+  "archiveSourceRebuild": {
+    "result": "passed",
+    "source": "export-complete/source",
+    "platform": "linux/amd64",
+    "byteIdentical": true,
+    "artifactSHA256": "f042f4119fc533377ea8ba671ddb4b77d8a2ca99ca70791dd2f7780025300d8e",
+    "flags": [
+      "CGO_ENABLED=0",
+      "GOOS=linux",
+      "GOARCH=amd64",
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=false",
+      "-ldflags=-s -w -X main.version=maintenance-linux-qualification -X main.commit=0b64465"
+    ],
+    "verifiedAt": "2026-10-16T07:31:01.092369+00:00"
+  }
+}

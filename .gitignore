@@ -2,4 +2,5 @@ converted_deployments
 conversion_log.txt
 .idea
 conversion_report.pdf
+conversion_report.json
 openshift-dc-migration

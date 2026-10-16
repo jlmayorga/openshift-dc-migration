@@ -1,66 +1,50 @@
 name: Continuous Integration
-
 on:
   push:
-    branches: [ main ]
+    branches: [main, maintenance/openshift-dc-migration]
   pull_request:
-    branches: [ main ]
 permissions:
   contents: read
-  pull-requests: read
-
 jobs:
-
-  build:
-    name: Build and Test
+  checks:
     runs-on: ubuntu-latest
     steps:
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
-          go-version: '1.21'
-
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-
-      - name: Build
-        run: go build -v .
-
-      - name: Test
-        run: go test -v ./...
-
-  lint:
-    name: Lint
+          go-version-file: go.mod
+      - run: go mod download && go mod verify
+      - run: test -z "$(gofmt -l *.go)"
+      - run: go test -mod=readonly -race -count=1 -coverprofile=coverage.out ./...
+      - run: go vet -mod=readonly ./...
+      - run: go build -mod=readonly -trimpath -o /tmp/openshift-dc-converter .
+      - run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - run: go mod tidy && git diff --exit-code -- go.mod go.sum
+      - run: go -C tools/security mod tidy && git diff --exit-code -- tools/security/go.mod tools/security/go.sum
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage
+          path: coverage.out
+  security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
-          go-version: stable
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+          go-version-file: go.mod
+      - run: |
+          mkdir -p /tmp/security-tools
+          go -C tools/security mod download
+          go -C tools/security mod verify
+          go -C tools/security build -mod=readonly -o /tmp/security-tools/govulncheck golang.org/x/vuln/cmd/govulncheck
+          go -C tools/security build -mod=readonly -o /tmp/security-tools/gosec github.com/securego/gosec/v2/cmd/gosec
+      - run: /tmp/security-tools/govulncheck -json ./... > govulncheck.json
+      - run: python3 tools/check-vulnerabilities.py govulncheck.json
+      - run: /tmp/security-tools/gosec -fmt=json -out=gosec.json ./...
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
-          args: "--timeout=10m --verbose"
-          version: latest
-
-  security-check:
-    name: Security Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: ./...
-
+          name: security-results
+          path: |
+            govulncheck.json
+            gosec.json

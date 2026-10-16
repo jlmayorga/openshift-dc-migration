@@ -1,0 +1,105 @@
+name: OpenShift qualification
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run_id:
+        description: Build and Release run containing the exact release-candidates artifact
+        required: true
+        type: string
+  schedule:
+    - cron: '17 6 * * 1'
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.matrix.outputs.targets }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - id: matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          full=os.environ['EVENT_NAME']!='push'
+          matrix=json.load(open('compatibility/matrix.json'))
+          if matrix.get('activeReleaseScope'):
+              import sys
+              sys.path.insert(0,'tools')
+              from release_gate import load_scope
+              scope=load_scope(matrix)
+              rows=[{'minor':scope['actualMinor'],'platform':a['platform'].replace('/','-')} for a in scope['artifacts'].values()]
+          else:
+              minors=[v['minor'] for v in matrix['targets'] if v['releaseRequirement']!='development' and v.get('qualificationPolicy','actual-cluster')=='actual-cluster'] if full else [matrix['newestGA']]
+              platforms=['linux-amd64','linux-arm64','darwin-amd64','darwin-arm64','windows-amd64'] if full else ['linux-amd64']
+              rows=[{'minor':m,'platform':p} for m in minors for p in platforms]
+              if full:rows.append({'minor':'next','platform':'linux-amd64'})
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('targets='+json.dumps({'include':rows})+'\n')
+          PY
+  qualify:
+    needs: matrix
+    environment: openshift-qualification
+    runs-on: [self-hosted, openshift-qualification, '${{ matrix.platform }}']
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.matrix.outputs.targets) }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: release-candidates
+          path: candidates
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.candidate_run_id || vars.OPENSHIFT_CANDIDATE_RUN_ID }}
+      - id: provenance
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,os,re
+          revision=json.load(open('candidates/build-provenance.json'))['revision']
+          if not re.fullmatch('[a-f0-9]{40}',revision):raise SystemExit('Invalid candidate revision')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('revision='+revision+'\n')
+          PY
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ steps.provenance.outputs.revision }}
+          clean: false
+      - name: Run on an explicitly configured disposable namespace
+        shell: bash
+        env:
+          TEST_KUBECONFIG: ${{ secrets.OPENSHIFT_TEST_KUBECONFIG }}
+          TEST_TARGETS: ${{ secrets.OPENSHIFT_TEST_TARGETS_JSON }}
+          TARGET_MINOR: ${{ matrix.minor }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
+          TEST_IMAGE: ${{ vars.OPENSHIFT_TEST_IMAGE }}
+          SECOND_TEST_IMAGE: ${{ vars.OPENSHIFT_SECOND_TEST_IMAGE }}
+          QUALIFICATION_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,subprocess
+          minor=os.environ['TARGET_MINOR'];platform=os.environ['TARGET_PLATFORM']
+          targets=json.loads(os.environ['TEST_TARGETS']);target=targets[minor][platform]
+          config=pathlib.Path(os.environ['RUNNER_TEMP'])/'qualification-kubeconfig'
+          config.write_text(os.environ['TEST_KUBECONFIG']);config.chmod(0o600)
+          binary=pathlib.Path('candidates')/('openshift-dc-converter-'+platform+('.exe' if platform.startswith('windows-') else ''))
+          binary.chmod(0o700)
+          argv=['python3','tools/qualify_openshift.py','--context',target['context'],'--namespace',target['namespace'],'--kubeconfig',str(config),'--binary',str(binary),'--image',os.environ['TEST_IMAGE'],'--output','evidence/'+minor+'-'+platform+'.json','--allow-test-mutations']
+          if os.environ['SECOND_TEST_IMAGE']:argv+=['--second-image',os.environ['SECOND_TEST_IMAGE']]
+          if target.get('supplementalEvidence'):argv+=['--supplemental-evidence',target['supplementalEvidence']]
+          if minor=='next':argv+=['--smoke-only']
+          try:subprocess.run(argv,check=True)
+          finally:config.unlink(missing_ok=True)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: actual-openshift-${{ matrix.minor }}-${{ matrix.platform }}
+          path: evidence/*.json

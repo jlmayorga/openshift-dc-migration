@@ -1,0 +1,858 @@
+{
+  "minor": "4.21",
+  "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+  "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.37.1",
+    "k8s.io/apimachinery": "v0.37.1",
+    "k8s.io/client-go": "v0.37.1"
+  },
+  "runner": "runner",
+  "kind": "actual-openshift",
+  "schemaVersion": "v1",
+  "result": "partial",
+  "scenarios": [
+    "exclusive-volume"
+  ],
+  "testedAt": "2026-10-16T15:28:36.653166+00:00",
+  "runURL": "local:source-retry-linux-20261016",
+  "nativeExecutionPlatform": "linux/amd64",
+  "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
+  "targetedCases": [
+    {
+      "case": "dry-run-2",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:17:48.977446+00:00",
+      "observations": {
+        "actualAPIServerConflicts": 2,
+        "statusOnly": true,
+        "cutoverPassedWithoutCLIRestart": true,
+        "retryEvents": [
+          "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec",
+          "source update dry run conflict; retry 3 of 5 will refetch and revalidate source identity/spec"
+        ],
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-dry-run-2"
+    },
+    {
+      "case": "dry-run-5",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:18:59.750597+00:00",
+      "observations": {
+        "actualAPIServerConflicts": 5,
+        "statusOnly": true,
+        "cutoverPassedWithoutCLIRestart": false,
+        "retryEvents": [
+          "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec",
+          "source update dry run conflict; retry 3 of 5 will refetch and revalidate source identity/spec",
+          "source update dry run conflict; retry 4 of 5 will refetch and revalidate source identity/spec",
+          "source update dry run conflict; retry 5 of 5 will refetch and revalidate source identity/spec"
+        ],
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-dry-run-5"
+    },
+    {
+      "case": "write-2",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:19:40.941288+00:00",
+      "observations": {
+        "actualAPIServerConflicts": 2,
+        "statusOnly": true,
+        "cutoverPassedWithoutCLIRestart": true,
+        "retryEvents": [
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 2 of 5 will refetch and revalidate source identity/spec",
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 3 of 5 will refetch and revalidate source identity/spec"
+        ],
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-write-2"
+    },
+    {
+      "case": "write-5",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:20:29.909615+00:00",
+      "observations": {
+        "actualAPIServerConflicts": 5,
+        "statusOnly": true,
+        "cutoverPassedWithoutCLIRestart": false,
+        "retryEvents": [
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 2 of 5 will refetch and revalidate source identity/spec",
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 3 of 5 will refetch and revalidate source identity/spec",
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 4 of 5 will refetch and revalidate source identity/spec",
+          "quiesce source triggers while allowing replica reconciliation conflict; retry 5 of 5 will refetch and revalidate source identity/spec"
+        ],
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-write-5"
+    },
+    {
+      "case": "uncertain-timeout",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:21:10.545946+00:00",
+      "observations": {
+        "committedSourceWrite": true,
+        "withheldResponse": "uncertain-timeout",
+        "automaticRetryAfterUnknownResponse": false,
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-uncertain-timeout"
+    },
+    {
+      "case": "uncertain-eof",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:21:49.525695+00:00",
+      "observations": {
+        "committedSourceWrite": true,
+        "withheldResponse": "uncertain-eof",
+        "automaticRetryAfterUnknownResponse": false,
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-uncertain-eof"
+    },
+    {
+      "case": "uncertain-retry-after",
+      "result": "passed",
+      "startedAt": "2026-10-16T15:22:27.449028+00:00",
+      "observations": {
+        "committedSourceWrite": true,
+        "withheldResponse": "uncertain-retry-after",
+        "automaticRetryAfterUnknownResponse": false,
+        "explicitRollbackAndRerun": true,
+        "fullOriginalSpecRecovered": true
+      },
+      "namespace": "dcmig-lnx-rv-final-20261016-uncertain-retry-after"
+    }
+  ],
+  "repeatedCSI": [
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "runner": "runner",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:26:22.537196+00:00",
+      "runURL": "local:regular-csi-6c8f7bf7",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-01cafd5b4088",
+      "sampledVolumePodExclusivity": {
+        "samples": 70,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision",
+      "evidenceDirectory": "csi-repeat-1",
+      "sourceConflictRetryEvents": [
+        "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec"
+      ]
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "runner": "runner",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:27:02.785643+00:00",
+      "runURL": "local:regular-csi-2e5ac506",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-44d3e954f245",
+      "sampledVolumePodExclusivity": {
+        "samples": 73,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision",
+      "evidenceDirectory": "csi-repeat-2",
+      "sourceConflictRetryEvents": [
+        "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec"
+      ]
+    },
+    {
+      "minor": "4.21",
+      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+      "revision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+      "runner": "runner",
+      "openshiftPatch": "4.21.36",
+      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+      "dependencyVersions": {
+        "k8s.io/api": "v0.37.1",
+        "k8s.io/apimachinery": "v0.37.1",
+        "k8s.io/client-go": "v0.37.1"
+      },
+      "kubernetesVersion": "v1.34.9",
+      "kind": "actual-openshift",
+      "schemaVersion": "v1",
+      "scenario": "exclusive-volume",
+      "result": "passed",
+      "testedAt": "2026-10-16T15:27:42.187564+00:00",
+      "runURL": "local:regular-csi-5366f29a",
+      "namespace": "dcmig-nf-c-20261016-regular-pvc",
+      "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+      "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+      "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+      "sourceSpecRecovered": true,
+      "dataCanaryBeforeDuringAfter": "sdk-csi-f216f80b6666",
+      "sampledVolumePodExclusivity": {
+        "samples": 70,
+        "readErrors": 0,
+        "concurrentSourceAndDestinationObserved": 0,
+        "limit": "Sampling plus actual source-drain/cutover checks, not proof of every possible instant or cross-node/driver behavior"
+      },
+      "newStorageOrSCC": false,
+      "originalApplicationMarkerPreserved": true,
+      "driverWorkingTree": "Private reusable-fixture helper; exact source retained with evidence, not claimed in the base Go revision",
+      "evidenceDirectory": "csi-repeat-3",
+      "sourceConflictRetryEvents": [
+        "source update dry run conflict; retry 2 of 5 will refetch and revalidate source identity/spec"
+      ]
+    }
+  ],
+  "endVerification": {
+    "result": "passed",
+    "at": "2026-10-16T15:28:36.653166+00:00",
+    "scope": "Targeted Linux7conflict/unknown-response cases and3regularCSI repeats only, not the full22scenario qualification",
+    "noActiveConverterProcesses": true,
+    "binaryHashUnchanged": true,
+    "CSIOriginalSourceFullSpecAndAvailability": true,
+    "CSIOriginalPVCAndPVUIDs": true,
+    "CSIDestinationPausedZero": true
+  },
+  "temporaryPrivilegeCleanup": {
+    "result": "all temporary global and namespace grants and runner removed or already absent",
+    "at": "2026-10-16T15:30:05.852949+00:00",
+    "objects": [
+      {
+        "kind": "ClusterRoleBinding",
+        "name": "dcmig-linux-qualification-20261016",
+        "namespace": null,
+        "uid": "9cd4337b-bf1a-448f-9d8f-e63226cd52a6",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "ClusterRole",
+        "name": "dcmig-linux-qualification-20261016",
+        "namespace": null,
+        "uid": "92aeafdb-e95e-463f-a13d-1dda72b40933",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-dry-run-2",
+        "name": "linux-qualification-fixture",
+        "uid": "34efe37d-59f8-403e-9260-5437d535afe4",
+        "namespaceUID": "2fd2a448-41c0-429c-b5fe-30085f6e1345",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-dry-run-2",
+        "name": "linux-qualification-fixture",
+        "uid": "ad11b9da-7d86-49ca-9454-543b02f0b6cc",
+        "namespaceUID": "2fd2a448-41c0-429c-b5fe-30085f6e1345",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-retry-after",
+        "name": "linux-qualification-fixture",
+        "uid": "8c59037f-86d2-45ce-810e-c24502dbb1f0",
+        "namespaceUID": "889d77ec-214e-44e5-b333-6177d3fe5f33",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-retry-after",
+        "name": "linux-qualification-fixture",
+        "uid": "4a6a6d0a-2ada-43ec-a529-61bebaa17325",
+        "namespaceUID": "889d77ec-214e-44e5-b333-6177d3fe5f33",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-uncertain-timeout",
+        "name": "linux-qualification-fixture",
+        "uid": "dd5d7a9e-6f45-4889-b054-5caccddf9379",
+        "namespaceUID": "2980a053-f382-47e1-b2cb-64d6adae53b2",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-uncertain-timeout",
+        "name": "linux-qualification-fixture",
+        "uid": "b873e37e-a7e8-4249-9fe7-65a36406524e",
+        "namespaceUID": "2980a053-f382-47e1-b2cb-64d6adae53b2",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "6c2c2c18-5a9b-4718-bc66-b8fabb14801d",
+        "namespaceUID": "49fc5dfb-ec02-4da6-b3cd-f944939291e0",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "6b9fcf98-b6a1-4b2c-be4e-c0fab18cd47a",
+        "namespaceUID": "49fc5dfb-ec02-4da6-b3cd-f944939291e0",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-dry-run-2",
+        "name": "linux-qualification-fixture",
+        "uid": "e4961865-967b-4f20-8a39-026d2895ec9e",
+        "namespaceUID": "58578c0c-5276-48ee-af43-cabfd075c8af",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-dry-run-2",
+        "name": "linux-qualification-fixture",
+        "uid": "610fb1eb-9d04-434f-84fd-ac0d6bc36120",
+        "namespaceUID": "58578c0c-5276-48ee-af43-cabfd075c8af",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-timeout",
+        "name": "linux-qualification-fixture",
+        "uid": "25ed2afe-8b29-4d32-97fd-39e17a42dc33",
+        "namespaceUID": "38c8fc45-2236-4391-a24d-e9046cfa028a",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-timeout",
+        "name": "linux-qualification-fixture",
+        "uid": "99e58248-81ab-4f40-8731-00c8cb521488",
+        "namespaceUID": "38c8fc45-2236-4391-a24d-e9046cfa028a",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "b03c8564-bf5d-46f2-b407-5d5ebbdc9b13",
+        "namespaceUID": "45c1ecb4-baa1-4383-a1c6-ba24d05b82c5",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "4d3167e4-ee0f-4474-ae3f-87f5a51eb0aa",
+        "namespaceUID": "45c1ecb4-baa1-4383-a1c6-ba24d05b82c5",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-dry-run-5",
+        "name": "linux-qualification-fixture",
+        "uid": "958ca9d1-e53f-4d95-85e8-bc86779aa7ff",
+        "namespaceUID": "f33a0bd1-5538-47c9-86b1-de0023be6b28",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-dry-run-5",
+        "name": "linux-qualification-fixture",
+        "uid": "c0f3bf7e-ed2c-4549-a4fa-8cde8419e2a6",
+        "namespaceUID": "f33a0bd1-5538-47c9-86b1-de0023be6b28",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-dry-run-5",
+        "name": "linux-qualification-fixture",
+        "uid": "fdbe7428-78fb-4163-9b13-84cdd9eccf19",
+        "namespaceUID": "92932531-e56f-488e-9d16-c64c47ee9d0b",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-dry-run-5",
+        "name": "linux-qualification-fixture",
+        "uid": "5574ca53-f8ce-4302-83c5-f23ed1a80e99",
+        "namespaceUID": "92932531-e56f-488e-9d16-c64c47ee9d0b",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "7ac9f510-3105-4a40-9233-f20f342da160",
+        "namespaceUID": "99155e38-eeaa-48b7-b36b-d850f83a7e56",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-write-5",
+        "name": "linux-qualification-fixture",
+        "uid": "9af7faf3-4439-4d56-b730-c54743451e0c",
+        "namespaceUID": "99155e38-eeaa-48b7-b36b-d850f83a7e56",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-nf-c-20261016-regular-pvc",
+        "name": "linux-qualification-fixture",
+        "uid": "cf4948ef-384a-4aa6-b4ee-319ea5e91c71",
+        "namespaceUID": "1f24eaeb-a655-4f58-b175-fbe863403991",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-nf-c-20261016-regular-pvc",
+        "name": "linux-qualification-fixture",
+        "uid": "e8edc75e-3b1d-470f-a92d-444c6d9c66f2",
+        "namespaceUID": "1f24eaeb-a655-4f58-b175-fbe863403991",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-eof",
+        "name": "linux-qualification-fixture",
+        "uid": "5a5639f9-1978-4a4e-91ee-19e5ea6f2be4",
+        "namespaceUID": "cb911134-47d7-443f-bfa6-faa42bb3cbd2",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-final-20261016-uncertain-eof",
+        "name": "linux-qualification-fixture",
+        "uid": "6b9b25c3-559f-4df2-8960-e25247315867",
+        "namespaceUID": "cb911134-47d7-443f-bfa6-faa42bb3cbd2",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-uncertain-eof",
+        "name": "linux-qualification-fixture",
+        "uid": "ad27ce10-fa10-4d27-998a-71e6221f6366",
+        "namespaceUID": "d128a9d3-e17c-4b9c-8ba0-c15a95a53a27",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-uncertain-eof",
+        "name": "linux-qualification-fixture",
+        "uid": "1901e024-3678-4960-b31d-232a4232aa09",
+        "namespaceUID": "d128a9d3-e17c-4b9c-8ba0-c15a95a53a27",
+        "result": "already absent"
+      },
+      {
+        "kind": "RoleBinding",
+        "namespace": "dcmig-lnx-rv-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "4139a481-69b7-41ff-910d-560f3f66a85f",
+        "namespaceUID": "738b44d1-d0b9-4fa5-9806-2186a22ae523",
+        "result": "already absent"
+      },
+      {
+        "kind": "Role",
+        "namespace": "dcmig-lnx-rv-20261016-write-2",
+        "name": "linux-qualification-fixture",
+        "uid": "fcbbcfb4-8723-4f68-9276-24d11514eac0",
+        "namespaceUID": "738b44d1-d0b9-4fa5-9806-2186a22ae523",
+        "result": "already absent"
+      },
+      {
+        "kind": "Pod",
+        "name": "runner",
+        "namespace": "dcmig-linux-runner-20261016",
+        "uid": "5bbec5a1-56f0-4b5b-90e7-492b7422656d",
+        "result": "UID verified and removed"
+      },
+      {
+        "kind": "ServiceAccount",
+        "name": "qualifier",
+        "namespace": "dcmig-linux-runner-20261016",
+        "uid": "959d72b6-8221-4960-8b0b-ba121cf943c8",
+        "result": "UID verified and removed"
+      }
+    ]
+  },
+  "remoteArchiveVerification": {
+    "result": "passed",
+    "size": 2199868,
+    "files": 1317,
+    "sha256": "77589bffe886b5418b72b1d698f05eb338c61debb5f3915da62c5c056111c2ab",
+    "initialDownload": "Preserved128KiB truncated stream despite oc exit0; same sealed archive downloaded in bounded chunks, no test or export rerun",
+    "chunks": [
+      {
+        "offset": 0,
+        "size": 49152,
+        "sha256": "9536e73df995213adc1a16fcaefd17ec208306b1c73cced1740482d89a250d58"
+      },
+      {
+        "offset": 49152,
+        "size": 49152,
+        "sha256": "ea9525f079fd9c092efd6f4d79bbf06911d89bb3a30e764562a9c83f53a93551"
+      },
+      {
+        "offset": 98304,
+        "size": 49152,
+        "sha256": "93425f32213046f61adb29e21090d4d147128ba0fb56e3890ca6c3ab91caa7db"
+      },
+      {
+        "offset": 147456,
+        "size": 49152,
+        "sha256": "32996db646e498d629d4119c927b07a887b8cd5b835985ad8a84d2057c781401"
+      },
+      {
+        "offset": 196608,
+        "size": 49152,
+        "sha256": "8efaf52b55901a21ccfde04f2f06c643c68a3b9afd1adaa1114397163eaffbdc"
+      },
+      {
+        "offset": 245760,
+        "size": 49152,
+        "sha256": "cc57773987537079ec7b3e4939affccf5cc64a44f4b7ba44ff03427da30dcf5e"
+      },
+      {
+        "offset": 294912,
+        "size": 49152,
+        "sha256": "bd4464bb298bcc620480f703f4ffb74b66d010fbde2f2774c4e6bc5d1772241b"
+      },
+      {
+        "offset": 344064,
+        "size": 49152,
+        "sha256": "7dbc2e72aad0ad2f4c002ffcd2a55e522e1e36bb528ac33a1a7a625e4821bdf3"
+      },
+      {
+        "offset": 393216,
+        "size": 49152,
+        "sha256": "9213e3b8d1d0e68238ee4b04d3a0615b5e025af20809cab6f5a4465beafc955c"
+      },
+      {
+        "offset": 442368,
+        "size": 49152,
+        "sha256": "be387eac5252957646de296736daee0c1d3a4d3e96900641d8e6d3938611cc97"
+      },
+      {
+        "offset": 491520,
+        "size": 49152,
+        "sha256": "ccdef2a63fd2f007f4405e965e3fef1cb5f89ddf285483e48222b4c57b88cd24"
+      },
+      {
+        "offset": 540672,
+        "size": 49152,
+        "sha256": "aeaecf38c858eb1105a7ee5e2ff556efe2b6ce76397d4df5b98d5435a7cd8210"
+      },
+      {
+        "offset": 589824,
+        "size": 49152,
+        "sha256": "728d2d0898c6f067e56c4483382eb5c5160c5cb492304bde1309efc34b70cda0"
+      },
+      {
+        "offset": 638976,
+        "size": 49152,
+        "sha256": "497bf97f3b9ecdb9466b54c7f4f7211f945901bb4b7588e3a234e070aed9b787"
+      },
+      {
+        "offset": 688128,
+        "size": 49152,
+        "sha256": "b8067adaf165a89733679e5622d99bc9bca92e89c7beec01d58ecdde7155a854"
+      },
+      {
+        "offset": 737280,
+        "size": 49152,
+        "sha256": "0bddaafa328dac49485bb49afcf2acfe90ad8c43a20e4b0bc14d0c0d39b25ee5"
+      },
+      {
+        "offset": 786432,
+        "size": 49152,
+        "sha256": "65fd421421e4e36a2e72b7c517fbd565f02e926ad8b14513ce1c4f1b1deb834b"
+      },
+      {
+        "offset": 835584,
+        "size": 49152,
+        "sha256": "8c7662d551435ce33c72f7b403176ecc44adabade230a06650e9213287313a23"
+      },
+      {
+        "offset": 884736,
+        "size": 49152,
+        "sha256": "4ef6df55ec06732110bb093b005d85cddcffc9c3ee3aff353438d78778cedc5c"
+      },
+      {
+        "offset": 933888,
+        "size": 49152,
+        "sha256": "e0fe72aed378dce9df7ab3d96d6e26e9dd67471c33b6e47b3c597e94c1c620bd"
+      },
+      {
+        "offset": 983040,
+        "size": 49152,
+        "sha256": "9728c5520f212e5dbabfda37f9d57cdecaec996f0bcb001bcb4b578c06d297be"
+      },
+      {
+        "offset": 1032192,
+        "size": 49152,
+        "sha256": "a25e97460798eedb641a619c84ee73094733e71a6314afa8f653a235c15b67b1"
+      },
+      {
+        "offset": 1081344,
+        "size": 49152,
+        "sha256": "b30193634d01bd8b5404efb1368a2aadb7cb8f24aa6fb5f96483135935d26a34"
+      },
+      {
+        "offset": 1130496,
+        "size": 49152,
+        "sha256": "d70d6dd9301a69631fc25b519de4cc68d339a49ed626c9132af71e1d43960c11"
+      },
+      {
+        "offset": 1179648,
+        "size": 49152,
+        "sha256": "53716fb34d5795a611a7d55c169d988b5645c2c108f2c0bdc9c94bbf600baf6f"
+      },
+      {
+        "offset": 1228800,
+        "size": 49152,
+        "sha256": "e33787668097179ef9e2a706a1379277b455adf3739ccdbb6e219424b23acb84"
+      },
+      {
+        "offset": 1277952,
+        "size": 49152,
+        "sha256": "5fb8ee60b14b5208a4d1c7096e98712ab6044f1d2c820e111602ba3c7875f6c1"
+      },
+      {
+        "offset": 1327104,
+        "size": 49152,
+        "sha256": "d08ee9e6df63c65931e2a7ca18cbebd1049ee3a4961b24aad0091f43a0705403"
+      },
+      {
+        "offset": 1376256,
+        "size": 49152,
+        "sha256": "c439db58eaa017b2877762d105b0bf51b03e92e93604ed6e4e38fb49901e930f"
+      },
+      {
+        "offset": 1425408,
+        "size": 49152,
+        "sha256": "58cc283668aa683cf3e3188975e934c2023e35e50a951d321640ace549adb366"
+      },
+      {
+        "offset": 1474560,
+        "size": 49152,
+        "sha256": "66b4d600f9bdc5bc0db71676116b755c9f2428b7bb327f74a3da837dd9bea40b"
+      },
+      {
+        "offset": 1523712,
+        "size": 49152,
+        "sha256": "8580413681c89384e11e33a830e666e2a7a7edbdf1b643fcedcbaece89e35e94"
+      },
+      {
+        "offset": 1572864,
+        "size": 49152,
+        "sha256": "cfa677726db42aa40aef6c72e79e2a6db8626f3164e08670e361f5169c4d8ad4"
+      },
+      {
+        "offset": 1622016,
+        "size": 49152,
+        "sha256": "095c672c07201cc0e37b94a7dc93ff43a220c98c388dde92de2c5563bbf2d334"
+      },
+      {
+        "offset": 1671168,
+        "size": 49152,
+        "sha256": "057d5a2e01e53ebaeca6e7b2bb6d0524e92565289bbbf8c10b0b89e0d543788e"
+      },
+      {
+        "offset": 1720320,
+        "size": 49152,
+        "sha256": "09fa860028ff3e182ef3eb3c7fe2aa41b1db01cbe637176bb71563491c6b5a8b"
+      },
+      {
+        "offset": 1769472,
+        "size": 49152,
+        "sha256": "0cbd0f327c3c121a2d6ac098babc30e0a4142c1452cf699c9c0dd650b6870344"
+      },
+      {
+        "offset": 1818624,
+        "size": 49152,
+        "sha256": "b78becdd48ca5439fcfb4b6ed706b7d9f94bfad11a4ac7283e5e8b42343b0068"
+      },
+      {
+        "offset": 1867776,
+        "size": 49152,
+        "sha256": "c3ac87a269a26a7ff18bc2b0cbc079ea05c8927c582c69613293a0980e3f34b1"
+      },
+      {
+        "offset": 1916928,
+        "size": 49152,
+        "sha256": "618a5c261d0dcc33798fc4b5788d464f927994e53be74bf76dd91c85c4465242"
+      },
+      {
+        "offset": 1966080,
+        "size": 49152,
+        "sha256": "88ad537174a1083ea13a7d724c582cc210293ac3edbe9b8d3e8a93d03ead165b"
+      },
+      {
+        "offset": 2015232,
+        "size": 49152,
+        "sha256": "530d607cbe4f70f2ce0136d27b925a731e510c05c758db448f61db36aec2ba44"
+      },
+      {
+        "offset": 2064384,
+        "size": 49152,
+        "sha256": "33570739779548a59378657fd1bc2964b13714b852240aded2ccd3e796983c84"
+      },
+      {
+        "offset": 2113536,
+        "size": 49152,
+        "sha256": "0a721a714545198a654887ba888f5af9358238d713a8e66d7a1245be1e051152"
+      },
+      {
+        "offset": 2162688,
+        "size": 37180,
+        "sha256": "31b49f4d0fbdaf163ce85b6c113349981f43e16c1cc3187777acd7aeda5a3d8a"
+      }
+    ]
+  },
+  "privateEvidenceRoot": ".scratchpad/source-retry-linux-20261016",
+  "limitations": [
+    "Seven actual conflict/uncertain-response cases and three actual CSI repetitions; no full 22-scenario pass claimed for this executable.",
+    "Earlier full Linux 4297 candidate evidence remains historical; no results transferred.",
+    "Actual 4.21.36 / v1.34.9 on one Linux amd64 node only; sample limitations and external version/platform release gates remain.",
+    "Initial end verification attempted an unauthorized read of the old staging namespace; no grant was broadened. Host admin verified its original full source spec/UID and paused destination separately.",
+    "Initial evidence download was truncated despite oc exit0; preserved then the same sealed archive downloaded in bounded chunks and every checksum verified. No migration test repeated for this transport issue."
+  ],
+  "evidenceFiles": [
+    {
+      "path": "remote-export/final/conflicts/cases.json",
+      "sha256": "475d223fa7aa232266ef328ce78262cf3ed2c0a097e27e56619ddde7fefe19d5"
+    },
+    {
+      "path": "remote-export/final/csi-repeated-results.json",
+      "sha256": "2bdd13cc3e6c006f395b3a2be455317aeb6adf0d69136f148c2fbe7da5cfd7ad"
+    },
+    {
+      "path": "remote-export/final/end-verification.json",
+      "sha256": "bf5aa1fff47379408e36a255fbc714ea8fdd02d068bfc4efe0d3014c2c50a749"
+    },
+    {
+      "path": "permission-cleanup/result.json",
+      "sha256": "51cbdb5af87c5fadb2d731857f4a2ec08bb4d6eb95de68ecee039865c46fd5a6"
+    },
+    {
+      "path": "old-staging-end-verification.json",
+      "sha256": "3b84d308342818704ba51db16298d804fb7a9c7dcfb9e5f8eb65ee590598b74f"
+    },
+    {
+      "path": "uploaded-final-provenance.json",
+      "sha256": "9348dd78ff9f4b65ce8ff1e462b253914d250e77deb30c537cac9c61c4ec8dcc"
+    }
+  ],
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/source-conflicts-final-20261016/openshift-4.21.36-source-conflicts-evidence.tar.gz",
+    "archiveSHA256": "2f6f4f85a529f45c2c546976a5d3dbe6c6d2153adac09f935b272ca6a1c0d7f7",
+    "files": 7134,
+    "manifestSHA256": "b21a53938c9a0770b96e58d69095ac56912d65b6777d463520bde3dcf5e6cffb",
+    "allManifestEntriesVerified": true,
+    "credentialScan": "Actual host admin, qualifier and restricted-account credential values absent; remote export separately checked qualifier/restricted-account tokens before transfer",
+    "sealedAt": "2026-10-16T15:33:02.896956+00:00",
+    "scope": "Final native full22plus16source-conflict cases; final Linux targeted7plus3CSI; preliminary candidates/failures/recovery and local regressions retained separately; saved exact eb8 source reproduces both final binaries. Public snapshot precedes appending archive/rebuild metadata to avoid circular hashes."
+  },
+  "archiveSourceRebuild": {
+    "result": "passed",
+    "sourceRevision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+    "sourceDirectory": "export-complete/source",
+    "results": [
+      {
+        "platform": "darwin/arm64",
+        "argv": [
+          "go",
+          "build",
+          "-mod=readonly",
+          "-trimpath",
+          "-buildvcs=false",
+          "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+          "-o",
+          "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/source-conflicts-final-20261016/rebuilt-darwin-arm64",
+          "."
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "at": "2026-10-16T15:31:36.095383+00:00",
+        "artifactSHA256": "158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17",
+        "byteIdentical": true
+      },
+      {
+        "platform": "linux/amd64",
+        "argv": [
+          "go",
+          "build",
+          "-mod=readonly",
+          "-trimpath",
+          "-buildvcs=false",
+          "-ldflags=-s -w -X main.version=maintenance-source-retry -X main.commit=eb8fb9d",
+          "-o",
+          "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/source-conflicts-final-20261016/rebuilt-linux-amd64",
+          "."
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "at": "2026-10-16T15:31:36.133117+00:00",
+        "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
+        "byteIdentical": true
+      }
+    ],
+    "archiveInputFilesMatchRebuiltSnapshot": true
+  }
+}

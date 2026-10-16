@@ -1,0 +1,501 @@
+{
+  "schemaVersion": "v1",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+  "platform": "darwin/arm64",
+  "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.31.3",
+    "k8s.io/apimachinery": "v0.31.3",
+    "k8s.io/client-go": "v0.31.3"
+  },
+  "kind": "actual-openshift-worker-expiry-and-recovery-session",
+  "result": "partial",
+  "suiteResult": "passed",
+  "testedAt": "2026-10-16T02:25:59.700420+00:00",
+  "completedAt": "2026-10-16T02:47:29.225079+00:00",
+  "targetedCases": 7,
+  "passedTargetedCases": 7,
+  "suites": {
+    "worker-final": {
+      "cases": 3,
+      "passed": 3,
+      "testCases": [
+        {
+          "case": "success",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:33:24.488497+00:00",
+          "observations": {
+            "sourceUID": "fd3d3626-6705-494d-9956-d10b4edc0512",
+            "initialWorker": {
+              "uid": "6999d679-2ba5-4bcd-9258-80c2f33baf61",
+              "renewTime": "2026-10-16T02:33:52.000000Z",
+              "pod": "web-1-pbtvq"
+            },
+            "destinationWorker": {
+              "uid": "b2ae1490-2cd7-4af3-b0da-a80a5f8ab4b4",
+              "renewTime": "2026-10-16T02:34:25.000000Z",
+              "pod": "web-865f495fc4-slfgd"
+            },
+            "restoredWorker": {
+              "uid": "94d1a75e-2c0c-4b1e-b8ad-8b9833877c8b",
+              "renewTime": "2026-10-16T02:34:50.000000Z",
+              "pod": "web-1-bpshq"
+            },
+            "heartbeatSamples": 96,
+            "concurrentPodsObserved": 0,
+            "readErrors": 0,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": true
+          },
+          "namespace": "dcmig-worker-final-20261016-success"
+        },
+        {
+          "case": "startup-failure",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:34:56.168850+00:00",
+          "observations": {
+            "sourceUID": "e58fd433-fd19-4153-a437-8bbd0cf9db98",
+            "initialWorker": {
+              "uid": "f694019a-2b99-4283-87b5-09c933544b71",
+              "renewTime": "2026-10-16T02:35:22.000000Z",
+              "pod": "web-1-mqdcl"
+            },
+            "destinationWorker": null,
+            "restoredWorker": {
+              "uid": "9b5d97d8-2cba-4063-b86c-08615d451078",
+              "renewTime": "2026-10-16T02:36:18.000000Z",
+              "pod": "web-1-fjtpk"
+            },
+            "heartbeatSamples": 92,
+            "concurrentPodsObserved": 0,
+            "readErrors": 0,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": true
+          },
+          "namespace": "dcmig-worker-final-20261016-startup-failure"
+        },
+        {
+          "case": "cancellation",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:36:24.429740+00:00",
+          "observations": {
+            "sourceUID": "4e046c0e-a73a-4b2b-850b-07811c28af25",
+            "initialWorker": {
+              "uid": "1f360a8c-acab-4ace-8cd3-9d9668580eb2",
+              "renewTime": "2026-10-16T02:36:52.000000Z",
+              "pod": "web-1-khvz5"
+            },
+            "destinationWorker": {
+              "uid": "f6397f4d-8f2e-4254-ad48-93c906cf2b44",
+              "renewTime": "2026-10-16T02:37:06.000000Z",
+              "pod": "web-5b47cbdd89-vvpvb"
+            },
+            "restoredWorker": {
+              "uid": "86a0c40a-e29e-46a6-aed5-c3f6ef42f481",
+              "renewTime": "2026-10-16T02:37:28.000000Z",
+              "pod": "web-1-k5tb4"
+            },
+            "heartbeatSamples": 60,
+            "concurrentPodsObserved": 0,
+            "readErrors": 0,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": true
+          },
+          "namespace": "dcmig-worker-final-20261016-cancellation"
+        }
+      ]
+    },
+    "expiry-verified": {
+      "cases": 1,
+      "passed": 1,
+      "testCases": [
+        {
+          "case": "expired-credentials",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:47:08.207994+00:00",
+          "observations": {
+            "validBeforeExpiry": true,
+            "actualSignedTokenExpiration": 1792118174.0,
+            "actualObservedRejection": 1792118829.910805,
+            "acceptedDuringThisRecheck": 0,
+            "priorAcceptedFiveSecondsAfterJWTExpiry": true,
+            "sourceUIDSpecAndHTTPUnchanged": true,
+            "destinationPersisted": false,
+            "report": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/worker-expiry-live-20261016/expiry-verified/expired-credentials-generate-0000/report.json"
+          },
+          "namespace": "dcmig-expiry-20261016-expired-credentials"
+        }
+      ]
+    },
+    "orphan": {
+      "cases": 1,
+      "passed": 1,
+      "testCases": [
+        {
+          "case": "orphan-recovery",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:33:27.536138+00:00",
+          "observations": {
+            "preRetirementAssessmentPassed": true,
+            "destinationStartupExitCode": 42,
+            "failedJournalPhase": "destination-updated",
+            "failureNotReportedReady": true,
+            "sourceRemainedRetiredUntilExplicitRecovery": true,
+            "sourceSpecAndHTTPRecovered": true,
+            "recoveryRerun": "verified",
+            "orphanBlockedRestorationUntilRemoved": true
+          },
+          "namespace": "dcmig-orphan-20261016-orphan-recovery"
+        }
+      ]
+    },
+    "drift": {
+      "cases": 2,
+      "passed": 2,
+      "testCases": [
+        {
+          "case": "changed-target",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:43:00.136808+00:00",
+          "observations": {
+            "changedStagedSpecRejected": true,
+            "sourceUnchanged": true,
+            "explicitRecovery": "verified"
+          },
+          "namespace": "dcmig-drift-20261016-changed-target"
+        },
+        {
+          "case": "foreign-controller-overlap",
+          "result": "passed",
+          "startedAt": "2026-10-16T02:43:24.817596+00:00",
+          "observations": {
+            "foreignUID": "cd321a30-5598-4ac9-ab96-66b3d1294555",
+            "foreignSpecUnchanged": true,
+            "overlap": true
+          },
+          "namespace": "dcmig-drift-20261016-foreign-controller-overlap"
+        }
+      ]
+    }
+  },
+  "invocations": {
+    "worker-final-invocation": {
+      "kind": "actual-openshift-worker-invocation",
+      "startedAt": "2026-10-16T02:33:24.382246+00:00",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+      "driverRevision": "053bae4280a60435a4d63d998fd958973b26bbfe",
+      "driverSHA256": "9df0baf22007615eed118ce8691d732b1f400bb393b5d9276eeed35bfe2d31b5",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+      "argv": [
+        "/Users/jlmayorga/.local/bin/python3",
+        "tools/qualify_worker.py",
+        "--kubeconfig",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/kubeconfig",
+        "--context",
+        "default/api-ocp-9r2k2-sandbox3558-opentlc-com:6443/admin",
+        "--binary",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/constraints-live-20261016/converter-complete",
+        "--image",
+        "quay.io/openshifttest/hello-openshift@sha256:c71f93174a3f92a3df934277f9f159b06451ba122ed417d1fe91b754ec300735",
+        "--namespace-prefix",
+        "dcmig-worker-final-20261016",
+        "--output",
+        ".scratchpad/worker-expiry-live-20261016/worker-final",
+        "--timeout",
+        "120",
+        "--cases",
+        "success,startup-failure,cancellation",
+        "--allow-test-mutations"
+      ],
+      "exit": 0,
+      "completedAt": "2026-10-16T02:37:34.398021+00:00"
+    },
+    "drift-invocation": {
+      "kind": "actual-openshift-drift-invocation",
+      "startedAt": "2026-10-16T02:42:59.649578+00:00",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+      "driverRevision": "2c5cf4a1fdd759e8c0f6827fa020418470fbd488",
+      "driverSHA256": "390ca28b3d16f23957cb4b40eb040c2a130ec47f554755d213ce2287db70a33c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+      "argv": [
+        "/Users/jlmayorga/.local/bin/python3",
+        "tools/qualify_new_app.py",
+        "--kubeconfig",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/kubeconfig",
+        "--context",
+        "default/api-ocp-9r2k2-sandbox3558-opentlc-com:6443/admin",
+        "--binary",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/constraints-live-20261016/converter-complete",
+        "--image",
+        "quay.io/openshifttest/hello-openshift@sha256:c71f93174a3f92a3df934277f9f159b06451ba122ed417d1fe91b754ec300735",
+        "--namespace-prefix",
+        "dcmig-drift-20261016",
+        "--output",
+        ".scratchpad/worker-expiry-live-20261016/drift",
+        "--timeout",
+        "120",
+        "--cases",
+        "changed-target,foreign-controller-overlap",
+        "--allow-test-mutations",
+        "--second-image",
+        "quay.io/openshifttest/hello-openshift@sha256:cc6eafafab7a31c18ef22a9199220fee0615b501f2e1923cd881784243b76aea",
+        "--sidecar-image",
+        "quay.io/openshifttest/hello-openshift@sha256:a8a8bf7683b445fc0807b93f46d9e1c9b1c2325f9d143566085f754eba46a32a"
+      ],
+      "exit": 0,
+      "completedAt": "2026-10-16T02:43:40.983851+00:00"
+    },
+    "expiry-invocation": {
+      "kind": "actual-openshift-expiry-invocation",
+      "startedAt": "2026-10-16T02:25:59.700420+00:00",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+      "driverRevision": "0ab3e094b2e7d7515d955fa2436a932bfd499ed3",
+      "driverSHA256": "b853ae36310b04edfd38e120ba1bb7812687c36f84ffdc5b4e5bcc7e7a357844",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+      "argv": [
+        "/Users/jlmayorga/.local/bin/python3",
+        "tools/qualify_permissions.py",
+        "--kubeconfig",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/kubeconfig",
+        "--context",
+        "default/api-ocp-9r2k2-sandbox3558-opentlc-com:6443/admin",
+        "--binary",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/constraints-live-20261016/converter-complete",
+        "--image",
+        "quay.io/openshifttest/hello-openshift@sha256:c71f93174a3f92a3df934277f9f159b06451ba122ed417d1fe91b754ec300735",
+        "--namespace-prefix",
+        "dcmig-expiry-20261016",
+        "--output",
+        ".scratchpad/worker-expiry-live-20261016/expiry",
+        "--timeout",
+        "120",
+        "--cases",
+        "expired-credentials",
+        "--allow-test-mutations"
+      ],
+      "exit": 1,
+      "completedAt": "2026-10-16T02:36:20.045552+00:00"
+    },
+    "worker-invocation": {
+      "kind": "actual-openshift-worker-invocation",
+      "startedAt": "2026-10-16T02:29:52.422974+00:00",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+      "driverRevision": "5dd612b08efb59adecdfc9d597f8bdcfe40881a2",
+      "driverSHA256": "677038ab27e8bc18731682f6a191ba8849c8f8bdae1aeb44fa2fc409441f48ff",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+      "argv": [
+        "/Users/jlmayorga/.local/bin/python3",
+        "tools/qualify_worker.py",
+        "--kubeconfig",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/kubeconfig",
+        "--context",
+        "default/api-ocp-9r2k2-sandbox3558-opentlc-com:6443/admin",
+        "--binary",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/constraints-live-20261016/converter-complete",
+        "--image",
+        "quay.io/openshifttest/hello-openshift@sha256:c71f93174a3f92a3df934277f9f159b06451ba122ed417d1fe91b754ec300735",
+        "--namespace-prefix",
+        "dcmig-worker-20261016",
+        "--output",
+        ".scratchpad/worker-expiry-live-20261016/worker",
+        "--timeout",
+        "120",
+        "--cases",
+        "success,startup-failure,cancellation",
+        "--allow-test-mutations"
+      ],
+      "exit": -15,
+      "completedAt": "2026-10-16T02:32:54.326067+00:00"
+    },
+    "orphan-invocation": {
+      "kind": "actual-openshift-orphan-invocation",
+      "startedAt": "2026-10-16T02:33:27.047335+00:00",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+      "driverRevision": "053bae4280a60435a4d63d998fd958973b26bbfe",
+      "driverSHA256": "390ca28b3d16f23957cb4b40eb040c2a130ec47f554755d213ce2287db70a33c",
+      "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+      "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+      "argv": [
+        "/Users/jlmayorga/.local/bin/python3",
+        "tools/qualify_new_app.py",
+        "--kubeconfig",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/live-20261015/kubeconfig",
+        "--context",
+        "default/api-ocp-9r2k2-sandbox3558-opentlc-com:6443/admin",
+        "--binary",
+        "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/constraints-live-20261016/converter-complete",
+        "--image",
+        "quay.io/openshifttest/hello-openshift@sha256:c71f93174a3f92a3df934277f9f159b06451ba122ed417d1fe91b754ec300735",
+        "--namespace-prefix",
+        "dcmig-orphan-20261016",
+        "--output",
+        ".scratchpad/worker-expiry-live-20261016/orphan",
+        "--timeout",
+        "120",
+        "--cases",
+        "orphan-recovery",
+        "--allow-test-mutations",
+        "--second-image",
+        "quay.io/openshifttest/hello-openshift@sha256:cc6eafafab7a31c18ef22a9199220fee0615b501f2e1923cd881784243b76aea",
+        "--sidecar-image",
+        "quay.io/openshifttest/hello-openshift@sha256:a8a8bf7683b445fc0807b93f46d9e1c9b1c2325f9d143566085f754eba46a32a"
+      ],
+      "exit": 0,
+      "completedAt": "2026-10-16T02:34:48.952904+00:00"
+    }
+  },
+  "expiryRecheckProvenance": {
+    "kind": "actual-openshift-expiry-recheck",
+    "startedAt": "2026-10-16T02:47:08.170766+00:00",
+    "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+    "goSourceRevision": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+    "driverRevision": "2a66aeff2e4debdca665c1a073eea010e03fe67c",
+    "driverSHA256": "70b60dde99d916bc3bf6b9a2d4790e93c2090cc854c0f654c09f6a32d04fc666",
+    "sourceUID": "928b30d3-bec5-4167-8b53-67b06f5e8666",
+    "originalValidBeforeExpiryCommands": [
+      "command-0024.json"
+    ],
+    "originalCredentialReusedUnmodified": true,
+    "priorInvocation": "expiry-invocation.json",
+    "helper": "recheck-expiry-verified.py"
+  },
+  "workerPostRunAudit": {
+    "result": "passed",
+    "checkedAt": "2026-10-16T02:41:48.248697+00:00",
+    "cases": [
+      {
+        "case": "success",
+        "sourceUID": "fd3d3626-6705-494d-9956-d10b4edc0512",
+        "sourceSpecRecovered": true,
+        "destinationPausedAtZero": true,
+        "currentLeaseHolder": "94d1a75e-2c0c-4b1e-b8ad-8b9833877c8b",
+        "renewTime": "2026-10-16T02:41:46.000000Z",
+        "HTTPResponse": "worker:94d1a75e-2c0c-4b1e-b8ad-8b9833877c8b\n"
+      },
+      {
+        "case": "startup-failure",
+        "sourceUID": "e58fd433-fd19-4153-a437-8bbd0cf9db98",
+        "sourceSpecRecovered": true,
+        "destinationPausedAtZero": true,
+        "currentLeaseHolder": "9b5d97d8-2cba-4063-b86c-08615d451078",
+        "renewTime": "2026-10-16T02:41:46.000000Z",
+        "HTTPResponse": "worker:9b5d97d8-2cba-4063-b86c-08615d451078\n"
+      },
+      {
+        "case": "cancellation",
+        "sourceUID": "4e046c0e-a73a-4b2b-850b-07811c28af25",
+        "sourceSpecRecovered": true,
+        "destinationPausedAtZero": true,
+        "currentLeaseHolder": "86a0c40a-e29e-46a6-aed5-c3f6ef42f481",
+        "renewTime": "2026-10-16T02:41:47.000000Z",
+        "HTTPResponse": "worker:86a0c40a-e29e-46a6-aed5-c3f6ef42f481\n"
+      }
+    ]
+  },
+  "workerHeartbeatSamples": 248,
+  "expiredTokenDirectProbe": {
+    "checkedAtEpoch": 1792118333.949002,
+    "status": 401,
+    "serverDate": "Fri, 16 Oct 2026 02:38:54 GMT",
+    "serverClockOffsetSeconds": 0.05099797248840332
+  },
+  "priorEvidence": "compatibility/evidence/2026-10-16-runtime-recovery-4.21.36.json",
+  "cumulativeSameBinaryCases": {
+    "targetedCases": 48,
+    "baselineAutomaticScenarioIDs": 13
+  },
+  "localValidation": {
+    "pythonTests": 18,
+    "black": "passed; 14 files unchanged",
+    "gitDiffCheck": "passed",
+    "goSourceUnchangedSince": "12c0f15c5aa7e2531fc7b1fb573c0a2fb49d915a",
+    "priorGoValidation": "148 race cases, vet, zero scanner findings, five cross-builds; other compiled artifacts not live-tested."
+  },
+  "historicalAttempts": [
+    {
+      "directory": "worker",
+      "result": "failed-setup",
+      "reason": "Lease MicroTime response rejected timestamp without six fractional digits; source precondition failed before migration; stopped driver and removed two ownership-verified failed setup namespaces.",
+      "cleanup": "failed-worker-setup-cleanup.json"
+    },
+    {
+      "directory": "expiry",
+      "result": "failed-assumption-in-harness",
+      "reason": "Server accepted the unchanged signed token five seconds after JWT expiry. This attempt is not counted as passing. Later direct API probe returned401 with near-zero clock offset, and corrected helper verified a nonzero CLI authentication failure using the same credential and original pre-expiry success evidence. Exact rejection boundary/cause is not inferred."
+    }
+  ],
+  "retainedResources": "Seven final dedicated lab namespaces retained; recovered source specs/health verified. Owned destination intentionally absent for orphan case, otherwise staged/recovered destinations paused at zero. No storage, node, SCC grant or ClusterRole provisioned. Worker accounts can only get/update their one namespaced Lease.",
+  "limitations": [
+    "Pod sampling is not continuous. Lease CAS protects test ownership independently; 248 actual samples show no source/destination Pod overlap or read errors.",
+    "Expiry evidence combines original valid-before-expiry generation, actual five-seconds-after acceptance, later HTTP401, and corrected same-profile CLI rejection; no account revocation, token replacement or clock changes. Exact server grace/cache behavior is not established.",
+    "Actual OpenShift4.21.36 and this native darwin/arm64 binary only. Older4.14\u20134.20 review-based assumptions remain pending the user-requested release-note backlog; other version/platform qualification remains incomplete.",
+    "These targeted cases do not prove every admission policy, custom scheduler, external reconciler, CSI failure, network partition or recovery state."
+  ],
+  "olderVersionReviewBacklog": "docs/backlog.md",
+  "finalCasesStartedAt": "2026-10-16T02:33:24.488497+00:00",
+  "driverSnapshotAudit": {
+    "worker-final-invocation.json": {
+      "revision": "053bae4280a60435a4d63d998fd958973b26bbfe",
+      "mainDriver": "tools/qualify_worker.py",
+      "hashVerified": true,
+      "exit": 0
+    },
+    "drift-invocation.json": {
+      "revision": "2c5cf4a1fdd759e8c0f6827fa020418470fbd488",
+      "mainDriver": "tools/qualify_new_app.py",
+      "hashVerified": true,
+      "exit": 0
+    },
+    "expiry-invocation.json": {
+      "revision": "0ab3e094b2e7d7515d955fa2436a932bfd499ed3",
+      "mainDriver": "tools/qualify_permissions.py",
+      "hashVerified": true,
+      "exit": 1
+    },
+    "worker-invocation.json": {
+      "revision": "5dd612b08efb59adecdfc9d597f8bdcfe40881a2",
+      "mainDriver": "tools/qualify_worker.py",
+      "hashVerified": true,
+      "exit": -15
+    },
+    "orphan-invocation.json": {
+      "revision": "053bae4280a60435a4d63d998fd958973b26bbfe",
+      "mainDriver": "tools/qualify_new_app.py",
+      "hashVerified": true,
+      "exit": 0
+    },
+    "expiry-final/metadata.json": {
+      "revision": "2c5cf4a1fdd759e8c0f6827fa020418470fbd488",
+      "mainDriver": "tools/qualify_permissions.py",
+      "hashVerified": true
+    },
+    "expiry-verified/metadata.json": {
+      "revision": "2a66aeff2e4debdca665c1a073eea010e03fe67c",
+      "mainDriver": "tools/qualify_permissions.py",
+      "hashVerified": true
+    }
+  },
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/worker-expiry-live-20261016/openshift-4.21.36-worker-expiry-evidence.tar.gz",
+    "archiveSHA256": "aac002858ad811b670a6655542501c9bb3bdf53b90aa1f31d2c8af5ce610728f",
+    "manifestSHA256": "21f582740e49961969cecd10652940003b50cef10e8e4007e6bf956e1e18506b",
+    "files": 771,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "allManifestEntriesVerified": true,
+    "generatedAt": "2026-10-16T02:49:38.320221+00:00"
+  }
+}
