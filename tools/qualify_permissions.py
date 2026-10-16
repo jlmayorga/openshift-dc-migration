@@ -6,11 +6,13 @@ Credentials are saved privately and never included in command evidence.
 """
 
 import argparse
+import base64
 import json
 import os
 import pathlib
 import re
 import subprocess
+import time
 
 from qualify_configurations import Live
 
@@ -29,6 +31,12 @@ def main():
     p.add_argument("--allow-test-mutations", action="store_true")
     p.add_argument("--timeout", type=int, default=90)
     p.add_argument("--cases", help="Comma-separated test names; omitted runs all")
+    p.add_argument(
+        "--expiry-wait-limit",
+        type=int,
+        default=720,
+        help="Maximum seconds to wait for explicitly selected expired-credentials case",
+    )
     args = p.parse_args()
     if not args.allow_test_mutations or not re.fullmatch(
         r"dcmig-[a-z0-9-]+", args.namespace_prefix
@@ -74,7 +82,7 @@ def main():
             },
         ]
 
-    def credential(role_rules):
+    def credential(role_rules, duration="15m"):
         live.create("ServiceAccount", "v1", None, name="restricted")
         live.create("Role", "rbac.authorization.k8s.io/v1", None, rules=role_rules)
         live.create(
@@ -93,7 +101,14 @@ def main():
         # Never pass token-bearing stdout through the command-evidence logger.
         token = subprocess.check_output(
             live.base
-            + ["-n", live.ns, "create", "token", "restricted", "--duration=15m"],
+            + [
+                "-n",
+                live.ns,
+                "create",
+                "token",
+                "restricted",
+                "--duration=" + duration,
+            ],
             text=True,
         ).strip()
         source = json.loads(
@@ -258,12 +273,77 @@ def main():
             "destinationReplicas": 0,
         }
 
+    def expired_credentials():
+        live.args.kubeconfig = original
+        health = live.setup("expired-credentials", lambda s: None)
+        source = live.get("dc")
+        path = credential(
+            [
+                {
+                    "apiGroups": ["apps.openshift.io"],
+                    "resources": ["deploymentconfigs"],
+                    "verbs": ["list"],
+                }
+            ],
+            duration="10m",
+        )
+        token = json.loads(pathlib.Path(path).read_text())["users"][0]["user"]["token"]
+        payload = token.split(".")[1]
+        claims = json.loads(
+            base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4))
+        )
+        expires = float(claims["exp"])
+        remaining = expires + 5 - time.time()
+        if remaining <= 0 or remaining > args.expiry_wait_limit:
+            raise RuntimeError(
+                f"Issued token requires {remaining:.0f}s until expiry; "
+                "outside --expiry-wait-limit. No expired-token result claimed."
+            )
+        live.args.kubeconfig = path
+        before = live.tool("generate")
+        assert json.loads(before.read_text())["totals"]["generated"] == 1
+        # Wait for the server-issued signed token's real expiration. Do not
+        # fake a token, revoke its account or change the test host's clock.
+        (live.root / "credential-expiry-wait.json").write_text(
+            json.dumps({"issuedAt": claims["iat"], "expiresAt": expires}, indent=2)
+        )
+        print(f"Waiting for actual signed-token expiry ({remaining:.0f}s)", flush=True)
+        while time.time() < expires + 5:
+            time.sleep(min(30, max(0.1, expires + 5 - time.time())))
+        denied = live.tool("generate", expected=1)
+        report = json.loads(denied.read_text())
+        assert report["totals"]["failed"] >= 1
+        assert report["totals"]["generated"] == 0
+        diagnostic = denied.read_text().lower()
+        assert "unauthorized" in diagnostic or "credentials" in diagnostic
+        live.args.kubeconfig = original
+        assert live.get("dc")["metadata"]["uid"] == source["metadata"]["uid"]
+        assert live.get("dc")["spec"] == source["spec"]
+        assert not live.oc(
+            "get", "deploy", "web", "--ignore-not-found", "-o", "name"
+        ).stdout.strip()
+        response = live.command(
+            ["curl", "-fsS", "--retry", "5", "--max-time", "10", health]
+        ).stdout
+        assert "qualified-expired-credentials" in response
+        return {
+            "validBeforeExpiry": True,
+            "actualSignedTokenExpiration": expires,
+            "observedAfterExpiry": time.time(),
+            "expiredCredentialsProduceFailedReportAndExit": True,
+            "sourceUIDSpecAndHTTPUnchanged": True,
+            "destinationPersisted": False,
+        }
+
     for name, fn in [
         ("restricted-rbac", rbac),
         ("quota-admission", admission),
         ("foreign-destination", foreign),
         ("denied-hpa-mutation", denied_hpa),
+        ("expired-credentials", expired_credentials),
     ]:
+        if name == "expired-credentials" and not args.cases:
+            continue
         if args.cases and name not in args.cases.split(","):
             continue
         live.run_case(name, fn)

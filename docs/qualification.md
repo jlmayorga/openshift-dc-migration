@@ -72,6 +72,8 @@ Before creating/publishing a release:
 
 The recovery driver uses a loopback-only authenticated oc proxy and a credential-free fault proxy to lose a success response after each of six real cluster mutations. Authorization/SCC reviews and server dry runs do not advance its mutation counter. It then restores connectivity and verifies explicit rollback and reruns. The permission driver saves short-lived account tokens privately; never publish its `*-credentials.json` files or kubeconfigs.
 
+Explicitly select permission case `--cases expired-credentials` to test real expiration of a server-issued ten-minute token. It verifies generation succeeds before expiration and fails visibly afterwards without changing source identity/spec/health or creating a destination. The optional case waits for the actual signed expiry within `--expiry-wait-limit` (default 720 seconds); it does not revoke the account, forge a token or change clocks. It is excluded from the default permission run.
+
 The optional feature `--static-volume-test --cases persistent-volume --volume-scc SCC_NAME` needs separate explicit approval for the node directory and exact existing SCC binding. It requires the explicitly approved existing `hostmount-anyuid-v2` SCC and creates a static hostPath PV/PVC with an empty StorageClass and uses an explicitly selected test SELinux context; it provisions no cloud volume. The test must first prove the source can write/read its marker. A namespace SCC grant does not imply that an admin-created Pod dry run reproduces service-account/controller admission. Inspect actual Pod admission and source readiness before migration. This single-node test cannot qualify cloud CSI attach/detach behavior.
 
 ## Apps created with oc new-app
