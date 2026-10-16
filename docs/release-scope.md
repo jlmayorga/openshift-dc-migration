@@ -1,6 +1,6 @@
 # Historical release policy
 
-The completed historical scope covers exactly Linux amd64 and Darwin arm64 binaries on OpenShift 4.21.36 / Kubernetes v1.34.9. OpenShift 4.14–4.20 have completed source-review assumptions with [prerequisites](compatibility-review.md). OpenShift 4.22 and other platforms remain outside that scope. Current maintenance candidates require reassessment and new qualification.
+The completed historical scope covers exactly Linux amd64 and Darwin arm64 binaries on OpenShift 4.21.36 / Kubernetes v1.34.9. OpenShift 4.14–4.20 have completed source-review assumptions with [prerequisites](compatibility-review.md). OpenShift 4.22 and other platforms remain outside that scope. The maintenance source delta has been reassessed separately; current candidates still require new actual qualification.
 
 The immutable [scope policy](../compatibility/release-scope.json) binds exact binary bytes, tested revision, production source, dependencies, fixtures and actual records. The [matrix](../compatibility/matrix.json) pins the review overlay and provenance chain. Do not update frozen hashes to match current source.
 
@@ -26,3 +26,9 @@ The ordinary candidate workflow builds current source without evidence and uploa
 Manual `release.yaml` takes that trusted evidence run, the selected candidate run and an existing tag. It verifies frozen artifact bytes and archived source through `--historical-source`, exports validated evidence and prepares only a draft in the protected `release-review` environment. An ordinary changed-source candidate cannot pass the historical gate. No published binary installation method is implied by these workflows. Review and publication remain separate maintainer actions.
 
 `--evidence DIRECTORY` selects replacement actual-record files from a directory **relative to `--evidence-root`**. It does not disable pinned scope or review checks. Paths and symlinks must stay inside the declared root. The default full-matrix record directory is `compatibility/results` inside that root. `--export-evidence DIRECTORY` writes only validated policy/records and gate results for private review. Never supply synthetic unit-test records as trusted evidence.
+
+## Current-source assumptions
+
+The [maintenance delta assessment](../compatibility/reviews/maintenance-refresh.json) supplements the completed per-release assessments. Matrix `currentSourceReview` pins a separate external overlay for current-source/full-matrix verification. The declared bundle must contain that record, its exact delta assessment and the unchanged historical base-review chain and assessment snapshots. Missing or altered inputs fail closed.
+
+Frozen scoped verification and reproduction continue to use the original row-level review pins, so an old trusted historical bundle remains usable for those operations. `--full-matrix` explicitly selects the refreshed current-source review when configured. That review cannot replace missing actual records: the current binary/patch/platform combinations still need developer-run live qualification, and the wider matrix remains incomplete. No active artifact scope or frozen hash is changed by this refresh.

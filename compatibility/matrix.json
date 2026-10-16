@@ -109,5 +109,10 @@
     "compatibility/evidence/2026-10-16-parallel-release-review.json": "b24564b59fa8e6ebc6de73c211e71f91177fbeb176b9ac352801a5708fe547bb",
     "compatibility/evidence/2026-10-16-source-retry-review.json": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
     "compatibility/evidence/2026-10-16-release-notes-review.json": "57f44cbf2d6bb703e8f0b187f62b1473bedd423100fea38f2b4a58836b8d0650"
+  },
+  "currentSourceReview": {
+    "summary": "compatibility/reviews/maintenance-refresh.json",
+    "evidence": "compatibility/evidence/maintenance-source-review.json",
+    "evidenceSHA256": "44c9f545f08662169282c534fc503b6d12b3fcf1e1b1c0393d69d1417752b94d"
   }
 }

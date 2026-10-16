@@ -286,15 +286,32 @@ def actual_evidence_paths(root, scope=None, directory=None):
     return paths
 
 
-def load_reviews(matrix, evidence_root=None):
-    reviews = []
-    for name in sorted(
-        {
-            v["reviewEvidence"]
-            for v in matrix["targets"]
-            if v.get("qualificationPolicy") == "review-assumption"
+def review_bindings(matrix, *, current_source=False):
+    """Select current assumptions explicitly; frozen scope always keeps old pins."""
+    if current_source and matrix.get("currentSourceReview"):
+        item = matrix["currentSourceReview"]
+        return [(item["evidence"], item["evidenceSHA256"])]
+    targets = [
+        t
+        for t in matrix["targets"]
+        if t.get("qualificationPolicy") == "review-assumption"
+    ]
+    bindings = []
+    for name in sorted({t["reviewEvidence"] for t in targets}):
+        pins = {
+            t.get("reviewEvidenceSHA256")
+            for t in targets
+            if t["reviewEvidence"] == name
         }
-    ):
+        if len(pins) != 1 or None in pins:
+            raise ValueError("Changed or unpinned review evidence")
+        bindings.append((name, pins.pop()))
+    return bindings
+
+
+def load_reviews(matrix, evidence_root=None, *, current_source=False):
+    reviews = []
+    for name, pin in review_bindings(matrix, current_source=current_source):
         path = pathlib.Path(name)
         if (
             path.parent != pathlib.Path("compatibility/evidence")
@@ -302,12 +319,7 @@ def load_reviews(matrix, evidence_root=None):
         ):
             raise ValueError("Invalid review evidence path")
         path = evidence_path(evidence_root, name)
-        pins = {
-            t.get("reviewEvidenceSHA256")
-            for t in matrix["targets"]
-            if t.get("reviewEvidence") == name
-        }
-        if len(pins) != 1 or None in pins or digest(path) not in pins:
+        if digest(path) != pin:
             raise ValueError("Changed or unpinned review evidence")
         review = json.loads(path.read_text())
         current = review
@@ -324,6 +336,30 @@ def load_reviews(matrix, evidence_root=None):
             if not expected or digest(base_path) != expected:
                 raise ValueError("Changed or unpinned base review")
             current = json.loads(base_path.read_text())
+        if current_source and matrix.get("currentSourceReview"):
+            delta = review.get("sourceDeltaAssessment", {})
+            reference = pathlib.Path(delta.get("path", ""))
+            if (
+                reference.parent != pathlib.Path("compatibility/reviews")
+                or reference.suffix != ".json"
+            ):
+                raise ValueError("Invalid current source delta assessment path")
+            delta_path = evidence_path(evidence_root, str(reference))
+            if digest(delta_path) != delta.get("sha256"):
+                raise ValueError("Changed current source delta assessment")
+            content = json.loads(delta_path.read_text())
+            if (
+                content.get("kind") != "production-source-delta-assessment"
+                or not isinstance(review.get("revision"), str)
+                or not re.fullmatch(r"[a-f0-9]{40}", review["revision"])
+                or content.get("reviewedRevision") != review.get("revision")
+                or content.get("conclusion")
+                != "no-new-applicable-breaking-change-identified"
+                or content.get("unresolvedApplicableFindings") != []
+            ):
+                raise ValueError(
+                    "Incomplete or mismatched current source delta assessment"
+                )
         for assessment in review.get("assessments", []):
             p = pathlib.Path(assessment["path"])
             if p.parent != pathlib.Path("compatibility/reviews") or p.suffix != ".json":
@@ -505,32 +541,38 @@ def main():
     tested_revision = scope["revision"] if scope else revision
     if provenance.get("revision") != tested_revision:
         raise ValueError("Candidate tested revision mismatch")
+    reviews = load_reviews(matrix, a.evidence_root, current_source=scope is None)
     if scope:
         verify_scope(
             matrix, scope, evidence, artifacts, *hashes, evidence_root=a.evidence_root
         )
     else:
-        verify(
-            matrix,
-            evidence,
-            artifacts,
-            revision,
-            *hashes,
-            load_reviews(matrix, a.evidence_root)
-        )
+        verify(matrix, evidence, artifacts, revision, *hashes, reviews)
     if a.export_evidence:
         out = pathlib.Path(a.export_evidence)
         out.mkdir(parents=True, exist_ok=True)
         paths = evidence_paths + [REPO_ROOT / "compatibility/matrix.json"]
         paths += [
-            evidence_path(a.evidence_root, t["reviewEvidence"])
-            for t in matrix["targets"]
-            if t.get("qualificationPolicy") == "review-assumption"
+            evidence_path(a.evidence_root, name)
+            for name, _ in review_bindings(matrix, current_source=scope is None)
         ]
-        for review in load_reviews(matrix, a.evidence_root):
+        for review in reviews:
             paths += [
                 evidence_path(a.evidence_root, r["path"]) for r in review["assessments"]
             ]
+            if review.get("sourceDeltaAssessment"):
+                paths.append(
+                    evidence_path(
+                        a.evidence_root, review["sourceDeltaAssessment"]["path"]
+                    )
+                )
+            current = review
+            while current.get("baseReviewEvidence"):
+                base_path = evidence_path(
+                    a.evidence_root, current["baseReviewEvidence"]
+                )
+                paths.append(base_path)
+                current = json.loads(base_path.read_text())
         if scope:
             paths.append(REPO_ROOT / matrix["activeReleaseScope"])
         for path in set(paths):

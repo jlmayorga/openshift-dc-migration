@@ -2,9 +2,17 @@
 
 The historical source-impact assessment is complete within the inventoried baseline scope. **OpenShift 4.14–4.20 are assumed compatible from official-source review, subject to the manual guards and prerequisites below.** No actual older-cluster integration pass is claimed. OpenShift 4.21 also has a source assessment and separately recorded actual 4.21.36 qualification for exact historical Linux amd64 and Darwin arm64 binaries.
 
-The completed conclusions remain useful operator prerequisites. Their source-bound applicability belongs to the recorded historical source, adopted v0.37.1 clients, catalog and fixtures. **All current maintenance binaries require reassessment and new qualification.** Wider versions/platforms remain untested; see [coverage](compatibility.md) and [release policy](release-scope.md).
+The completed conclusions remain useful operator prerequisites. A separate [maintenance delta assessment](../compatibility/reviews/maintenance-refresh.json) extends the conditional source assumptions to the reviewed maintenance production identity with unchanged application dependencies, catalog and fixtures. **Current binaries still require new actual qualification.** Wider versions/platforms remain untested; see [coverage](compatibility.md) and [release policy](release-scope.md).
 
 Durable per-release summaries remain under `compatibility/reviews/`. A trusted external bundle retains exact historical assessment snapshots and hash-pinned resolution overlays. Current summaries cannot replace those immutable verification inputs. The review covers relevant release notes, API migrations, controller/admission changes and patch conditions; it does not certify arbitrary extensions or every cluster advisory.
+
+## Maintenance delta refresh
+
+The refresh compares committed maintenance source with the historical assessed source. It found no new applicable breaking change: implementation/package moves preserve the reviewed logic, command metadata is passed explicitly without changing flags/defaults, and `slices.Contains` preserves the previous string-membership predicates. API versions, requested operations, migration ordering, raw-field guards, required-SCC authorization, policy/topology checks, conflict retries and recovery boundaries remain unchanged. The declared Go toolchain and application dependencies are unchanged; the scanner-only patch remains separate.
+
+The embedded catalog and synthetic fixtures retain their original bytes. Local contract checks and normalized offline output comparisons support equivalence; they are not live observations. All conditional patch/runtime/storage/network prerequisites below still apply. This is a bounded delta review over the completed upstream assessments, not a fresh survey of release notes or advisory feeds.
+
+Original per-release summaries and exact historical overlays are preserved, including their prior applicability notes. The new delta assessment records current applicability separately. Matrix `currentSourceReview` pins the new external overlay and delta assessment; historical scoped verification continues to select the original review pins. Changed source remains a different artifact identity, and no historical integration result transfers to a new binary.
 
 ## Version mapping and source provenance
 

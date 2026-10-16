@@ -1,6 +1,6 @@
 # OpenShift migration maintenance specification
 
-Status: maintenance design implemented. The reconciled starting snapshot is repository revision `c60b7db`; its conditions are retained below as design context. Current binaries require source-review reassessment and actual qualification. The completed historical scoped result remains bound to its immutable source and exact artifacts. Execution notes, validation output and independent documentation reviews are kept in ignored private storage.
+Status: maintenance design implemented. The reconciled starting snapshot is repository revision `c60b7db`; its conditions are retained below as design context. The current source delta assessment is recorded separately; current binaries still require actual qualification. The completed historical scoped result remains bound to its immutable source and exact artifacts. Execution notes, validation output and independent documentation reviews are kept in ignored private storage.
 
 This specification turns the maintenance TODO into bounded work for AI coding agents using specification driven development (SDD). The intended result is a project that is easy to build, understand, maintain and use, with truthful documentation and optional development testing against disposable OpenShift clusters.
 
@@ -450,3 +450,7 @@ No dependency, public format, migration policy or safety-gate change is part of 
 `tools/qualification_fixtures.py` is retained test support, imported only by release-policy and frozen-builder unit tests. Its temporary synthetic records are never a qualification export or production evidence input. The colocated `test_build_candidates.py` covers candidate production through normal unittest discovery; `test_qualification.py` retains local scenario-harness safety checks.
 
 Release integrity applies to every evidence selection path: replacement actual-record directories receive the same containment and immutable byte-hash checks as canonical scoped records. Full-matrix actual observations must bind the production source and native artifact platform as well as revision, fixtures and dependencies. Developers verify selected candidate provenance against the source checkout before running local qualification; release verification independently enforces the recorded identities. These checks retain the existing scope and do not convert unqualified inputs into qualified output.
+
+## Source-review refresh policy
+
+A current-source delta assessment supplements the completed per-release assessments without rewriting them. Matrix `currentSourceReview` pins an external review overlay and links a durable delta summary. Full-matrix/current-source verification selects that overlay explicitly; frozen scoped verification retains the original row-level review pins. Both selections validate the complete base-review chain and referenced assessment bytes. A current overlay also validates its pinned delta assessment. Source-review assumptions remain limited to the existing 4.14–4.20 rows and do not grant actual qualification to any changed binary or expand the release scope.

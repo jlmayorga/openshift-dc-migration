@@ -429,3 +429,134 @@ class EvidenceSelectionTests(unittest.TestCase):
             for selected_scope in [scope, None]:
                 with self.assertRaisesRegex(ValueError, "escapes"):
                     actual_evidence_paths(root, selected_scope, "replacements")
+
+
+class CurrentSourceReviewTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = pathlib.Path(self.temp.name)
+        self.matrix, self.scope, self.rows, self.hashes = write_policy(self.root)
+        self.base_name = self.matrix["targets"][0]["reviewEvidence"]
+        self.delta_name = "compatibility/reviews/maintenance-refresh.json"
+        self.delta = self.root / self.delta_name
+        self.delta.write_text(
+            json.dumps(
+                dict(
+                    kind="production-source-delta-assessment",
+                    reviewedRevision="b" * 40,
+                    conclusion="no-new-applicable-breaking-change-identified",
+                    unresolvedApplicableFindings=[],
+                )
+            )
+        )
+        self.current_name = "compatibility/evidence/current-review.json"
+        self.current = self.root / self.current_name
+        record = json.loads((self.root / self.base_name).read_text())
+        record.update(
+            revision="b" * 40,
+            productionSourceSHA256="current-source",
+            baseReviewEvidence=self.base_name,
+            baseReviewSHA256=digest(self.root / self.base_name),
+            sourceDeltaAssessment=dict(path=self.delta_name, sha256=digest(self.delta)),
+        )
+        self.current.write_text(json.dumps(record))
+        self.matrix["currentSourceReview"] = dict(
+            evidence=self.current_name, evidenceSHA256=digest(self.current)
+        )
+
+    def test_current_and_historical_reviews_are_selected_independently(self):
+        self.assertEqual(
+            load_reviews(self.matrix, self.root)[0]["productionSourceSHA256"], "source"
+        )
+        self.assertEqual(
+            load_reviews(self.matrix, self.root, current_source=True)[0][
+                "productionSourceSHA256"
+            ],
+            "current-source",
+        )
+        self.assertTrue(
+            verify_scope(
+                self.matrix,
+                self.scope,
+                self.rows,
+                {n: a["sha256"] for n, a in self.scope["artifacts"].items()},
+                *self.hashes,
+                evidence_root=self.root,
+            )
+        )
+        self.current.unlink()
+        self.assertEqual(
+            load_reviews(self.matrix, self.root)[0]["productionSourceSHA256"], "source"
+        )
+        with self.assertRaisesRegex(ValueError, "Missing external evidence"):
+            load_reviews(self.matrix, self.root, current_source=True)
+
+    def test_current_review_delta_and_historical_provenance_remain_pinned(self):
+        original_delta = self.delta.read_bytes()
+        self.delta.write_text("{}")
+        with self.assertRaisesRegex(ValueError, "Changed current source delta"):
+            load_reviews(self.matrix, self.root, current_source=True)
+        self.delta.write_bytes(original_delta)
+        base = self.root / self.base_name
+        base.write_text("{}")
+        with self.assertRaisesRegex(ValueError, "base review"):
+            load_reviews(self.matrix, self.root, current_source=True)
+
+    def test_relabelled_or_escaping_delta_does_not_enable_current_assumptions(self):
+        for changed in [
+            dict(reviewedRevision="c" * 40),
+            dict(unresolvedApplicableFindings=["unreviewed-change"]),
+        ]:
+            content = dict(
+                kind="production-source-delta-assessment",
+                reviewedRevision="b" * 40,
+                conclusion="no-new-applicable-breaking-change-identified",
+                unresolvedApplicableFindings=[],
+            )
+            content.update(changed)
+            self.delta.write_text(json.dumps(content))
+            record = json.loads(self.current.read_text())
+            record["sourceDeltaAssessment"]["sha256"] = digest(self.delta)
+            self.current.write_text(json.dumps(record))
+            self.matrix["currentSourceReview"]["evidenceSHA256"] = digest(self.current)
+            with self.assertRaisesRegex(ValueError, "Incomplete or mismatched"):
+                load_reviews(self.matrix, self.root, current_source=True)
+        record["sourceDeltaAssessment"]["path"] = "../../outside.json"
+        self.current.write_text(json.dumps(record))
+        self.matrix["currentSourceReview"]["evidenceSHA256"] = digest(self.current)
+        with self.assertRaisesRegex(ValueError, "Invalid current source delta"):
+            load_reviews(self.matrix, self.root, current_source=True)
+
+    def test_refresh_requires_new_actual_evidence_and_rejects_the_old_review(self):
+        reviews = load_reviews(self.matrix, self.root, current_source=True)
+        artifacts = {
+            name: item["sha256"] for name, item in self.scope["artifacts"].items()
+        }
+        rows = [
+            dict(row, revision="b" * 40, productionSourceSHA256="current-source")
+            for row in self.rows
+        ]
+        args = (artifacts, "b" * 40, self.hashes[0], self.hashes[1], "current-source")
+        self.assertTrue(
+            verify(
+                self.matrix,
+                rows,
+                *args,
+                reviews,
+                required_minors=self.scope["requiredMinors"],
+            )
+        )
+        for evidence, selected in [
+            (self.rows, reviews),
+            ([], reviews),
+            (rows, load_reviews(self.matrix, self.root)),
+        ]:
+            with self.assertRaises(ValueError):
+                verify(
+                    self.matrix,
+                    evidence,
+                    *args,
+                    selected,
+                    required_minors=self.scope["requiredMinors"],
+                )
