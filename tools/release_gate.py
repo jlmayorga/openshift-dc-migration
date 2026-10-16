@@ -20,6 +20,7 @@ SCENARIOS = {
     "cutover-overlap",
     "rollback",
     "failed-rollout",
+    "constraint-preflight",
     "interruption",
     "stale-plan",
     "safe-rerun",

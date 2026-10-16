@@ -445,14 +445,28 @@ def main():
             tool("stage", plan, expected=1)
             passed.add("stale-plan")
             cleanup()
-            # A Pod quota prevents an overlap destination while keeping its source healthy.
+            # Quota rejection must happen before any source/HPA mutation.
+            # This is preflight evidence, not an actual failed rollout.
             health = prepare()
+            before_source, before_hpa = obj("dc", "web"), obj("hpa", "web")
             create("ResourceQuota", "v1", "web", {"hard": {"pods": "1"}})
             plan = tool("plan", health=health, overlap=True)
             tool("stage", plan)
+            tool("preflight", plan, expected=1)
             tool("cutover", plan, expected=1)
-            tool("rollback", plan)
-            passed.add("failed-rollout")
+            after_source, after_hpa = obj("dc", "web"), obj("hpa", "web")
+            if (
+                after_source["spec"] != before_source["spec"]
+                or after_hpa["metadata"]["uid"] != before_hpa["metadata"]["uid"]
+                or after_hpa["spec"] != before_hpa["spec"]
+            ):
+                raise RuntimeError("Constraint refusal mutated source or HPA")
+            if (
+                json.loads(pathlib.Path(plan).read_text())["progress"]["phase"]
+                != "staged"
+            ):
+                raise RuntimeError("Constraint refusal advanced the cutover journal")
+            passed.add("constraint-preflight")
             cleanup()
             health = prepare()
             plan = tool("plan", health=health)

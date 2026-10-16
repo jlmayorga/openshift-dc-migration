@@ -81,6 +81,44 @@ class NamespaceAuthorization(unittest.TestCase):
                 self.assertIn("Explicit disposable target", proc.stderr)
 
 
+class ConstraintAuthorization(unittest.TestCase):
+    def invoke(self, output, cases, acknowledge):
+        script = pathlib.Path(__file__).with_name("qualify_constraints.py")
+        command = [
+            sys.executable,
+            str(script),
+            "--context",
+            "test",
+            "--kubeconfig",
+            "/nonexistent",
+            "--binary",
+            "/nonexistent",
+            "--image",
+            "test@sha256:00",
+            "--namespace-prefix",
+            "dcmig-test",
+            "--output",
+            output,
+            "--cases",
+            cases,
+        ]
+        if acknowledge:
+            command.append("--allow-test-mutations")
+        return subprocess.run(command, capture_output=True, text=True, timeout=10)
+
+    def test_requires_mutation_ack_before_access(self):
+        with tempfile.TemporaryDirectory() as output:
+            proc = self.invoke(output, "positive", False)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("Explicit disposable target", proc.stderr)
+
+    def test_rejects_empty_selection_before_access(self):
+        with tempfile.TemporaryDirectory() as output:
+            proc = self.invoke(output, "", True)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("Unknown or empty", proc.stderr)
+
+
 class StaticVolumeAuthorization(unittest.TestCase):
     def test_requires_explicit_scc_before_access(self):
         script = pathlib.Path(__file__).with_name("qualify_features.py")
