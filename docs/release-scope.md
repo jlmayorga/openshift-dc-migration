@@ -19,6 +19,8 @@ Candidate builds, historical reproduction, eligibility verification and draft pr
 
 ## Workflows and artifact selection
 
+Developers produce live results against development clusters using the [local qualification drivers](qualification.md). The workflows below consume a separately supplied trusted evidence bundle; they do not run live qualification.
+
 The ordinary candidate workflow builds current source without evidence and uploads unqualified binaries, checksums, provenance and security results. Manual `reproduce.yaml` instead takes an `evidence_run_id` containing a trusted `qualification-bundle` artifact and uploads the reproduced historical candidates. Both use the artifact name `release-candidates`; select the originating run deliberately.
 
 Manual `release.yaml` takes that trusted evidence run, the selected candidate run and an existing tag. It verifies frozen artifact bytes and archived source through `--historical-source`, exports validated evidence and prepares only a draft in the protected `release-review` environment. An ordinary changed-source candidate cannot pass the historical gate. No published binary installation method is implied by these workflows. Review and publication remain separate maintainer actions.

@@ -58,13 +58,12 @@ Every Python command uses `python3 tools/<name>.py` from the root. Qualification
 | `python3 tools/build_candidates.py --output dist` | Developers and candidate CI; current-source unqualified builds and provenance |
 | `python3 tools/build_qualified.py --output frozen-dist --evidence-root /path/to/bundle` | Release maintainers; reproduce immutable historical binaries byte for byte |
 | `python3 tools/release_gate.py --artifacts frozen-dist --evidence-root /path/to/bundle --historical-source` | Release maintainers/workflow; fail-closed exact-artifact and external-evidence verification |
-| `python3 tools/dispatch_qualification.py` | Manual qualification workflow; validate environment-selected candidate/native target and install checksum-pinned `oc` before live execution |
 | `python3 tools/check_vulnerabilities.py /path/to/govulncheck.json` | Security CI and maintainers; fail on symbol-level vulnerability findings or scanner errors |
 | `python3 tools/extract_baseline.py /path/to/swagger.json` | Maintainers; deterministic embedded baseline regeneration |
 | `tools/qualification_fixtures.py` | Imported only by local Python policy tests; creates temporary synthetic evidence, never release inputs |
 | `tools/test_build_candidates.py`, `tools/test_build_qualified.py` | Unittest discovery above; candidate identity and historical reproduction regressions |
 | `tools/test_release_gate.py` | Unittest discovery above; missing/tampered evidence, provenance, source and artifact rejection |
-| `tools/test_dispatch_qualification.py`, `tools/test_qualification.py` | Unittest discovery above; native-dispatch validation and local harness safety without cluster operations |
+| `tools/test_qualification.py` | Unittest discovery above; local scenario-harness safety without cluster operations |
 | `tools/security/go.mod`, `go.sum` | Security CI and maintainers; separately pinned scanner builds and checksums, commands in [security](security.md) |
 
-Every retained `qualify_*.py` driver is listed with its command and purpose in the [live driver inventory](qualification.md#driver-inventory). These reusable scenarios remain optional; importing local test modules does not start a cluster operation. Keep raw logs, generated reports, credentials and review transcripts in ignored private output or an authorized external artifact store. Never commit them as documentation.
+Every retained `qualify_*.py` driver is listed with its command and purpose in the [live driver inventory](qualification.md#driver-inventory). Developers run these optional scenarios directly against an explicitly selected development cluster; GitHub workflows never run live qualification. Importing local test modules does not start a cluster operation. Keep raw logs, generated reports, credentials and review transcripts in ignored private output or an authorized external artifact store. Never commit them as documentation.

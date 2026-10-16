@@ -18,7 +18,7 @@ The repository currently has these conditions relevant to the work:
 | Tests and baseline | Tests use root-relative `testdata` paths. `baseline.go` embeds `compatibility/baseline-1.27.json`. | Move fixtures and embedded assets deliberately; preserve their contents. |
 | Dependencies | The application adopts aligned Kubernetes v0.37.1 clients and Go 1.27.2. The separate security-tooling module pins gRPC v1.83.2. | Preserve adopted versions and client adaptations; do not repeat or undo the completed upgrades. |
 | Ordinary CI | `.github/workflows/ci.yaml` runs Go checks, Python unit tests and security checks without a cluster. Some Python policy tests use tracked canonical evidence. | Preserve cluster independence and make local unit tests independent of historical run files before removing those files. |
-| Live qualification | `.github/workflows/compatibility.yaml` still runs on main pushes, a schedule and manual dispatch, using self-hosted runners. Its matrix now selects the active 4.21 release scope. | Keep scope selection while making live testing explicit and independent of normal checks. |
+| Live qualification | The reconciled baseline had `.github/workflows/compatibility.yaml` running on main pushes, a schedule and manual dispatch with cluster runners. | Remove the workflow; developers run the retained drivers directly against an explicitly selected development cluster. |
 | Candidate and release workflow | `.github/workflows/build-and-release.yaml` invokes `tools/build_qualified.py`, which validates checked-in evidence before reproducing frozen binaries. The gate exports that evidence; it no longer downloads a qualification run. | Separate ordinary candidate builds from frozen-binary reproduction and release eligibility. The outstanding dependency is local evidence, not a mandatory fresh cluster run. |
 | Active release scope | `compatibility/release-scope.json` covers the exact Linux amd64 and Darwin arm64 binaries qualified on OpenShift 4.21.36 / Kubernetes v1.34.9. | Preserve the completed scoped result. OpenShift 4.22 and other native platforms remain outside it; the full-matrix gate remains incomplete. |
 | Evidence policy | `tools/release_gate.py` validates actual records, source-review assumptions, exact artifact sets, production source, dependencies, fixtures and assessment hashes. Loaders require particular repository paths. | Externalize raw evidence through a verified loader migration before deleting inputs. Keep actual and review-based claims distinct. |
@@ -122,17 +122,17 @@ Owner: workflow agent. Scope: `.github/workflows`, release-gate tests and narrow
 
 ### W1T1 Make live testing an explicit operation
 
-Remove automatic push and scheduled cluster qualification. Keep an explicit manual workflow for an available disposable cluster, requiring a selected candidate and target configuration. Do not require permanently installed self-hosted runners. Use a hosted runner capable of reaching the selected cluster, or make an explicitly selected temporary runner an optional execution choice.
+Remove the GitHub live qualification workflow entirely. Developers run the retained qualification drivers directly against an explicitly selected development cluster and disposable test namespace. No GitHub runner, cluster secret, hosted dispatcher or automatic upload is part of live testing.
 
-Match each runner's operating system and architecture to the native execution claim. A Linux hosted runner cannot qualify a Darwin executable by cross-building it. Select an appropriate native hosted or temporary runner for each requested platform, or retain its untested status when none is available.
+Run each selected candidate on a developer machine whose operating system and architecture match the native execution claim. A cross-build alone does not qualify native execution. Select the exact binary and corresponding source checkout deliberately; verify candidate checksums and source/dependency/fixture provenance before testing.
 
-The manual operation must validate inputs before mutations, use its declared context and test namespace, preserve test mutation acknowledgements, and fail clearly on missing configuration or unreachable targets. An absent cluster does not trigger the workflow. A dispatched but unsuccessful qualification cannot become a passing test result.
+The direct operation must require an explicit kubeconfig file, context and test namespace, preserve test mutation acknowledgements, and fail clearly on missing configuration or unreachable targets. Missing clusters leave live qualification unavailable without blocking ordinary development. An unsuccessful or partial run cannot become a passing test result.
 
 Acceptance:
 
-- Push and pull-request checks have no dependency on live qualification, `oc`, cluster secrets or cluster runners.
-- Live qualification is dispatched explicitly and cannot select the operator's current kubeconfig implicitly.
-- The workflow has no permanent runner assumption and retains restricted access to test credentials.
+- GitHub workflows contain no live qualification job or cluster credentials.
+- Live qualification is invoked directly by a developer and cannot select the operator's current kubeconfig implicitly.
+- Reusable scenario drivers and their local safety tests remain available; raw results stay in ignored private output or a declared external bundle.
 
 ### W1T2 Separate candidates from release eligibility
 
@@ -419,7 +419,7 @@ The inspected baseline is `c60b7db`. Adopted Go/Kubernetes clients, the scanner 
 | Other guides, README | Keep/merge by subject in wave 5 | One authoritative operator/maintainer guide per subject |
 | `.github/workflows/ci.yaml` | Keep, repair nested paths | Cluster-independent tests, formatting, module/security checks |
 | `build-and-release.yaml` | Candidate build only; separate manual reproduction and release workflows | Candidate production independent of qualification; drafts require verified exact inputs |
-| `compatibility.yaml` | Manual native-platform qualification | Explicit candidate/context/namespace and mutation acknowledgment; hosted runner |
+| `.github/workflows/compatibility.yaml`, `.github/actionlint.yaml` | Remove | Live qualification runs only on developer machines; cluster-runner labels are obsolete |
 
 The flat `tools/` script layout is retained: drivers share `Live`/`NewApp` helpers and release digest functions. Snake-case script names are used consistently. No packaging dependency is introduced. Commands are `python3 tools/<name>.py`; unittest discovery remains `python3 -m unittest discover -s tools -p 'test_*.py'`.
 
@@ -429,7 +429,7 @@ Canonical evidence dependency map: `load_scope` reads `compatibility/release-sco
 
 Production hashing will inventory every non-test Go file under `cmd/` and `internal/` and the canonical embedded catalog. Historical root-layout hashing is used only for explicitly selected immutable historical source. Fixture hashing is relative to its declared root. Neither path migration nor current documentation can grant historical qualification to new candidates.
 
-Additional retained tools: `tools/build_candidates.py` produces unqualified current-source candidates for ordinary CI; `tools/dispatch_qualification.py` validates explicit native hosted qualification configuration and installs a checksum-pinned oc client. Their colocated tests are ordinary synthetic tests. Every retained driver remains an explicit script with a guarded main entry point.
+Additional retained tooling: `tools/build_candidates.py` and its local tests produce and verify unqualified current-source candidates for ordinary CI. The former workflow-only dispatcher and its tests are removed with the GitHub qualification workflow. Every retained live driver remains an explicit developer-invoked script with a guarded main entry point.
 
 External evidence design: `--evidence-root` declares a bundle root containing original `compatibility/evidence/` records and exact historical `compatibility/reviews/` snapshots. References must resolve inside that root, including through symlinks. Matrix policy pins the source-review overlay hash; scope policy retains original actual-record hashes. Current durable assessment summaries never replace historical hash-pinned snapshots. Historical reproduction extracts the immutable tested Git revision into temporary storage, checks its production/dependency/fixture digests, and rebuilds there with frozen linker metadata. Current policy and tested revision stay distinct.
 
@@ -447,6 +447,6 @@ The flow review covered command/runner dispatch, planning and journals, exclusiv
 
 No dependency, public format, migration policy or safety-gate change is part of these refactors. Complex scheduling/admission/recovery checks have concrete distinct responsibilities and remain intact.
 
-`tools/qualification_fixtures.py` is retained test support, imported only by release-policy and frozen-builder unit tests. Its temporary synthetic records are never a qualification export or production evidence input. The colocated `test_build_candidates.py` and `test_dispatch_qualification.py` cover the added candidate/workflow boundaries through normal unittest discovery.
+`tools/qualification_fixtures.py` is retained test support, imported only by release-policy and frozen-builder unit tests. Its temporary synthetic records are never a qualification export or production evidence input. The colocated `test_build_candidates.py` covers candidate production through normal unittest discovery; `test_qualification.py` retains local scenario-harness safety checks.
 
-Release integrity applies to every evidence selection path: replacement actual-record directories receive the same containment and immutable byte-hash checks as canonical scoped records. Full-matrix actual observations must bind the production source and native artifact platform as well as revision, fixtures and dependencies. Qualification dispatch compares selected candidate provenance with the checked-out source identities before installing the client or accessing the cluster. These checks retain the existing scope and do not convert unqualified inputs into qualified output.
+Release integrity applies to every evidence selection path: replacement actual-record directories receive the same containment and immutable byte-hash checks as canonical scoped records. Full-matrix actual observations must bind the production source and native artifact platform as well as revision, fixtures and dependencies. Developers verify selected candidate provenance against the source checkout before running local qualification; release verification independently enforces the recorded identities. These checks retain the existing scope and do not convert unqualified inputs into qualified output.

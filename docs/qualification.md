@@ -4,46 +4,26 @@ Ordinary builds, Python tests, Go tests and security checks do not require OpenS
 
 [Compatibility](compatibility.md) summarizes completed historical results and untested targets. Exact historical Linux amd64 and Darwin arm64 binaries qualified on OpenShift 4.21.36 / Kubernetes v1.34.9. All changed current binaries need reassessment and new actual evidence; historical passes do not transfer. The wider full-matrix gate remains incomplete. Qualification, candidate builds and [historical release verification](release-scope.md) are separate operations.
 
-## Explicit workflow dispatch
+## Select a development target
 
-The OpenShift qualification workflow is manual only. Select `candidate_run_id` from a candidate build, `platform` (`linux/amd64` or `darwin/arm64`) and minor `4.21`. It downloads the selected artifact, checks out its recorded revision and executes on native hosted Ubuntu or macOS runners. There are no scheduled/push cluster jobs or permanent self-hosted runner requirements. The hosted runner must reach the cluster and application Routes.
+Developers run qualification from their own machines against a development cluster. GitHub Actions runs ordinary checks, candidate builds and explicit historical verification; it does not connect to development clusters or run live qualification.
 
-Protect the `openshift-qualification` environment. Configure:
+Use the source checkout corresponding to the candidate being tested. Verify its `build-provenance.json` and `SHA256SUMS`, including the source, dependency and fixture identities. Run the exact binary on its matching native operating system and architecture; a cross-build or emulated execution does not establish native qualification. Install the matching `oc` client locally and confirm that your machine can reach the cluster API and application Routes.
 
-- Secret `OPENSHIFT_TEST_KUBECONFIG`: test-only kubeconfig contents.
-- Secret `OPENSHIFT_TEST_TARGETS_JSON`: minor → hyphenated platform → explicit target settings, for example:
-
-  ```json
-  {
-    "4.21": {
-      "linux-amd64": {
-        "context": "AUTHORIZED_CONTEXT",
-        "namespace": "dcmig-lab",
-        "ocURL": "https://APPROVED_HOST/oc-client.tar.gz",
-        "ocSHA256": "REPLACE_WITH_ARCHIVE_SHA256"
-      }
-    }
-  }
-  ```
-
-- Variable `OPENSHIFT_TEST_IMAGE`: approved immutable HTTP image reference; optional `OPENSHIFT_SECOND_TEST_IMAGE` for image-update scenarios. Both must use the expected port/health contract.
-
-Configure Darwin separately with a matching native `oc` archive. `ocSHA256` pins the archive, not the extracted executable. The workflow-internal `python3 tools/dispatch_qualification.py` consumes mapped environment values, validates platform/context/namespace, checks candidate bytes against provenance and installs the pinned client. It has no interactive CLI. Missing or invalid inputs, unavailable targets and unsuccessful tests fail; they never become passing records.
-
-Optional `supplementalEvidence` target configuration names a private file available in the checked-out runner workspace. It must contain reviewed same-artifact actual variants; dispatch does not fetch arbitrary private supplemental files for you. The default baseline invocation alone may produce partial evidence. The workflow uploads actual results, but does not create a complete historical `qualification-bundle` automatically.
+Choose an explicit test kubeconfig file, context and disposable namespace. Keep credentials and generated evidence in private local storage. No GitHub cluster secrets, runner setup or dispatch configuration is required. The baseline invocation may produce partial evidence until the required supplemental actual variants are present; review the results before using them for release verification.
 
 ## Run a driver directly
 
 Use Python 3.12+, a matching `oc` client on PATH, a native candidate binary, explicit kubeconfig/context, approved immutable images and target-specific fixture permissions. The baseline driver needs an existing disposable `dcmig-*` namespace labelled `migration.openshift-dc.io/test-namespace=true`; an operator supplies this namespace. Reserve resource name `web`. Other drivers create fresh labelled namespaces from a unique `--namespace-prefix dcmig-...` and refuse to adopt existing ones. The operator needs the harness permissions described in [RBAC](rbac.md), including release metadata access and Route connectivity; these exceed ordinary converter access.
 
-After separately authorizing those test mutations, the baseline command is:
+Set `TEST_KUBECONFIG` to the explicit kubeconfig file path, `TEST_CONTEXT` to the development context, `TEST_NAMESPACE` to that labelled disposable namespace and `CANDIDATE_BINARY` to the matching native binary. Set both image variables to approved immutable HTTP image references. After separately authorizing those test mutations, run:
 
 ```sh
 python3 tools/qualify_openshift.py \
   --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
   --namespace "$TEST_NAMESPACE" --binary "$CANDIDATE_BINARY" \
   --image "$APP_IMAGE_DIGEST" --second-image "$SECOND_APP_IMAGE_DIGEST" \
-  --health-path / --output ./private-qualification/actual.json --allow-test-mutations
+  --health-path / --output .scratchpad/qualification/actual.json --allow-test-mutations
 ```
 
 It creates test workloads and a Route, changes test HPA/controller state, checks quota refusal, interrupts a migration and verifies explicit recovery. Successful baseline scenarios clean up only owned fixture objects. Failed runs and several supplemental drivers retain resources and private artifacts for inspection. Inspect journal and cluster state before rollback or cleanup; never broadly delete a namespace or restore an uncertain workload automatically.

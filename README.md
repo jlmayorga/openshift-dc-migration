@@ -35,4 +35,4 @@ Plans and reports can contain sensitive workload values; keep them private. The 
 - [Migration, preflight and recovery](docs/migration.md) · [RBAC](docs/rbac.md)
 - [Feature mapping](docs/feature-mapping.md) · [Compatibility prerequisites](docs/compatibility-review.md)
 - [Development and tool commands](docs/development.md) · [Dependencies](docs/dependencies.md) · [Security](docs/security.md)
-- [Optional live qualification](docs/qualification.md) · [Historical release verification](docs/release-scope.md) · [Follow-up backlog](docs/backlog.md)
+- [Developer-run live qualification](docs/qualification.md) · [Historical release verification](docs/release-scope.md) · [Follow-up backlog](docs/backlog.md)
