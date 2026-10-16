@@ -112,12 +112,12 @@ def main():
                 sidecar.update(
                     name="sidecar",
                     ports=[{"name": "sidecar", "containerPort": 8081}],
-                    env=[
-                        {"name": "PORT", "value": "8081"},
-                        {"name": "SECOND_PORT", "value": "8889"},
-                    ],
+                    command=["/bin/sh", "-ec", "exec sleep 86400"],
+                    env=[],
                 )
-                sidecar["readinessProbe"]["httpGet"]["port"] = 8081
+                # Exercise independent tag/container updates without assuming
+                # the approved image supports changing its HTTP listen port.
+                sidecar.pop("readinessProbe", None)
                 spec["template"]["spec"]["containers"].append(sidecar)
                 spec["triggers"].append(
                     {

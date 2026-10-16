@@ -89,6 +89,8 @@ python3 tools/qualify_new_app.py \
 
 Apps awaiting their first binary build can generate read-only review artifacts, but cannot produce an executable live plan until the DC image controller has resolved their automatic ImageChange triggers. A new-app origin does not bypass unsupported hooks/test/custom behavior, selector/ownership checks or stale dependency checks.
 
+The `failed-initial-rollout` case deliberately exits with code 42 only when the destination migration label is present. Its source is healthy and all pre-retirement admission/capacity checks pass; actual startup fails after source retirement. The runner verifies a failed, non-ready result, retained recovery state, and explicit source/HTTP restoration. This proves a runtime failure path that quota preflight cannot replace. The feature runner's `multi-image` fixture uses a sleeping sidecar so independently updating both tags does not depend on configurable HTTP ports.
+
 ## Multiple namespaces in one invocation
 
 The [actual multi-namespace evidence](multiple-namespaces-live-tests.md) records six passing cases on OpenShift 4.21.36.

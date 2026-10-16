@@ -1223,6 +1223,83 @@ def add_advanced_cases(cases, live, args):
         ] and not self_active_destination(live)
         return {"unsafeVolumeOverlapRejected": True, "sourceUnchanged": True}
 
+    def failed_initial_rollout():
+        live.app("failed-initial-rollout")
+
+        def inject(spec):
+            pod = spec["template"]["spec"]
+            pod["terminationGracePeriodSeconds"] = 1
+            container = pod["containers"][0]
+            container.setdefault("env", []).append(
+                {
+                    "name": "QUALIFICATION_MIGRATION_ID",
+                    "valueFrom": {
+                        "fieldRef": {
+                            "fieldPath": "metadata.labels['migration.openshift-dc.io/id']"
+                        }
+                    },
+                }
+            )
+            # The source has no migration label and remains healthy. Admission
+            # accepts both templates; only actual destination startup fails.
+            container["command"] = [
+                "/bin/sh",
+                "-ec",
+                'if [ -n "$QUALIFICATION_MIGRATION_ID" ]; then '
+                "echo 'injected destination startup failure' >&2; exit 42; fi; "
+                "exec /hello_openshift",
+            ]
+            container["readinessProbe"] = {
+                "httpGet": {"port": 8080, "path": "/"},
+                "periodSeconds": 1,
+            }
+
+        live.patch(inject)
+        health = live.route()
+        original_response = live.http(health)
+        source = live.get("dc")
+        plan = live.tool("plan", health=health)
+        live.tool("stage", plan)
+        report = live.tool(
+            "cutover", plan, expected=1, extra=("--readiness-timeout", "20s")
+        )
+        result = json.loads(report.read_text())["results"][0]
+        assert result["constraints"]["status"] == "passed"
+        assert not result["ready"]
+        phase = json.loads(plan.read_text())["progress"]["phase"]
+        assert phase not in {"staged", "complete"}
+        assert live.get("dc")["spec"]["replicas"] == 0
+        assert live.get("deployment")["spec"]["replicas"] == 1
+        pods = json.loads(
+            live.oc(
+                "get", "pods", "-l", "migration.openshift-dc.io/id", "-o", "json"
+            ).stdout
+        )["items"]
+        exit_codes = [
+            state["terminated"]["exitCode"]
+            for pod in pods
+            for status in pod.get("status", {}).get("containerStatuses", [])
+            for state in (status.get("state", {}), status.get("lastState", {}))
+            if "terminated" in state
+        ]
+        assert 42 in exit_codes, "Injected startup failure was not observed"
+        live.snapshot("failed-destination-startup")
+        live.tool("rollback", plan)
+        assert live.get("dc")["spec"] == source["spec"]
+        assert live.get("deployment")["spec"]["replicas"] == 0
+        assert live.get("deployment")["spec"]["paused"]
+        assert live.http(health) == original_response
+        live.tool("rollback", plan)
+        return {
+            "preRetirementAssessmentPassed": True,
+            "destinationStartupExitCode": 42,
+            "failedJournalPhase": phase,
+            "failureNotReportedReady": True,
+            "sourceRemainedRetiredUntilExplicitRecovery": True,
+            "sourceSpecAndHTTPRecovered": True,
+            "recoveryRerun": "verified",
+        }
+
     def failed_image_rollout():
         live.app("failed-image-rollout")
 
@@ -1297,6 +1374,7 @@ def add_advanced_cases(cases, live, args):
             "added-hpa": added_hpa,
             "volume-overlap": volume_overlap,
             "failed-image-rollout": failed_image_rollout,
+            "failed-initial-rollout": failed_initial_rollout,
             "recreate-hook": lambda: rejected_strategy(
                 "recreate-hook",
                 {
