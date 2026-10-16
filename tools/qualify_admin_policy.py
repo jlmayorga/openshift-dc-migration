@@ -122,7 +122,7 @@ def main():
             ("AdminNetworkPolicy", "adminnetworkpolicy"),
             ("BaselineAdminNetworkPolicy", "baselineadminnetworkpolicy"),
         ):
-            for position in ("subject", "peer"):
+            for position in ("subject", "peer", "controller-hash"):
                 name = (
                     "dcmig-" + live.run if kind == "AdminNetworkPolicy" else "default"
                 )
@@ -131,11 +131,11 @@ def main():
                     "podSelector": {
                         "matchExpressions": [
                             {
-                                "key": (
-                                    "migration.openshift-dc.io/id"
-                                    if position == "subject"
-                                    else "deployment"
-                                ),
+                                "key": {
+                                    "subject": "migration.openshift-dc.io/id",
+                                    "peer": "deployment",
+                                    "controller-hash": "pod-template-hash",
+                                }[position],
                                 "operator": "Exists",
                             }
                         ]
