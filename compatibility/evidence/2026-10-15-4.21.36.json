@@ -632,5 +632,9 @@
     "files": 2877,
     "credentialScan": "passed; actual admin/test token and key values absent",
     "generatedAt": "2026-10-15T23:54:55.994541+00:00"
+  },
+  "followUp": {
+    "evidence": "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
+    "note": "Historical failed static hostPath setup superseded by an authorized regular gp3 CSI PVC new-app case, which passed on the follow-up binary. No v2 SCC binding was applied; superseded hostPath namespace/PV definition and legacy grant were removed. Original archive remains unchanged."
   }
 }
