@@ -52,6 +52,8 @@ type contractCluster struct {
 	hpaStatusChurn                bool
 	dropPodLabel, injectPodBudget bool
 	networkPolicies               []networkingv1.NetworkPolicy
+	adminPolicyVersion            string
+	adminPolicies                 map[string][]unstructured.Unstructured
 	clusterQuotas                 []unstructured.Unstructured
 	denyPodDryRun                 bool
 	podDryRuns                    int
@@ -106,6 +108,41 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 	}
 	if c.lost {
 		http.Error(w, "connection lost", 503)
+		return
+	}
+	if strings.HasPrefix(req.URL.Path, "/apis/policy.networking.k8s.io") {
+		if c.adminPolicyVersion == "" {
+			http.NotFound(w, req)
+			return
+		}
+		if c.denyConstraintRead != "" && strings.HasSuffix(req.URL.Path, c.denyConstraintRead) {
+			http.Error(w, "admin policy read forbidden", http.StatusForbidden)
+			return
+		}
+		group := "policy.networking.k8s.io"
+		version := group + "/" + c.adminPolicyVersion
+		if req.URL.Path == "/apis/"+group {
+			jsonResponse(w, map[string]interface{}{"kind": "APIGroup", "apiVersion": "v1", "name": group, "versions": []interface{}{map[string]interface{}{"groupVersion": version, "version": c.adminPolicyVersion}}})
+			return
+		}
+		if req.URL.Path == "/apis/"+version {
+			jsonResponse(w, map[string]interface{}{"kind": "APIResourceList", "apiVersion": "v1", "groupVersion": version, "resources": []interface{}{map[string]interface{}{"name": "adminnetworkpolicies", "kind": "AdminNetworkPolicy"}, map[string]interface{}{"name": "baselineadminnetworkpolicies", "kind": "BaselineAdminNetworkPolicy"}}})
+			return
+		}
+		resource := req.URL.Path[strings.LastIndex(req.URL.Path, "/")+1:]
+		items := []interface{}{}
+		for _, p := range c.adminPolicies[resource] {
+			items = append(items, p.Object)
+		}
+		jsonResponse(w, map[string]interface{}{"kind": "List", "apiVersion": "v1", "items": items})
+		return
+	}
+	if req.Method == http.MethodGet && req.URL.Path == "/api/v1/namespaces/example" {
+		if c.denyConstraintRead == "namespace" {
+			http.Error(w, "namespace read forbidden", http.StatusForbidden)
+			return
+		}
+		jsonResponse(w, map[string]interface{}{"kind": "Namespace", "apiVersion": "v1", "metadata": map[string]interface{}{"name": "example", "labels": map[string]interface{}{"kubernetes.io/metadata.name": "example"}}})
 		return
 	}
 	if req.Header.Get("Accept") != "application/json" {

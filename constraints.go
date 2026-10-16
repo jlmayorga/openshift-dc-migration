@@ -395,6 +395,11 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 	}); err != nil {
 		return err
 	}
+	if err := check("admin-network-policy-selection", func() error {
+		return r.checkAdminPolicies(ctx, p, pod, a)
+	}); err != nil {
+		return err
+	}
 	if err := check("storage-references", func() error {
 		if problems := unsupportedInlineVolumes(pod.Spec.Volumes); len(problems) > 0 {
 			return fmt.Errorf("admitted Pod has unsupported storage: %v", problems)

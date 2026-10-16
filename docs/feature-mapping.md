@@ -22,6 +22,7 @@ The baseline is OpenShift 4.14 (Kubernetes 1.27). The embedded field/required-pr
 | Inline `cephfs`, `rbd`, `gitRepo` volumes | Preserved in a paused review manifest; automatic migration blocked because their runtime plugins were removed/disabled within the target range |
 | PVC backed by an in-tree CephFS/RBD PV | Pre-cutover refusal before source/HPA changes; replace with reviewed CSI storage first |
 | Required SCC annotation | Preserve the pin; prove service-account access to that exact SCC and verify Pod admission used it. A namespaced access review is needed when the subject review selected another SCC |
+| Cluster admin network policies | Discover optional ANP/BANP APIs and compare subject/peer Pod selection before source retirement. Changed selection or unassessed policy capabilities require manual review; policies are never modified by the converter |
 
 Migration identifiers derive from source namespace, name and UID. Output contains no source owner references, resource version or server status. Conversion never modifies the source object. Hook Jobs, custom deployers and dependent-resource transitions require operator design; the tool does not invent substitutes.
 
