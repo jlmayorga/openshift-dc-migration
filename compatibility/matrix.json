@@ -174,7 +174,7 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "passed (all22scenarioIDs on recorded native Darwin/arm64 artifact; full release matrix incomplete)",
       "limitations": [
-        "Primary all22scenario result is native Darwin/arm64. Separate Linux/amd64 evidence passes units/contracts and actual generation/staging only; it remains partial.",
+        "Darwin/arm64 b247 and Linux/amd64 4297 each passed all22scenarioIDs in separate actual runs. Supplemental40newapp/16constraint/6namespace edges remain attributed to their recorded native artifact.",
         "OpenShift4.14\u20134.20 use source-review assumptions, not actual integration passes.",
         "OpenShift4.22 and other shipped platform binaries lack matching actual qualification; full release gate remains closed.",
         "All six injected faults eventually recovered; write5 required explicit rollback rerun after a visible resourceVersion conflict. The helper observation error and original failure are retained.",
@@ -188,6 +188,7 @@
       "artifactSHA256": "b2472a02d402fe88435483080f5137673d486cc015d97c82cc439126169a28a8",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-linux-full-4.21.36.json",
         "compatibility/evidence/2026-10-16-linux-stage-4.21.36.json",
         "compatibility/evidence/2026-10-16-pv-topology-4.21.36.json",
         "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json",
