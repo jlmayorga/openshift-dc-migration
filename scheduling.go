@@ -156,6 +156,9 @@ func (r *Runner) checkScheduling(ctx context.Context, pod *corev1.Pod, replicas 
 			if err != nil {
 				return fmt.Errorf("read PVC node affinity: %w", err)
 			}
+			if err := checkLegacyPV(pv); err != nil {
+				return fmt.Errorf("PVC %q: %w", claim.Name, err)
+			}
 			if pv.Spec.NodeAffinity != nil && pv.Spec.NodeAffinity.Required != nil {
 				volumeAffinity = append(volumeAffinity, pv.Spec.NodeAffinity.Required)
 			}

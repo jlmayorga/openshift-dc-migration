@@ -6,9 +6,11 @@ OpenShift 4.14 / Kubernetes 1.27 remains the mandatory floor. The current releas
 
 **Fully qualified versions: none.** Actual tests have now run on **OpenShift 4.21.36 / Kubernetes v1.34.9**; see the [live test evidence](live-tests-2026-10-15.md) and [actual new-app tests](new-app-live-tests.md) for exact scope, binary hashes, failures and retained artifacts. This tests its own version and cannot supply 4.14 evidence. The matrix records exact patches/Kubernetes versions only after observation. Synthetic fixtures for each target, the Kubernetes 1.27 baseline catalog and loopback JSON contracts are separate local evidence. None proves OpenShift admission, SCC defaults, image controllers or Service routing.
 
-The current native artifact additionally passed [26 constraint/migration cases](preflight-live-tests.md) and [15 runtime/recovery cases](recovery-live-tests.md). Its successful quota preflight and actual runtime-failure recovery are separate evidence. The matrix remains partial until all required targets, artifacts and scenarios pass.
+The native artifact recorded in those reports additionally passed [26 constraint/migration cases](preflight-live-tests.md) and [15 runtime/recovery cases](recovery-live-tests.md). Its successful quota preflight and actual runtime-failure recovery are separate evidence. The matrix remains partial until all required targets, artifacts and scenarios pass.
 
 [Seven further cases](worker-expiry-live-tests.md) verify singleton ownership through success/failure/cancellation, actual expired credentials, orphan recovery refusal and staged/foreign-controller guards on that same artifact.
+
+The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. A rebuilt artifact requires fresh live results before it can inherit any qualification claim.
 
 ## Running on a disposable cluster
 

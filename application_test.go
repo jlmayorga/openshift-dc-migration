@@ -29,6 +29,9 @@ import (
 )
 
 type contractCluster struct {
+	injectedPodVolumes            []corev1.Volume
+	claims                        map[string]corev1.PersistentVolumeClaim
+	volumes                       map[string]corev1.PersistentVolume
 	disruptionBudgets             []policyv1.PodDisruptionBudget
 	hpaStatusChurn                bool
 	dropPodLabel, injectPodBudget bool
@@ -83,6 +86,16 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		http.Error(w, "constraint inventory denied", 403)
 		return
 	}
+	if req.Method == http.MethodGet {
+		if claim, ok := c.claims[req.URL.Path]; ok {
+			jsonResponse(w, &claim)
+			return
+		}
+		if volume, ok := c.volumes[req.URL.Path]; ok {
+			jsonResponse(w, &volume)
+			return
+		}
+	}
 	if strings.HasSuffix(req.URL.Path, "/podsecuritypolicysubjectreviews") && req.Method == http.MethodPost {
 		var review map[string]interface{}
 		_ = json.NewDecoder(req.Body).Decode(&review)
@@ -101,6 +114,7 @@ func (c *contractCluster) serve(t *testing.T, w http.ResponseWriter, req *http.R
 		}
 		var pod corev1.Pod
 		_ = json.NewDecoder(req.Body).Decode(&pod)
+		pod.Spec.Volumes = append(pod.Spec.Volumes, c.injectedPodVolumes...)
 		if c.destination != nil {
 			for key, value := range c.destination.Spec.Template.Labels {
 				if pod.Labels[key] != value {

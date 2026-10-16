@@ -366,6 +366,9 @@ func (r *Runner) assessConstraints(ctx context.Context, p *MigrationPlan, staged
 		return err
 	}
 	if err := check("storage-references", func() error {
+		if problems := unsupportedInlineVolumes(pod.Spec.Volumes); len(problems) > 0 {
+			return fmt.Errorf("admitted Pod has unsupported storage: %v", problems)
+		}
 		for _, volume := range pod.Spec.Volumes {
 			if volume.PersistentVolumeClaim != nil {
 				claim, err := r.Kube.CoreV1().PersistentVolumeClaims(ns).Get(ctx, volume.PersistentVolumeClaim.ClaimName, metav1.GetOptions{})

@@ -176,6 +176,7 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	}
 	dep.Spec.Template.ObjectMeta = metav1.ObjectMeta{Labels: dep.Spec.Template.Labels, Annotations: dep.Spec.Template.Annotations}
 	c.Deployment = dep
+	c.Unsupported = append(c.Unsupported, unsupportedInlineVolumes(dep.Spec.Template.Spec.Volumes)...)
 	for key := range raw {
 		if !contains([]string{"replicas", "selector", "template", "paused", "test", "minReadySeconds", "revisionHistoryLimit", "strategy", "triggers"}, key) {
 			c.Unsupported = append(c.Unsupported, "spec."+key+" needs a manual equivalent")
