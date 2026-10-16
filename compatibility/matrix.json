@@ -16,10 +16,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.14-dc.yaml",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.15",
@@ -32,10 +33,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.15-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.16",
@@ -48,10 +50,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.16-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.17",
@@ -64,10 +67,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.17-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.18",
@@ -80,10 +84,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.18-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.19",
@@ -96,10 +101,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.19-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.20",
@@ -112,10 +118,11 @@
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "not-run",
       "limitations": [
-        "Older clusters unavailable; official release-note/API compatibility review is planned in docs/backlog.md. No live test or completed compatibility-review assumption is claimed."
+        "Older clusters unavailable; official release-note/API review is in progress in docs/compatibility-review.md. Legacy storage changes have guards, but no completed compatibility assumption or live-test pass is claimed."
       ],
       "fixture": "testdata/ocp-4.20-dc.json",
-      "fixtureTestDate": "2026-10-15"
+      "fixtureTestDate": "2026-10-15",
+      "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json"
     },
     {
       "minor": "4.21",
@@ -127,23 +134,25 @@
         "k8s.io/apimachinery": "v0.31.3",
         "k8s.io/client-go": "v0.31.3"
       },
-      "testedAt": "2026-10-16T02:47:29.225079+00:00",
+      "testedAt": "2026-10-16T03:25:15.251686+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "partial (actual cluster; see linked session evidence)",
       "limitations": [
-        "Only OpenShift 4.21.36 and the recorded darwin/arm64 artifact were exercised live; 4.14, other minors and other platform artifacts remain unqualified.",
-        "Same final artifact passed 48 targeted cases across linked sessions plus 13 automatic baseline scenario IDs, including singleton ownership, actual expired credentials and orphan recovery refusal. Full release qualification remains partial.",
-        "Preflight is point-in-time, not a reservation or startup guarantee; conservative capacity includes all source consumption and full destination plus surge.",
-        "Single-node ReadWriteOnce CSI evidence does not test cross-node detach/attach or node failure.",
-        "Earlier 39-case new-app and six-case namespace sessions retain their original binary hashes in additionalEvidence; they are historical evidence."
+        "Only OpenShift 4.21.36 and the recorded darwin/arm64 artifact were exercised live; full release qualification remains partial.",
+        "New storage-guard source has four verified targeted outcomes, with documented follow-up inspections, plus 13 automatic baseline scenario IDs. Original TLS/harness failures remain explicit.",
+        "Earlier f19 artifact's 48 targeted cases and older new-app/namespace sessions are historical for their hashes; supplemental variants require requalification on the current artifact.",
+        "Legacy plugin refusal fixtures have zero application replicas; actual admission-added legacy/PV behavior is covered only by request-contract simulations.",
+        "Point-in-time checks do not reserve capacity or guarantee startup. Single-node CSI test does not qualify cross-node detach/attach or node failure.",
+        "OpenShift 4.14\u20134.20 release-note review remains in progress; no review-based assumption is claimed."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-worker-expiry-4.21.36.json",
-      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
+      "evidence": "compatibility/evidence/2026-10-16-storage-guard-4.21.36.json",
+      "artifactSHA256": "d40a3091902443bb3c298959368ea071080b6109bae940c1206ecc1010ae5457",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-worker-expiry-4.21.36.json",
         "compatibility/evidence/2026-10-16-runtime-recovery-4.21.36.json",
         "compatibility/evidence/2026-10-16-preflight-4.21.36.json",
         "compatibility/evidence/2026-10-16-new-app-4.21.36.json",

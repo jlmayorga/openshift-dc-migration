@@ -1,0 +1,326 @@
+{
+  "schemaVersion": "v1",
+  "kind": "actual-openshift-storage-guard-session",
+  "result": "partial",
+  "suiteResult": "passed with documented read-only rechecks",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "platform": "darwin/arm64",
+  "artifactSHA256": "d40a3091902443bb3c298959368ea071080b6109bae940c1206ecc1010ae5457",
+  "goSourceRevision": "4ce61e7063ec550b844e4c5766e61850aa8d4590",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+  "dependencyVersions": {
+    "k8s.io/api": "v0.31.3",
+    "k8s.io/apimachinery": "v0.31.3",
+    "k8s.io/client-go": "v0.31.3"
+  },
+  "testedAt": "2026-10-16T03:18:26.270673+00:00",
+  "completedAt": "2026-10-16T03:25:15.251686+00:00",
+  "targetedCases": 4,
+  "verifiedTargetedCases": 4,
+  "cases": [
+    {
+      "case": "cephfs",
+      "result": "passed",
+      "startedAt": "2026-10-16T03:18:26.270673+00:00",
+      "observations": {
+        "plugin": "cephfs",
+        "sourceUID": "58385f5e-9f58-4be6-9a21-b262e599d533",
+        "sourceReplicas": 0,
+        "sourceUnchanged": true,
+        "pausedReviewPreservesVolume": true,
+        "generationAndPlan": [
+          {
+            "mode": "generate",
+            "diagnostic": "manual migration required: volume \"legacy\" uses cephfs in-tree storage, removed in Kubernetes 1.31; migrate the data and workload to a reviewed CSI volume before automatic migration"
+          },
+          {
+            "mode": "plan",
+            "diagnostic": "manual migration required: volume \"legacy\" uses cephfs in-tree storage, removed in Kubernetes 1.31; migrate the data and workload to a reviewed CSI volume before automatic migration"
+          }
+        ],
+        "stageRefusedWithoutDestination": true,
+        "applicationPodsCreated": 0,
+        "completedDeployerPodsAllowed": true,
+        "admittedSourceVolumes": [
+          {
+            "cephfs": {
+              "monitors": [
+                "192.0.2.1:6789"
+              ],
+              "path": "/data"
+            },
+            "name": "legacy"
+          }
+        ]
+      },
+      "namespace": "dcmig-storage-current-20261016-cephfs"
+    },
+    {
+      "case": "rbd",
+      "result": "passed",
+      "startedAt": "2026-10-16T03:18:43.213407+00:00",
+      "observations": {
+        "plugin": "rbd",
+        "sourceUID": "4dc19fa8-ac2c-419c-89e8-a38a2a6f010d",
+        "sourceReplicas": 0,
+        "sourceUnchanged": true,
+        "pausedReviewPreservesVolume": true,
+        "generationAndPlan": [
+          {
+            "mode": "generate",
+            "diagnostic": "manual migration required: volume \"legacy\" uses rbd in-tree storage, removed in Kubernetes 1.31; migrate the data and workload to a reviewed CSI volume before automatic migration"
+          },
+          {
+            "mode": "plan",
+            "diagnostic": "manual migration required: volume \"legacy\" uses rbd in-tree storage, removed in Kubernetes 1.31; migrate the data and workload to a reviewed CSI volume before automatic migration"
+          }
+        ],
+        "stageRefusedWithoutDestination": true,
+        "applicationPodsCreated": 0,
+        "completedDeployerPodsAllowed": true,
+        "admittedSourceVolumes": [
+          {
+            "name": "legacy",
+            "rbd": {
+              "image": "fixture-only",
+              "keyring": "/etc/ceph/keyring",
+              "monitors": [
+                "192.0.2.1:6789"
+              ],
+              "pool": "rbd",
+              "user": "admin"
+            }
+          }
+        ]
+      },
+      "namespace": "dcmig-storage-current-20261016-rbd"
+    },
+    {
+      "case": "csi-post-rollback-audit",
+      "result": "passed",
+      "startedAt": "2026-10-16T03:22:36.912625+00:00",
+      "observations": {
+        "originalAttempt": "live-csi-final/cases.json",
+        "completedCutoverAndRollbackReports": true,
+        "postRollbackReadOnlyAudit": "passed",
+        "sourceUID": "75e7fb13-89d0-4330-beec-c18cc2ee47a1",
+        "sourceSpecAndHTTPRecovered": true,
+        "pvcUID": "bca86984-9c1c-4b98-8a73-85b698683560",
+        "pvUID": "356e7dcb-4a0e-4a8b-9a17-c82ecc5e5ad7",
+        "markerPreserved": "constraint-canary-8e4ebcd9c6",
+        "destinationPausedAtZero": true,
+        "newStorageOrSCCGrants": false
+      },
+      "namespace": "dcmig-nf-c-20261016-regular-pvc"
+    },
+    {
+      "case": "gitrepo-recheck",
+      "result": "passed",
+      "startedAt": "2026-10-16T03:22:39.747778+00:00",
+      "observations": {
+        "plugin": "gitRepo",
+        "originalAttempt": "live-refusals-current/cases.json",
+        "sourceUID": "67ef668d-0db8-4137-926f-525585034558",
+        "sourceSpecUnchanged": true,
+        "sourceReplicas": 0,
+        "generationPlanAndStageRefusedWithStorageDiagnostic": true,
+        "volumePreserved": true,
+        "applicationPodsCreated": 0,
+        "newDestinationCreated": false
+      },
+      "namespace": "dcmig-storage-current-20261016-gitrepo"
+    }
+  ],
+  "baseline": {
+    "kind": "actual-openshift",
+    "schemaVersion": "v1",
+    "result": "partial",
+    "minor": "4.21",
+    "artifactSHA256": "d40a3091902443bb3c298959368ea071080b6109bae940c1206ecc1010ae5457",
+    "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+    "dependencySHA256": "98ade97e6d5f90ba36f28bcdd4aa1c1413171380df1e1ffafeb10bf1bf3b18ef",
+    "revision": "4ce61e7063ec550b844e4c5766e61850aa8d4590",
+    "runner": "Mac-mini",
+    "runURL": "local:2fd6c1e1-cb2e-442f-92fe-bf1b311a0bb9",
+    "testedAt": "2026-10-16T03:18:47.304945+00:00",
+    "scenarios": [
+      "admission-scc",
+      "constraint-preflight",
+      "cutover-exclusive",
+      "cutover-overlap",
+      "dry-run",
+      "hpa-retarget",
+      "image-triggers",
+      "interruption",
+      "rollback",
+      "safe-rerun",
+      "schema",
+      "service-routing",
+      "stale-plan"
+    ],
+    "limitations": [
+      "Outstanding actual scenarios: admission-rejection, connectivity-loss, cross-namespace-image-triggers, exclusive-volume, failed-rollout, multi-container-image-triggers, per-mutation-recovery, restricted-rbac, singleton-worker"
+    ],
+    "openshiftPatch": "4.21.36",
+    "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+    "dependencyVersions": {
+      "k8s.io/api": "v0.31.3",
+      "k8s.io/apimachinery": "v0.31.3",
+      "k8s.io/client-go": "v0.31.3"
+    },
+    "kubernetesVersion": "v1.34.9",
+    "sccEvidence": [
+      {
+        "uid": "b86f0ee8-89dc-4658-ba62-be6206c73c46",
+        "scc": "restricted-v2",
+        "securityContext": {
+          "fsGroup": 1003430000,
+          "seLinuxOptions": {
+            "level": "s0:c59,c4"
+          },
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        }
+      }
+    ],
+    "privateArtifacts": "/var/folders/qj/vl2t03q52fs9zbk9bj2vzwkm0000gn/T/dcmig-qualification-isyfjbi_"
+  },
+  "baselineLimit": "13 automatic scenario IDs, result partial. Supplemental scenarios are not automatically imported or qualified.",
+  "localValidation": {
+    "goRaceCasesIncludingSubtests": 175,
+    "goStatementCoveragePercent": 75.3,
+    "goVet": "passed",
+    "pythonTests": 19,
+    "govulncheckFindings": 0,
+    "gosecIssues": 0,
+    "gosecCompilerErrors": 0,
+    "gosecProductionFiles": 16,
+    "crossBuilds": [
+      {
+        "platform": "linux/amd64",
+        "exit": 0,
+        "stderr": "",
+        "binarySHA256": "52a056049eb8f91ab513e386c980c0665aad1811a6b0c07755e564886847e202",
+        "scope": "compilation only; not live-executed"
+      },
+      {
+        "platform": "linux/arm64",
+        "exit": 0,
+        "stderr": "",
+        "binarySHA256": "0926267f3e7f63a6dc2ee517399fcdfa21018d624a665bfddf146914b9bee5dd",
+        "scope": "compilation only; not live-executed"
+      },
+      {
+        "platform": "darwin/amd64",
+        "exit": 0,
+        "stderr": "",
+        "binarySHA256": "7ae8719ec3a706320f4eee1580ddace4cf70f93d953429c82e6834d185cd30f6",
+        "scope": "compilation only; not live-executed"
+      },
+      {
+        "platform": "darwin/arm64",
+        "exit": 0,
+        "stderr": "",
+        "binarySHA256": "c4ba8934dab91e1eba280e48fef698cddd5443174b309fc388ff95346cfb2294",
+        "scope": "compilation only; not live-executed"
+      },
+      {
+        "platform": "windows/amd64",
+        "exit": 0,
+        "stderr": "",
+        "binarySHA256": "383cc411fac249c32b5fc16ae39af80b2d351f255f6d795e9c02fee45a5d9bc9",
+        "scope": "compilation only; not live-executed"
+      }
+    ],
+    "crossBuildLimit": "Compilation only. Only the named darwin/arm64 artifact ran live."
+  },
+  "provenance": {
+    "storageDriverRevision": "fb9e4df",
+    "finalSourceRevision": "4ce61e7063ec550b844e4c5766e61850aa8d4590",
+    "finalBaselineInvocation": "baseline-final-invocation.json",
+    "refusalInvocation": "storage-current-invocation.json",
+    "initialFinalCSIProtocol": "live-csi-final/",
+    "finalReadOnlyAudit": "live-final-audit/",
+    "auditHelperSHA256": "69bcbfcec1a73df17cae4ef9691a3c591c3f4c2dd91f69b44aec4fe2c1971e63",
+    "fixtureReuse": "Existing approved 1Gi gp3 CSI claim and source reused; only UID/ownership-verified paused-zero destination regenerated. Final baseline reused this run's empty labelled namespace. gitRepo recheck reused unchanged owned zero-replica fixture after TLS failure."
+  },
+  "historicalAttempts": [
+    {
+      "directory": "live-refusals",
+      "result": "failed-harness-assumption",
+      "reason": "Zero-replica DC retains a completed deployer Pod. No legacy-volume application Pod started; driver initially expected no Pod objects at all."
+    },
+    {
+      "directory": "live-refusals-final",
+      "result": "two passed; RBD failed harness comparison",
+      "reason": "RBD server defaults pool/user/keyring were present and preserved; initial assertion incorrectly compared with the pre-admission request."
+    },
+    {
+      "directories": [
+        "live-refusals-verified",
+        "live-csi",
+        "qualification-baseline-initial.json"
+      ],
+      "result": "passing targeted cases/partial baseline on earlier binary; historical only",
+      "artifactSHA256": "11eec8f9be0e628d4d12bf38a5dd757682b82f4ebac95dcf5e213cdb4b8a33d1",
+      "reason": "Earlier candidate preceded the explicit old-plan recovery exemption; never counted as current artifact evidence."
+    },
+    {
+      "directory": "live-refusals-current",
+      "result": "cephfs and rbd passed; original gitRepo case failed",
+      "reason": "gitRepo generation classified correctly, but subsequent discovery hit TLS handshake timeout. Read-only generation/plan/stage recheck later passed on unchanged fixture."
+    },
+    {
+      "directory": "live-csi-final",
+      "result": "cutover and rollback succeeded; original harness case failed during post-read",
+      "reason": "Post-rollback oc get DC hit TLS handshake timeout. Final independent audit verifies the recorded successful protocol, recovered source/HTTP, same canary and PVC/PV UIDs. Original failed case remains failed."
+    }
+  ],
+  "behavior": {
+    "legacyPlugins": "Inline cephfs/rbd/gitRepo require manual replacement; admission-added variants and CephFS/RBD PV backing block before source retirement.",
+    "oldSavedPlans": "Stage/preflight/cutover revalidate and reject unsafe legacy volumes. Explicit rollback can restore previously reviewed original source, subject to ownership/spec/readiness/health checks.",
+    "CSI": "Actual cutover, marker read during destination operation, rollback, final marker/source health and PVC/PV identity audit. No new storage/SCC grant."
+  },
+  "limitations": [
+    "Actual OpenShift4.21.36 and exact native artifact only; full matrix remains partial.",
+    "Legacy refusal fixtures have zero application replicas. Completed OpenShift deployer Pods are allowed and verified not to mount legacy volumes. These tests do not prove legacy plugin mountability or real admission-added legacy PV behavior; those paths have local request-contract tests.",
+    "CSI evidence combines completed final-binary cutover/rollback with a subsequent read-only post-audit after TLS failure; not a fresh all-in-one successful public-driver run.",
+    "Earlier f19 binary's 48 targeted cases remain historical and do not qualify this source. Remaining runtime/recovery/RBAC/singleton/image/namespace variants require exact-artifact requalification.",
+    "Single-node CSI evidence does not qualify cross-node detach/attach or node failure.",
+    "OpenShift4.14\u20134.20 review remains in progress, with no completed compatibility assumption."
+  ],
+  "compatibilityReview": "compatibility/evidence/2026-10-16-release-notes-review.json",
+  "archive": {
+    "archive": "/Users/jlmayorga/sandbox/personal/openshift-dc-migration/.scratchpad/release-notes-review-20261016/openshift-4.21.36-storage-guard-complete-evidence.tar.gz",
+    "archiveSHA256": "4ff09afb8cb3dd57aed80035e056726f2508febd016367a3de011566cc9a9b1a",
+    "manifestSHA256": "af98460c0cb4de7678be9a206528daa8497f09fd49e00ffc3fbb8bcf4140e2fd",
+    "files": 716,
+    "credentialScan": "passed; actual admin/test token and key values absent",
+    "allManifestEntriesVerified": true,
+    "generatedAt": "2026-10-16T03:28:15.453890+00:00"
+  },
+  "archiveDocumentCopy": "Public record captured before archive/rebuild metadata appended, avoiding circular checksums.",
+  "sourceRebuildValidation": {
+    "sourceSnapshot": "export-complete/source",
+    "rebuildSHA256": "d40a3091902443bb3c298959368ea071080b6109bae940c1206ecc1010ae5457",
+    "testedArtifactSHA256": "d40a3091902443bb3c298959368ea071080b6109bae940c1206ecc1010ae5457",
+    "byteIdentical": true,
+    "flags": [
+      "-mod=readonly",
+      "-trimpath",
+      "-buildvcs=false",
+      "-ldflags=-s -w -X main.version=maintenance-storage-final"
+    ],
+    "CGO_ENABLED": "0"
+  },
+  "supersededFixtureCleanup": {
+    "deletedNamespaces": 9,
+    "ownershipAndZeroApplicationReplicasVerified": true,
+    "absenceVerified": true,
+    "privateRecord": "superseded-fixture-cleanup.json"
+  }
+}

@@ -10,7 +10,7 @@ The native artifact recorded in those reports additionally passed [26 constraint
 
 [Seven further cases](worker-expiry-live-tests.md) verify singleton ownership through success/failure/cancellation, actual expired credentials, orphan recovery refusal and staged/foreign-controller guards on that same artifact.
 
-The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. A rebuilt artifact requires fresh live results before it can inherit any qualification claim.
+The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. The rebuilt artifact has [four verified storage outcomes and 13 automatic baseline scenarios](storage-guard-live-tests.md), including documented follow-up inspections after TLS failures; supplemental variants still require requalification on that exact artifact.
 
 ## Running on a disposable cluster
 
