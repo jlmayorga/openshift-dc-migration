@@ -125,6 +125,22 @@ func TestNewStatusFieldsDoNotPreventMigration(t *testing.T) {
 	}
 }
 
+func TestRawActivationAllowsOmittedTemplateTimestamp(t *testing.T) {
+	r, c, _ := cutoverTest(t, "exclusive", true)
+	c.mutateResponse = func(req *http.Request, object map[string]interface{}) {
+		if strings.HasSuffix(req.URL.Path, "/deployments/web") {
+			unstructured.RemoveNestedField(object, "spec", "template", "metadata", "creationTimestamp")
+		}
+	}
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal("server omission of a null template timestamp prevented activation", err)
+	}
+	r.Options.Mode = "rollback"
+	if err := r.Run(context.Background()); err != nil {
+		t.Fatal("could not recover after activation", err)
+	}
+}
+
 func TestPersistedStageResponseRetainsIdentityForRawRecovery(t *testing.T) {
 	r, c, path := stageTest(t)
 	r.Options.ReadinessTimeout = 200 * time.Millisecond

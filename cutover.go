@@ -283,20 +283,16 @@ func (r *Runner) changeDestination(ctx context.Context, p *MigrationPlan, activa
 	if err = r.checkpoint(p, "destination-intent", fmt.Sprintf("intent: set destination replicas=%d paused=%t", *d.Spec.Replicas, d.Spec.Paused)); err != nil {
 		return err
 	}
-	request, err := resourceObject(d, deploymentResource, "Deployment")
-	if err != nil {
-		return err
-	}
-	if !activate {
-		// Recovery stops the owned live object without discarding fields a
-		// newer server added outside this client's typed model.
-		request = original.DeepCopy()
-		_ = unstructured.SetNestedField(request.Object, int64(0), "spec", "replicas")
+	// Preserve the server's representation, including omitted null metadata.
+	// Recovery also retains fields outside this client's typed model.
+	request := original.DeepCopy()
+	_ = unstructured.SetNestedField(request.Object, int64(*d.Spec.Replicas), "spec", "replicas")
+	if d.Spec.Paused {
 		_ = unstructured.SetNestedField(request.Object, true, "spec", "paused")
-		annotations := request.GetAnnotations()
-		delete(annotations, imageTriggerAnnotation)
-		request.SetAnnotations(annotations)
+	} else {
+		unstructured.RemoveNestedField(request.Object, "spec", "paused")
 	}
+	request.SetAnnotations(d.Annotations)
 	admitted, err := r.updateResource(ctx, deploymentResource, "Deployment", request, metav1.UpdateOptions{DryRun: []string{metav1.DryRunAll}, FieldValidation: "Strict"})
 	if err != nil {
 		return fmt.Errorf("destination update dry run: %w", err)
