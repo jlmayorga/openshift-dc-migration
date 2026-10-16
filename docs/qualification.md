@@ -64,17 +64,11 @@ Also run the supported fixture corpus through actual server dry run and exercise
 
 ## Trusted CI and release gate
 
-Protect the `openshift-qualification` environment and use trusted self-hosted runners labelled `openshift-qualification` and their platform (`linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64`, `windows-amd64`). There are no PR-triggered cluster jobs. While the scoped maintenance policy is active, main pushes and weekly/manual jobs select only its 4.21 Linux amd64 and Darwin arm64 targets. Without an active scope, the broader workflow selects newest GA on main and the full inventory plus next-development smoke on weekly/manual runs. Explicit 4.14–4.20 review-assumption rows do not request unavailable clusters. No missing context or runner is counted as passing.
+The live OpenShift qualification GitHub Actions workflow has been removed because no self-hosted runners are available. Live qualification is a manual operation on an authorized machine with `oc`, Python 3, the exact candidate binary, explicit disposable-cluster credentials/context and Route connectivity. Use the commands above and the variant drivers below; retain their actual results and supplemental evidence. No scheduled or push-triggered live cluster job is configured.
 
-Configure:
+Build and Release runs on GitHub-hosted Ubuntu. It reproduces only the two frozen candidates with `tools/build_qualified.py`, then validates the hash-pinned canonical evidence with `tools/release_gate.py --artifacts dist --export-evidence evidence`. The exported policy, actual records, review assessments and gate result accompany the draft. The source revision remains `eb8fb9d`; documentation/policy revision is recorded separately. Different source, dependencies, fixtures or output bytes fail the gate. This evidence-validation job needs no cluster credentials or self-hosted runner.
 
-- `OPENSHIFT_TEST_KUBECONFIG` environment secret: test-only kubeconfig contents.
-- `OPENSHIFT_TEST_TARGETS_JSON` secret: `{ "4.21": { "linux-amd64": { "context": "AUTHORIZED_CONTEXT", "namespace": "dcmig-421-linux-amd64", "supplementalEvidence": "/private/qualified-variants.json" } } }`, with each required minor/platform configured separately. The optional supplemental path is private data preloaded on that trusted runner.
-- Immutable `OPENSHIFT_TEST_IMAGE` / `OPENSHIFT_SECOND_TEST_IMAGE` variables and `OPENSHIFT_CANDIDATE_RUN_ID` for scheduled runs. `oc`, Python 3 and Route connectivity must be installed on runners.
-
-Build and Release reproduces only the two frozen candidates with `tools/build_qualified.py`, then validates the hash-pinned canonical evidence with `tools/release_gate.py --artifacts dist --export-evidence evidence`. Its scoped gate no longer depends on a new cluster run or `OPENSHIFT_QUALIFICATION_RUN_ID`. The exported policy, actual records, review assessments and gate result accompany the draft. The source revision remains `eb8fb9d`; documentation/policy revision is recorded separately. Different source, dependencies, fixtures or output bytes fail the gate.
-
-Optional fresh OpenShift qualification accepts the candidate run ID, checks out its tested source revision, and runs on explicitly configured disposable targets. Such new results do not silently replace the frozen records; expanding support or changing binaries requires reviewing evidence and explicitly updating the policy. This session verified the local builder/gate and workflow syntax, without running GitHub jobs or publishing.
+Fresh manual qualification must use the exact candidate and its tested source/dependency/fixture revision on an explicitly authorized disposable target. New results do not silently replace the frozen records; expanding support or changing binaries requires reviewing actual evidence and explicitly updating the policy. The recorded integration results remain the basis for the scoped release; unavailable targets remain untested.
 
 Before creating/publishing a release:
 
