@@ -5,6 +5,7 @@ import pathlib
 import tempfile
 import unittest
 from unittest import mock
+from qualification_fixtures import write_policy
 from release_gate import (
     verify,
     SCENARIOS,
@@ -35,6 +36,8 @@ class GateTests(unittest.TestCase):
                 revision="rev",
                 fixtureSHA256="fixtures",
                 dependencySHA256="deps",
+                productionSourceSHA256="source",
+                nativeExecutionPlatform="linux/amd64",
                 openshiftPatch=x + ".1",
                 kubernetesVersion="v1.27.16" if x == "4.14" else "v1.35.1",
                 dependencyVersions={
@@ -52,7 +55,13 @@ class GateTests(unittest.TestCase):
 
     def check(self, rows):
         return verify(
-            self.matrix, rows, {"linux-amd64": "sha"}, "rev", "fixtures", "deps"
+            self.matrix,
+            rows,
+            {"linux-amd64": "sha"},
+            "rev",
+            "fixtures",
+            "deps",
+            "source",
         )
 
     def test_valid_contract(self):
@@ -77,6 +86,18 @@ class GateTests(unittest.TestCase):
                 rows[0][field] = value
                 with self.assertRaises(ValueError):
                     self.check(rows)
+
+    def test_full_gate_rejects_wrong_or_missing_source_and_native_platform(self):
+        for field, value in [
+            ("productionSourceSHA256", "old"),
+            ("productionSourceSHA256", None),
+            ("nativeExecutionPlatform", "darwin/arm64"),
+            ("nativeExecutionPlatform", None),
+        ]:
+            rows = copy.deepcopy(self.rows)
+            rows[0][field] = value
+            with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                self.check(rows)
 
     def reviewed_floor(self):
         self.matrix["targets"][0]["qualificationPolicy"] = "review-assumption"
@@ -167,43 +188,39 @@ class GateTests(unittest.TestCase):
                         }
                     ]
                 }
-                self.assertEqual(len(load_reviews(matrix)), 1)
+                matrix["targets"][0]["reviewEvidenceSHA256"] = digest(path)
+                self.assertEqual(len(load_reviews(matrix, ".")), 1)
                 assessment.write_text('{"changed": true}\n')
                 with self.assertRaisesRegex(ValueError, "Changed release assessment"):
-                    load_reviews(matrix)
+                    load_reviews(matrix, ".")
                 # A correctly hashed assessment for a different release cannot
                 # be relabelled to satisfy the unavailable floor.
                 assessment.write_text('{"openshift": "4.21"}\n')
                 record["assessments"][0]["sha256"] = digest(assessment)
                 path.write_text(json.dumps(record))
+                matrix["targets"][0]["reviewEvidenceSHA256"] = digest(path)
                 with self.assertRaisesRegex(ValueError, "identity mismatch"):
-                    load_reviews(matrix)
+                    load_reviews(matrix, ".")
                 record["assessments"][0]["path"] = "../../outside.json"
                 path.write_text(json.dumps(record))
+                matrix["targets"][0]["reviewEvidenceSHA256"] = digest(path)
                 with self.assertRaisesRegex(ValueError, "Invalid assessment path"):
-                    load_reviews(matrix)
+                    load_reviews(matrix, ".")
             finally:
                 os.chdir(original_cwd)
 
 
 class ScopedGateTests(unittest.TestCase):
-    """Exercise the real frozen candidate contract, including its exclusions."""
+    """Exercise frozen policy integrity with synthetic temporary records."""
 
     def setUp(self):
-        self.matrix = json.loads(pathlib.Path("compatibility/matrix.json").read_text())
-        self.scope = load_scope(self.matrix)
-        self.rows = [
-            json.loads(pathlib.Path(item["evidence"]).read_text())
-            for item in self.scope["artifacts"].values()
-        ]
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = self.temp.name
+        self.matrix, self.scope, self.rows, self.hashes = write_policy(self.root)
         self.artifacts = {
             name: item["sha256"] for name, item in self.scope["artifacts"].items()
         }
-        self.hashes = (
-            tree_digest("testdata"),
-            dependency_digest(),
-            production_source_digest(),
-        )
 
     def check(self, rows=None, artifacts=None, hashes=None):
         return verify_scope(
@@ -212,6 +229,7 @@ class ScopedGateTests(unittest.TestCase):
             self.rows if rows is None else rows,
             self.artifacts if artifacts is None else artifacts,
             *(self.hashes if hashes is None else hashes),
+            evidence_root=self.root,
         )
 
     def test_current_policy_passes_without_relabelling_ga_or_untested_targets(self):
@@ -272,7 +290,7 @@ class ScopedGateTests(unittest.TestCase):
             changed = dict(self.scope, **{field: value})
             with mock.patch("pathlib.Path.read_text", return_value=json.dumps(changed)):
                 with self.subTest(field=field), self.assertRaises(ValueError):
-                    load_scope(self.matrix)
+                    load_scope(self.matrix, self.root)
 
     def test_scoped_evidence_hash_and_paths_are_enforced(self):
         for field, value in [
@@ -283,7 +301,7 @@ class ScopedGateTests(unittest.TestCase):
             next(iter(changed["artifacts"].values()))[field] = value
             with mock.patch("pathlib.Path.read_text", return_value=json.dumps(changed)):
                 with self.subTest(field=field), self.assertRaises(ValueError):
-                    load_scope(self.matrix)
+                    load_scope(self.matrix, self.root)
 
     def test_full_matrix_remains_unqualified(self):
         with self.assertRaisesRegex(ValueError, "4.22"):
@@ -293,5 +311,121 @@ class ScopedGateTests(unittest.TestCase):
                 self.artifacts,
                 self.scope["revision"],
                 *self.hashes,
-                load_reviews(self.matrix),
+                load_reviews(self.matrix, self.root),
             )
+
+
+class ExternalEvidenceTests(unittest.TestCase):
+    def test_missing_tampered_and_escaping_inputs_fail_closed(self):
+        from release_gate import evidence_path
+
+        with tempfile.TemporaryDirectory() as tmp:
+            matrix, scope, rows, hashes = write_policy(tmp)
+            with self.assertRaisesRegex(ValueError, "explicit"):
+                load_scope(matrix)
+            self.assertEqual(
+                load_reviews(matrix, tmp)[0]["result"],
+                "assumed-compatible-with-prerequisites",
+            )
+            name = matrix["targets"][0]["reviewEvidence"]
+            path = pathlib.Path(tmp) / name
+            path.write_text("{}")
+            with self.assertRaisesRegex(ValueError, "review evidence"):
+                load_reviews(matrix, tmp)
+            path.unlink()
+            with self.assertRaisesRegex(ValueError, "Missing external"):
+                load_reviews(matrix, tmp)
+            for name in ["../../outside.json", "/etc/passwd"]:
+                with self.assertRaises(ValueError):
+                    evidence_path(tmp, name)
+            (pathlib.Path(tmp) / "escape").symlink_to("/etc/passwd")
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                evidence_path(tmp, "escape")
+
+
+class ProductionInventoryTests(unittest.TestCase):
+    def test_nested_production_and_catalog_drift_but_not_docs_or_tests(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            for name in [
+                "cmd/tool/main.go",
+                "internal/migration/nested/source.go",
+                "internal/migration/compatibility/baseline-1.27.json",
+            ]:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(name)
+            before = production_source_digest(root)
+            (root / "README.md").write_text("documentation")
+            (root / "internal/migration/nested/source_test.go").write_text("test")
+            self.assertEqual(before, production_source_digest(root))
+            for name in [
+                "cmd/tool/main.go",
+                "internal/migration/nested/source.go",
+                "internal/migration/compatibility/baseline-1.27.json",
+            ]:
+                path = root / name
+                old = path.read_text()
+                path.write_text("changed")
+                self.assertNotEqual(before, production_source_digest(root))
+                path.write_text(old)
+            with self.assertRaisesRegex(ValueError, "empty fixture"):
+                tree_digest(root / "missing")
+
+
+class ReviewProvenanceTests(unittest.TestCase):
+    def test_base_chain_is_hash_checked_and_cycles_fail(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            matrix, scope, rows, hashes = write_policy(tmp)
+            root = pathlib.Path(tmp)
+            name = matrix["targets"][0]["reviewEvidence"]
+            top = root / name
+            base_name = "compatibility/evidence/base.json"
+            base = root / base_name
+            base.write_text("{}")
+            record = json.loads(top.read_text())
+            record["baseReviewEvidence"] = base_name
+            top.write_text(json.dumps(record))
+            for target in matrix["targets"]:
+                if target.get("reviewEvidence") == name:
+                    target["reviewEvidenceSHA256"] = digest(top)
+            matrix["reviewProvenanceSHA256"] = {base_name: digest(base)}
+            original = load_reviews(matrix, tmp)[0]
+            self.assertEqual(original, record)
+            base.write_text('{"changed":true}')
+            with self.assertRaisesRegex(ValueError, "base review"):
+                load_reviews(matrix, tmp)
+            base.write_text(json.dumps({"baseReviewEvidence": base_name}))
+            matrix["reviewProvenanceSHA256"][base_name] = digest(base)
+            with self.assertRaisesRegex(ValueError, "Cyclic"):
+                load_reviews(matrix, tmp)
+
+
+class EvidenceSelectionTests(unittest.TestCase):
+    def test_replacement_records_are_pinned_and_cannot_escape_the_bundle(self):
+        from release_gate import actual_evidence_paths
+        import shutil
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "bundle"
+            matrix, scope, rows, hashes = write_policy(root)
+            replacements = root / "replacements"
+            replacements.mkdir()
+            for item in scope["artifacts"].values():
+                source = root / item["evidence"]
+                shutil.copyfile(source, replacements / source.name)
+            self.assertEqual(len(actual_evidence_paths(root, scope, "replacements")), 2)
+            first = next(replacements.iterdir())
+            original = first.read_bytes()
+            altered = json.loads(original)
+            altered["runURL"] = "https://invalid.example/relabelled"
+            first.write_text(json.dumps(altered))
+            with self.assertRaisesRegex(ValueError, "pinned scoped evidence"):
+                actual_evidence_paths(root, scope, "replacements")
+            first.unlink()
+            outside = pathlib.Path(tmp) / "outside.json"
+            outside.write_bytes(original)
+            first.symlink_to(outside)
+            for selected_scope in [scope, None]:
+                with self.assertRaisesRegex(ValueError, "escapes"):
+                    actual_evidence_paths(root, selected_scope, "replacements")

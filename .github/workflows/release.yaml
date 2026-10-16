@@ -1,0 +1,48 @@
+name: Verify and prepare release draft
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_run_id:
+        description: Run holding a trusted qualification-bundle artifact
+        required: true
+        type: string
+      candidate_run_id:
+        description: Selected candidate run
+        required: true
+        type: string
+      tag:
+        description: Existing release tag to verify
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    environment: release-review
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: qualification-bundle
+          path: evidence-input
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.evidence_run_id }}
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: release-candidates
+          path: dist
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.candidate_run_id }}
+      - run: python3 tools/release_gate.py --artifacts dist --evidence-root evidence-input --historical-source --export-evidence verified
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release create "$RELEASE_TAG" dist/* verified/* --draft --verify-tag --title "$RELEASE_TAG" --notes 'Verified historical scoped candidates. Review compatibility prerequisites and untested targets before publication.'

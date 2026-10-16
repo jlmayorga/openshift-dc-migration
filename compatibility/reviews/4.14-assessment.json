@@ -1,218 +1,147 @@
 {
   "schemaVersion": "v1",
-  "kind": "release-compatibility-impact-assessment",
+  "kind": "durable-release-impact-summary",
   "minor": "4.14",
-  "kubernetes": "1.27",
-  "reviewedAt": "2026-10-16T05:52:10.185736+00:00",
-  "codeRevisionReviewed": "0dcf787d58c03c50a11275941881d73e57ebdf47",
-  "status": "bounded inventory impact assessment; consolidation guards and qualification tracked separately",
-  "basis": "Previously completed128-entry candidate screen plus targeted cross-floor source/patch assessment; API-serving and named behavior scope, not a security certification or an exhaustive review of every unrelated advisory.",
-  "candidateScreen": "compatibility/reviews/4.14-candidates.json",
+  "evidenceBasis": "Completed bounded official-source review of historical production, with consolidation resolutions; not actual older-cluster integration.",
+  "currentSourceApplicability": "Requires reassessment after production layout changes.",
   "sources": [
     {
       "name": "ocp-4.14",
       "sourceCommit": "9e1779093c4cacdc324992e84c0b03900a3a9ffe",
-      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc",
-      "retrievedAt": "2026-10-16T02:56:55.680936+00:00",
-      "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec",
-      "bytes": 392777,
-      "localFile": "ocp-4.14.adoc"
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc"
     },
     {
       "name": "kubernetes-1.27",
       "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md",
-      "finalURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/CHANGELOG/CHANGELOG-1.27.md",
-      "retrievedAt": "2026-10-16T02:55:21.916363+00:00",
-      "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c",
-      "bytes": 477502,
-      "localFile": "kubernetes-1.27.md",
-      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-      "immutableBytesVerifiedAt": "2026-10-16T03:15:03.394459+00:00"
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
     }
   ],
   "findings": [
     {
       "id": "FLOOR-API",
       "change": "API removals and DC deprecation",
-      "sources": [
+      "disposition": "no-impact",
+      "assessment": "The removed CSIStorageCapacity beta API is unused. DC remains served and deprecation warnings are informational; disabled capabilities fail discovery explicitly and exported input remains available.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L154",
-          "line": 154,
-          "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec"
+          "line": 154
         }
-      ],
-      "toolPaths": [
-        "runtime.go:Runner.Run",
-        "preflight.go:Runner.requireAPI",
-        "converter.go:Runner.Convert"
-      ],
-      "disposition": "no-impact",
-      "assessment": "The removed CSIStorageCapacity beta API is unused. DC remains served and deprecation warnings are informational; disabled capabilities fail discovery explicitly and exported input remains available."
+      ]
     },
     {
       "id": "FLOOR-SECURITY",
       "change": "SCC/PSA defaults and namespace user IDs",
-      "sources": [
+      "disposition": "existing-guard",
+      "assessment": "Review the actual workload service account; raw SCC-defaulted/Pod-admitted specs are validated before decoding and required-SCC authorization is explicit. Admission is authoritative on the target.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L715",
-          "line": 715,
-          "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec"
+          "line": 715
         }
-      ],
-      "toolPaths": [
-        "scc.go",
-        "constraints.go:Runner.assessConstraints",
-        "baseline.go:validateBaseline"
-      ],
-      "disposition": "existing-guard",
-      "assessment": "Review the actual workload service account; raw SCC-defaulted/Pod-admitted specs are validated before decoding and required-SCC authorization is explicit. Admission is authoritative on the target."
+      ]
     },
     {
       "id": "FLOOR-PDB",
       "change": "Policy/v1 disruption handling",
-      "sources": [
+      "disposition": "existing-guard",
+      "assessment": "Read synchronized policy/v1 disruption budgets before retirement; no eviction requests or unhealthyPodEvictionPolicy changes are emitted. Controller scaling is checked explicitly because eviction protection alone would not prevent it.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2473",
-          "line": 2473,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2473
         }
-      ],
-      "toolPaths": [
-        "constraints.go"
-      ],
-      "disposition": "existing-guard",
-      "assessment": "Read synchronized policy/v1 disruption budgets before retirement; no eviction requests or unhealthyPodEvictionPolicy changes are emitted. Controller scaling is checked explicitly because eviction protection alone would not prevent it."
+      ]
     },
     {
       "id": "FLOOR-PROBE",
       "change": "gRPC probes and seccomp defaults",
-      "sources": [
+      "disposition": "prerequisite",
+      "assessment": "Preserve baseline probe/security settings and validate admitted Pods. Kubelet/runtime/kernel behavior and application startup remain runtime prerequisites; HTTP health checks do not certify every container probe or kernel.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2430",
-          "line": 2430,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2430
         }
-      ],
-      "toolPaths": [
-        "converter.go",
-        "constraints.go"
-      ],
-      "disposition": "prerequisite",
-      "assessment": "Preserve baseline probe/security settings and validate admitted Pods. Kubelet/runtime/kernel behavior and application startup remain runtime prerequisites; HTTP health checks do not certify every container probe or kernel."
+      ]
     },
     {
       "id": "FLOOR-HPA",
       "change": "ContainerResource HPA metrics beta",
-      "sources": [
+      "disposition": "existing-guard",
+      "assessment": "Use autoscaling/v2, preserve names/metrics/full HPA spec, retarget only the reference, and validate raw responses. Metrics availability is an operator/controller prerequisite, not proved by retargeting.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2440",
-          "line": 2440,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2440
         }
-      ],
-      "toolPaths": [
-        "planning.go",
-        "cutover.go",
-        "raw_resources.go"
-      ],
-      "disposition": "existing-guard",
-      "assessment": "Use autoscaling/v2, preserve names/metrics/full HPA spec, retarget only the reference, and validate raw responses. Metrics availability is an operator/controller prerequisite, not proved by retargeting."
+      ]
     },
     {
       "id": "FLOOR-TOKENS",
       "change": "Legacy service-account token tracking",
-      "sources": [
+      "disposition": "no-impact",
+      "assessment": "Production treats credentials as opaque and does not fetch automatically generated Secret names. Harness obtains explicit short-lived tokens. Expiry/denials remain visible failures with recovery state.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2549",
-          "line": 2549,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2549
         }
-      ],
-      "toolPaths": [
-        "runtime.go:Runner.connect",
-        "tools/qualify_permissions.py"
-      ],
-      "disposition": "no-impact",
-      "assessment": "Production treats credentials as opaque and does not fetch automatically generated Secret names. Harness obtains explicit short-lived tokens. Expiry/denials remain visible failures with recovery state."
+      ]
     },
     {
       "id": "FLOOR-QUOTA",
       "change": "PriorityClass quota patch backport",
-      "sources": [
+      "disposition": "no-impact",
+      "assessment": "Upstream fix was backported for1.27.2 (PR117825); official OpenShift4.14.0 uses1.27.6. This does not require a new guard for the supported floor. Exact primary-patch and payload evidence is recorded by the4.15/4.16 reviewer.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2158",
-          "line": 2158,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2158
         }
-      ],
-      "toolPaths": [
-        "quota.go:quotaApplies",
-        "quota.go:quotaHeadroom"
-      ],
-      "disposition": "no-impact",
-      "assessment": "Upstream fix was backported for1.27.2 (PR117825); official OpenShift4.14.0 uses1.27.6. This does not require a new guard for the supported floor. Exact primary-patch and payload evidence is recorded by the4.15/4.16 reviewer."
+      ]
     },
     {
       "id": "FLOOR-SECRET-ADMISSION",
       "change": "Mountable-secret policy fixes",
-      "sources": [
+      "disposition": "prerequisite",
+      "assessment": "Preserve envFrom/Secret references, do not bypass target ServiceAccount admission, and keep real Pod dry-run errors authoritative. Cluster security patches remain administrator prerequisites. Production does not add ephemeral containers.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L768",
-          "line": 768,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 768
         },
         {
           "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md#L2023",
-          "line": 2023,
-          "sha256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c"
+          "line": 2023
         }
-      ],
-      "toolPaths": [
-        "constraints.go",
-        "converter.go"
-      ],
-      "disposition": "prerequisite",
-      "assessment": "Preserve envFrom/Secret references, do not bypass target ServiceAccount admission, and keep real Pod dry-run errors authoritative. Cluster security patches remain administrator prerequisites. Production does not add ephemeral containers."
+      ]
     },
     {
       "id": "FLOOR-STORAGE",
       "change": "CSI and PV placement",
-      "sources": [
+      "disposition": "guard-added-in-consolidation",
+      "assessment": "CephFS/RBD/gitRepo portability already has manual guards. Newly identified independent PV zone/region labels require manual scheduling review; node affinity alone cannot establish usable capacity. CSI topology/driver attachment/mount/SELinux support remains a runtime prerequisite.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L974",
-          "line": 974,
-          "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec"
+          "line": 974
         }
-      ],
-      "toolPaths": [
-        "scheduling.go:Runner.checkScheduling",
-        "storage.go:checkLegacyPV"
-      ],
-      "disposition": "guard-added-in-consolidation",
-      "assessment": "CephFS/RBD/gitRepo portability already has manual guards. Newly identified independent PV zone/region labels require manual scheduling review; node affinity alone cannot establish usable capacity. CSI topology/driver attachment/mount/SELinux support remains a runtime prerequisite."
+      ]
     },
     {
       "id": "FLOOR-ADMIN-POLICY",
       "change": "Optional admin network policy selectors",
-      "sources": [
+      "disposition": "existing-guard",
+      "assessment": "Discover optional ANP/BANP resources and assess changed source/destination selection; future pod-template-hash selection requires manual review. This is not a full traffic or CNI simulation.",
+      "references": [
         {
           "url": "https://raw.githubusercontent.com/openshift/openshift-docs/9e1779093c4cacdc324992e84c0b03900a3a9ffe/release_notes/ocp-4-14-release-notes.adoc#L879",
-          "line": 879,
-          "sha256": "130d2a7e760450f5eef4691bb0739ce619142ec49ba4523abb6aedc419c022ec"
+          "line": 879
         }
-      ],
-      "toolPaths": [
-        "admin_policy.go:Runner.checkAdminPolicies"
-      ],
-      "disposition": "existing-guard",
-      "assessment": "Discover optional ANP/BANP resources and assess changed source/destination selection; future pod-template-hash selection requires manual review. This is not a full traffic or CNI simulation."
+      ]
     }
   ],
-  "actualIntegrationResult": "not-run",
-  "assumedCompatible": false,
-  "limitations": [
-    "Older clusters unavailable; never synthesize live results.",
-    "Parent consolidation must resolve STORAGE-PV-TOPOLOGY-LABELS and link the final client decision, tests and operator prerequisites before consuming an assumption.",
-    "External drivers, hardware/kernel, non-HTTP traffic and feature-specific behavior need their documented prerequisites; reviewed API compatibility does not reserve resources or guarantee startup."
-  ]
+  "consolidatedPrerequisites": "docs/compatibility-review.md",
+  "historicalSnapshots": "Exact snapshots and source-bound resolution overlays require the external evidence bundle."
 }

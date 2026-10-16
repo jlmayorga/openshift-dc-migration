@@ -1,0 +1,32 @@
+name: Reproduce historical candidates
+on:
+  workflow_dispatch:
+    inputs:
+      evidence_run_id:
+        description: Run holding a trusted qualification-bundle artifact
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: qualification-bundle
+          path: evidence-input
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.evidence_run_id }}
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+      - run: python3 tools/build_qualified.py --output dist --evidence-root evidence-input
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-candidates
+          path: dist/

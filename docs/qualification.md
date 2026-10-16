@@ -1,50 +1,85 @@
-# OpenShift qualification and release checklist
+# Optional OpenShift qualification
 
-The completed [parallel source review](compatibility-review.md) supports an explicitly labelled, source/dependency/fixture-bound compatibility assumption for unavailable OpenShift 4.14–4.20 clusters. The release gate consumes that record separately from actual integration results and rejects stale or unresolved reviews. The owner narrowed the active maintenance release to the two available 4.21 candidates on 2026-10-16. Its [scoped gate is open](release-scope.md); broader targets remain follow-up qualification.
+Ordinary builds, Python tests, Go tests and security checks do not require OpenShift. Live qualification is an explicit development operation against an authorized disposable target. It can create, scale and interrupt test applications; it provisions no cluster and must never select the operator's current kubeconfig implicitly.
 
-OpenShift 4.14 / Kubernetes 1.27 remains the mandatory floor. The current released-minor inventory is 4.14 through 4.22, with a separate next-development smoke row. The newest GA inventory source is [Red Hat's 4.22 announcement](https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22). On 2026-10-15, Red Hat's public [stable-4.22 update graph](https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.22&arch=amd64) contained 4.22.18 and stable-4.23 had no nodes. This observes release availability, not tested support. Refresh the inventory before release; conversion discovers capabilities and imposes no maximum version.
+[Compatibility](compatibility.md) summarizes completed historical results and untested targets. Exact historical Linux amd64 and Darwin arm64 binaries qualified on OpenShift 4.21.36 / Kubernetes v1.34.9. All changed current binaries need reassessment and new actual evidence; historical passes do not transfer. The wider full-matrix gate remains incomplete. Qualification, candidate builds and [historical release verification](release-scope.md) are separate operations.
 
-The current [source-conflict qualification](source-conflict-live-tests.md) records all 22 required scenario groups on the Darwin arm64 artifact `158b3523…`. The current [full Linux qualification](linux-execution-tests.md) independently records all 22 groups on Linux amd64 artifact `cdbd5358…`, plus 381 actual Linux unit/contract tests and six fresh multi-namespace cases. Both use the unchanged production source from `eb8fb9d`, Go 1.27.2 and Kubernetes clients v0.37.1 on OpenShift 4.21.36 / Kubernetes v1.34.9. The former targeted-only Linux session remains historical and has been followed by this full result.
+## Explicit workflow dispatch
 
-OpenShift 4.22 has no actual results. Linux arm64, Darwin amd64 and Windows amd64 have current cross-builds but no native execution or live qualification. Next-development smoke testing also remains unrun. These targets are explicitly `not-run` in the matrix; compile success does not qualify a platform. **The scoped maintenance gate passes for the two recorded 4.21 binaries.** The broader full-matrix policy remains unsatisfied and outside this goal. The workflows are implemented; this local session does not claim an executed GitHub workflow or a published release. Results must match the exact release binary hashes, source, dependencies and fixtures.
+The OpenShift qualification workflow is manual only. Select `candidate_run_id` from a candidate build, `platform` (`linux/amd64` or `darwin/arm64`) and minor `4.21`. It downloads the selected artifact, checks out its recorded revision and executes on native hosted Ubuntu or macOS runners. There are no scheduled/push cluster jobs or permanent self-hosted runner requirements. The hosted runner must reach the cluster and application Routes.
 
-## Earlier artifact evidence
+Protect the `openshift-qualification` environment. Configure:
 
-These earlier artifact sessions were partial; the current two candidates above have since completed their 4.21 qualification. Actual tests ran on **OpenShift 4.21.36 / Kubernetes v1.34.9**; see the [live test evidence](live-tests-2026-10-15.md) and [actual new-app tests](new-app-live-tests.md) for exact scope, binary hashes, failures and retained artifacts. This tests its own version and cannot supply 4.14 evidence. The matrix records exact patches/Kubernetes versions only after observation. Synthetic fixtures for each target, the Kubernetes 1.27 baseline catalog and loopback JSON contracts are separate local evidence. None proves OpenShift admission, SCC defaults, image controllers or Service routing.
+- Secret `OPENSHIFT_TEST_KUBECONFIG`: test-only kubeconfig contents.
+- Secret `OPENSHIFT_TEST_TARGETS_JSON`: minor → hyphenated platform → explicit target settings, for example:
 
-The native artifact recorded in those reports additionally passed [26 constraint/migration cases](preflight-live-tests.md) and [15 runtime/recovery cases](recovery-live-tests.md). Its successful quota preflight and actual runtime-failure recovery are separate evidence. These earlier records remain partial for their own hashes; they are not substituted for current candidate evidence.
+  ```json
+  {
+    "4.21": {
+      "linux-amd64": {
+        "context": "AUTHORIZED_CONTEXT",
+        "namespace": "dcmig-lab",
+        "ocURL": "https://APPROVED_HOST/oc-client.tar.gz",
+        "ocSHA256": "REPLACE_WITH_ARCHIVE_SHA256"
+      }
+    }
+  }
+  ```
 
-[Seven further cases](worker-expiry-live-tests.md) verify singleton ownership through success/failure/cancellation, actual expired credentials, orphan recovery refusal and staged/foreign-controller guards on that same artifact.
+- Variable `OPENSHIFT_TEST_IMAGE`: approved immutable HTTP image reference; optional `OPENSHIFT_SECOND_TEST_IMAGE` for image-update scenarios. Both must use the expected port/health contract.
 
-The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. The rebuilt artifact has [four verified storage outcomes and 13 automatic baseline scenarios](storage-guard-live-tests.md), including documented follow-up inspections after TLS failures; supplemental variants still require requalification on that exact artifact.
+Configure Darwin separately with a matching native `oc` archive. `ocSHA256` pins the archive, not the extracted executable. The workflow-internal `python3 tools/dispatch_qualification.py` consumes mapped environment values, validates platform/context/namespace, checks candidate bytes against provenance and installs the pinned client. It has no interactive CLI. Missing or invalid inputs, unavailable targets and unsuccessful tests fail; they never become passing records.
 
-Raw admission-field validation and required-SCC service-account authorization were added after the storage-guard artifact. The newer [admission/SCC session](admission-scc-live-tests.md) passed two targeted cases and completed 13 automatic baseline scenario IDs on its recorded hash, including actual permission revocation followed by refusal and recovery after grant restoration. Earlier evidence remains historical; supplemental variants still require exact-artifact requalification.
+Optional `supplementalEvidence` target configuration names a private file available in the checked-out runner workspace. It must contain reviewed same-artifact actual variants; dispatch does not fetch arbitrary private supplemental files for you. The default baseline invocation alone may produce partial evidence. The workflow uploads actual results, but does not create a complete historical `qualification-bundle` automatically.
 
-The subsequent [raw workload response session](raw-response-live-tests.md) passed two targeted cases and 13 automatic baseline scenario IDs on its corrected artifact. It verifies actual refusal of an unfamiliar staged Deployment field, preservation during explicit recovery, and the existing regular CSI volume. The first artifact's activation failure, recovery and serialization correction are documented separately from the final passes. Broader variants still require exact-artifact requalification.
+## Run a driver directly
 
-The newer [cluster admin-policy session](admin-policy-live-tests.md) passed six ANP/BANP subject/peer/controller-hash variants within one aggregate case, successful migration/recovery after policy removal, and 13 baseline IDs. All 12 refusals preserve the healthy source, HPA and staged target. This does not transfer earlier artifact results or constitute full policy-engine/CNI qualification.
+Use Python 3.12+, a matching `oc` client on PATH, a native candidate binary, explicit kubeconfig/context, approved immutable images and target-specific fixture permissions. The baseline driver needs an existing disposable `dcmig-*` namespace labelled `migration.openshift-dc.io/test-namespace=true`; an operator supplies this namespace. Reserve resource name `web`. Other drivers create fresh labelled namespaces from a unique `--namespace-prefix dcmig-...` and refuse to adopt existing ones. The operator needs the harness permissions described in [RBAC](rbac.md), including release metadata access and Route connectivity; these exceed ordinary converter access.
 
-## Running on a disposable cluster
-
-The baseline driver provisions no cluster, node or PVC. The separately authorized new-app volume case creates a 1Gi claim using an existing StorageClass. Supply a kubeconfig, explicit authorized context, existing disposable `dcmig-*` namespace, and immutable approved HTTP images that listen on port 8080. A cluster administrator/operator must label that namespace `migration.openshift-dc.io/test-namespace=true`; this integration-only namespace read is not required for normal conversion. Reserve the resource name `web`; the harness refuses to overwrite existing objects. The context must permit the integration operations in the RBAC reference and access to ClusterVersion metadata. It also needs network access to the test Route.
+After separately authorizing those test mutations, the baseline command is:
 
 ```sh
 python3 tools/qualify_openshift.py \
   --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
   --namespace "$TEST_NAMESPACE" --binary "$CANDIDATE_BINARY" \
   --image "$APP_IMAGE_DIGEST" --second-image "$SECOND_APP_IMAGE_DIGEST" \
-  --health-path / --output ./qualification-result.json --allow-test-mutations
+  --health-path / --output ./private-qualification/actual.json --allow-test-mutations
 ```
 
-The command creates test workloads and an HTTP Route, temporarily removes/recreates a test HPA, scales controllers, tests Pod quota failure, sends SIGTERM to an active migration, and exercises explicit recovery. It cleans up only objects bearing this run's ownership label after successful scenarios. Failed runs retain objects and private artifacts for inspection; never broadly delete a namespace or recover an uncertain workload automatically. Inspect the journal and use rollback before cleanup.
+It creates test workloads and a Route, changes test HPA/controller state, checks quota refusal, interrupts a migration and verifies explicit recovery. Successful baseline scenarios clean up only owned fixture objects. Failed runs and several supplemental drivers retain resources and private artifacts for inspection. Inspect journal and cluster state before rollback or cleanup; never broadly delete a namespace or restore an uncertain workload automatically.
 
-Automatic scenarios include baseline dry run without persistence, SCC annotation/default evidence, source/destination readiness, Service endpoint routing, exclusive and overlap cutover, HPA retargeting, stale plans, safe reruns, quota refusal before any source/HPA mutation, interruption/recovery and actual ImageStream updates (the latter requires the second image). Both images must work with the same port/health contract. Image tags are restored before rollback so source recovery is reproducible.
+Automatic coverage includes nonpersistent dry run, admission/SCC observations, source/destination readiness, Service endpoints, exclusive/overlap cutover, HPA retargeting, stale plans, safe reruns, interruption/recovery and ImageStream updates. `--smoke-only` intentionally produces partial evidence. A full invocation also remains partial until all policy-required actual variants are present. A successful command exit alone does not establish release eligibility.
 
-`--smoke-only` runs the basic exclusive scenario. Its successful exit records **partial** evidence, which cannot pass the release gate. Full invocations also remain partial when any required variant is missing. Every actual record includes binary SHA-256, source revision, fixture tree hash, hashes of go.mod/go.sum, actual Kubernetes module versions, exact OpenShift/Kubernetes versions, release image, date and runner/run provenance. The current Darwin arm64 and Linux amd64 runs each passed all 13 automatic scenario IDs and imported nine reviewed, same-artifact actual supplemental records. Each 22-scenario result passes for its own recorded artifact on 4.21.36. A run without those required supplemental records remains partial; remaining release limits are recorded in the current live evidence.
+## Driver inventory
+
+Qualification maintainers consume every driver below for an explicit scenario family. Run the shown safe command to inspect current flags, then supply the target/image/output and mutation arguments described above. Except for the baseline's `--namespace`, drivers use a fresh `--namespace-prefix`. Case selection and additional inputs differ; an empty selection is an error.
+
+| Command | Purpose and additional prerequisites |
+| --- | --- |
+| `python3 tools/qualify_openshift.py --help` | Baseline actual integration and supplemental-record assembly; existing labelled namespace, optional second image |
+| `python3 tools/qualify_configurations.py --help` | Recreate/Rolling, replica, configuration and unsupported-semantics fixtures |
+| `python3 tools/qualify_features.py --help` | Image triggers, containers and optional volume features; requires second image; special storage fixtures need separate approval |
+| `python3 tools/qualify_permissions.py --help` | Restricted RBAC, denial and optional real signed-token expiration; saves credentials privately |
+| `python3 tools/qualify_recovery.py --help` | Per-mutation uncertain-response/fault recovery using loopback authenticated and fault proxies |
+| `python3 tools/qualify_new_app.py --help` | Actual new-app, templates, image imports/builds, failed startup and orphan recovery; HTTP/sidecar images, installed builder and optional approved regular PVC |
+| `python3 tools/qualify_namespaces.py --help` | Multi-project isolation, aggregate failures, same-named resources and independent recovery; namespace reader test identity |
+| `python3 tools/qualify_constraints.py --help` | Quota/SCC/capacity/PDB/policy refusal before retirement; isolated shared quota and namespace SCC-use setup where selected |
+| `python3 tools/qualify_storage.py --help` | Removed/disabled inline storage refusal using zero-replica sources; creates no PV/PVC or actual legacy mount |
+| `python3 tools/qualify_admission.py --help` | Required-SCC service-account authorization revoke/refuse/restore; requires `--allow-scc-binding` and existing policy inspection |
+| `python3 tools/qualify_raw_fields.py --help` | Unfamiliar persisted Deployment field refusal and raw-preserving recovery; server must retain fixture field |
+| `python3 tools/qualify_admin_policy.py --help` | ANP/BANP subject/peer/future-hash selector checks; requires `--allow-cluster-policy-fixture`, never replaces an existing BANP |
+| `python3 tools/qualify_conflicts.py --help` | Source resource-version churn, full-spec drift refusal and bounded-conflict recovery with controlled proxy faults |
+| `python3 tools/qualify_worker.py --help` | Singleton success/startup-failure/cancellation through Lease ownership; approved image needs `/bin/sh`, `curl`, `sed`, `date`, `sleep` and `/hello_openshift` |
+
+Some drivers support `--previous-binary` solely for read-only regression preflight, never an old-binary cutover. Permission `--cases expired-credentials` waits for an actual server-issued token to expire; it is excluded from default cases and bounded by `--expiry-wait-limit`. It changes neither clocks nor token signatures.
+
+The new-app driver uses `oc new-app --as-deployment-config`, grouped containers, processed templates and binary Docker/S2I builds. `--builder-image-stream` selects an installed approved builder. `--cases all --allow-regular-pvc` includes an explicitly authorized regular claim through an existing default StorageClass. It creates neither nodes nor StorageClasses and grants no extra SCC for that regular-volume case. Resolve first-build ImageChange triggers before live migration.
+
+The feature driver's optional `--static-volume-test --cases persistent-volume --volume-scc SCC_NAME` requires separate approval for an existing node directory, exact SCC binding and SELinux context; it creates a static hostPath PV/PVC. It cannot qualify cloud CSI behavior. Constraint/admission fixtures may create namespace-only grants to existing SCCs; the converter itself never grants access or changes SCCs. Admin-policy fixtures require separate cluster policy mutation privileges and ownership-checked cleanup. These permissions are test setup, not converter requirements.
 
 ## Required variants and evidence
 
-The following require actual test-cluster inputs or controlled fault/credential profiles. They cannot be inferred from loopback tests. Complete each on every required target/artifact; preserve command logs and journal/report snapshots. A reviewer must confirm these results before supplying supplemental records.
+Actual cluster inputs or controlled fault profiles are needed for the following policy variants. Preserve private logs and journal/report snapshots, and review results before supplying supplemental records. Local HTTP simulations cannot substitute.
 
 | Scenario ID | Reproducible qualification steps and required observation |
 | --- | --- |
@@ -58,103 +93,12 @@ The following require actual test-cluster inputs or controlled fault/credential 
 | per-mutation-recovery | Interrupt or deny the next request after each journalled HPA deletion, source trigger pause, source retirement, destination activation and HPA recreation. Roll back each state. Re-run recovery; foreign objects/changed specs and orphan destination pods must block unsafe restoration. Restore dependent specs and verify routing and health. |
 | connectivity-loss | Revoke only the lab account or use a controlled network proxy after each mutation. CLI must return failure and retain uncertain state. Restore access, inspect cluster/journal, and explicitly recover. Never count inaccessible or merely configured recovery as passed. |
 
-Also run the supported fixture corpus through actual server dry run and exercise Recreate, percentage/integer Rolling limits, zero replicas, pause/test/custom/hooks, disabled ConfigChange behavior and source immutability. Unsupported cases must remain manual and blocked. Keep negative/missing-API behavior under the contract tests; where a later cluster disables DCs, record that live capability limitation and verify offline conversion explicitly.
+Also run the synthetic fixture corpus through actual server dry run and exercise Recreate, percentage/integer Rolling limits, zero replicas, pause/test/custom/hooks, disabled ConfigChange behavior and source immutability. Unsupported cases must remain manual and blocked. Keep negative/missing-API behavior under the contract tests; where a later cluster disables DCs, record that live capability limitation and verify offline conversion explicitly.
 
 `--supplemental-evidence FILE` accepts an array of actual variant records. Each must have `kind: actual-openshift`, `result: passed`, `scenario`, `testedAt`, `runURL`, and exactly matching `artifactSHA256`, `revision`, `fixtureSHA256`, `dependencySHA256`, `openshiftPatch`, `kubernetesVersion` and `releaseImage` from this candidate/cluster. Mismatched or stale records are rejected. Supplying labels without performing these tests is not qualification. The automatic summary remains partial until every required scenario is present.
 
-## Trusted CI and release gate
+## Evidence and release boundary
 
-Protect the `openshift-qualification` environment and use trusted self-hosted runners labelled `openshift-qualification` and their platform (`linux-amd64`, `linux-arm64`, `darwin-amd64`, `darwin-arm64`, `windows-amd64`). There are no PR-triggered cluster jobs. While the scoped maintenance policy is active, main pushes and weekly/manual jobs select only its 4.21 Linux amd64 and Darwin arm64 targets. Without an active scope, the broader workflow selects newest GA on main and the full inventory plus next-development smoke on weekly/manual runs. Explicit 4.14–4.20 review-assumption rows do not request unavailable clusters. No missing context or runner is counted as passing.
+Actual records bind the binary bytes, source revision, production/dependency/fixture identities, native platform, observed OpenShift/Kubernetes versions and release image. Their test time and execution provenance remain in the external evidence bundle. Skipped, simulated, stale, mismatched or incomplete records cannot qualify a release. Synthetic fixtures generated by `qualification_fixtures.py` are only unit-test inputs and must never be exported as actual evidence.
 
-Configure:
-
-- `OPENSHIFT_TEST_KUBECONFIG` environment secret: test-only kubeconfig contents.
-- `OPENSHIFT_TEST_TARGETS_JSON` secret: `{ "4.21": { "linux-amd64": { "context": "AUTHORIZED_CONTEXT", "namespace": "dcmig-421-linux-amd64", "supplementalEvidence": "/private/qualified-variants.json" } } }`, with each required minor/platform configured separately. The optional supplemental path is private data preloaded on that trusted runner.
-- Immutable `OPENSHIFT_TEST_IMAGE` / `OPENSHIFT_SECOND_TEST_IMAGE` variables and `OPENSHIFT_CANDIDATE_RUN_ID` for scheduled runs. `oc`, Python 3 and Route connectivity must be installed on runners.
-
-Build and Release reproduces only the two frozen candidates with `tools/build_qualified.py`, then validates the hash-pinned canonical evidence with `tools/release_gate.py --artifacts dist --export-evidence evidence`. Its scoped gate no longer depends on a new cluster run or `OPENSHIFT_QUALIFICATION_RUN_ID`. The exported policy, actual records, review assessments and gate result accompany the draft. The source revision remains `eb8fb9d`; documentation/policy revision is recorded separately. Different source, dependencies, fixtures or output bytes fail the gate.
-
-Optional fresh OpenShift qualification accepts the candidate run ID, checks out its tested source revision, and runs on explicitly configured disposable targets. Such new results do not silently replace the frozen records; expanding support or changing binaries requires reviewing evidence and explicitly updating the policy. This session verified the local builder/gate and workflow syntax, without running GitHub jobs or publishing.
-
-Before creating/publishing a release:
-
-- Local and CI race tests, vet, formatting, readonly builds, module verification/clean-module checks, Python gate tests and pinned security scanners must pass. Preserve scan artifacts; inspect dispositions.
-- Every actual target selected by the active scope must contain full passing **actual** results for each shipped binary hash. Preserve exact patch, Kubernetes/module versions, dates, limitations and provenance. OpenShift 4.14–4.20 use the approved source-review assumptions, with no actual integration claim. The optional `--full-matrix` policy still requires unavailable 4.22 qualification.
-- Fresh qualification is mandatory after dependency/fixture/binary changes. For 4.14–4.20 this means refreshing the approved source review against exact source/dependency/fixture hashes; actual targets selected by the release scope need exact final-artifact integrations. Aligned Kubernetes0.37.1 is adopted with a refreshed, hash-bound delta assessment; the two selected 4.21 candidates have completed qualification.
-- Review feature/RBAC/recovery docs and all variant evidence; refresh the released-minor inventory. Do not advertise an untested release or an untested feature as verified.
-- Release automation creates only a draft after gates pass, attaching binaries, checksums, build metadata, scans and compatibility results. A maintainer reviews before publishing; this work does not push tags or publish anything.
-
-## Additional live variant drivers
-
-`tools/qualify_configurations.py`, `tools/qualify_features.py`, `tools/qualify_permissions.py` and `tools/qualify_recovery.py` accept explicit `--kubeconfig`, `--context`, `--binary`, immutable `--image`, disposable `--namespace-prefix dcmig-...`, private `--output` and `--allow-test-mutations`. Features also requires `--second-image`. These drivers create new labelled namespaces and retain workloads, source snapshots, stage reports, plans, API observations and command evidence for inspection. Use unique prefixes; they refuse to adopt an existing namespace. An empty case selection fails. `--cases` selects named configuration, image or permission cases where supported.
-
-The recovery driver uses a loopback-only authenticated oc proxy and a credential-free fault proxy to lose a success response after each of six real cluster mutations. Authorization/SCC reviews and server dry runs do not advance its mutation counter. It then restores connectivity and verifies explicit rollback and reruns. The permission driver saves short-lived account tokens privately; never publish its `*-credentials.json` files or kubeconfigs.
-
-`tools/qualify_raw_fields.py` accepts the same explicit target, immutable image, fresh namespace prefix and mutation acknowledgement. It adds `spec.template.spec.securityContext.seLinuxChangePolicy` only to a paused zero-replica Deployment created from a real new-app source. The server must retain the field for this case to qualify. Both preflight and cutover must refuse while preserving the original healthy source Pod, source spec, HPA identity/spec and destination. Explicit recovery must preserve the unfamiliar destination field. An optional `--previous-binary` runs only that binary's read-only preflight to demonstrate the regression; it never runs a previous-binary cutover. This tests a live-read boundary, not admission-webhook injection or successful runtime use of the field.
-
-`tools/qualify_admin_policy.py` additionally requires `--allow-cluster-policy-fixture`. It creates temporary AdminNetworkPolicy/BaselineAdminNetworkPolicy subject, peer and future-controller-hash rules scoped to its newly labelled test namespace. An existing BANP is never replaced. Current preflight/cutover must refuse changes or unassessed future Pod selection with source Pod/HTTP/spec, HPA UID/spec and staged target unchanged; optional previous-binary execution is read-only preflight. Each policy is removed after verifying its UID and run label. After all six variants, the driver verifies the original cluster policy identities remain and completes normal cutover/recovery. These selector checks do not qualify every policy-priority or traffic-flow combination.
-
-Explicitly select permission case `--cases expired-credentials` to test real expiration of a server-issued ten-minute token. It verifies generation succeeds before expiration and fails visibly afterwards without changing source identity/spec/health or creating a destination. The optional case waits for the actual signed expiry and observed server authentication rejection within `--expiry-wait-limit` (default 900 seconds), recording any acceptance after the JWT timestamp. It does not revoke the account, forge a token or change clocks. It is excluded from the default permission run.
-
-`tools/qualify_worker.py` accepts the same explicit target, binary, immutable image, namespace prefix and mutation acknowledgement. Its `success,startup-failure,cancellation` cases use an active-owner Lease heartbeat and namespace-only service-account access to that one Lease. Exclusive cutover/recovery must preserve single ownership; a failed destination startup and SIGTERM during activation must retain failed/incomplete state and explicitly recover. Sampled Pod/Lease timelines, distinct worker UID responses and logs are retained. The fixture requires the approved image to contain `/bin/sh`, `curl`, `sed`, `date`, `sleep` and `/hello_openshift`; it creates no storage or SCC grant. Its Lease protects test work independently, while Pod sampling verifies the migration itself does not overlap source/destination Pods.
-
-The optional feature `--static-volume-test --cases persistent-volume --volume-scc SCC_NAME` needs separate explicit approval for the node directory and exact existing SCC binding. It requires the explicitly approved existing `hostmount-anyuid-v2` SCC and creates a static hostPath PV/PVC with an empty StorageClass and uses an explicitly selected test SELinux context; it provisions no cloud volume. The test must first prove the source can write/read its marker. A namespace SCC grant does not imply that an admin-created Pod dry run reproduces service-account/controller admission. Inspect actual Pod admission and source readiness before migration. This single-node test cannot qualify cloud CSI attach/detach behavior.
-
-## Apps created with oc new-app
-
-`tools/qualify_new_app.py` creates actual applications with `oc new-app --as-deployment-config`, including existing/cross-namespace ImageStreams, grouped containers, processed templates, and binary Docker/S2I build workflows. It verifies that rebuild output continues updating the Deployment after cutover, and retains BuildConfigs, ImageStreams, Services, UIDs and per-stage observations. Both Service ports are exercised where the runtime exposes 8080 and 8888. The default builder input is `openshift/httpd:2.4-ubi9`; choose `--builder-image-stream` for another installed, approved S2I builder. Build evidence records resolved images.
-
-Supply the usual explicit context/kubeconfig/binary and new `dcmig-*` namespace prefix, plus immutable `--image`, `--second-image` (HTTP 8080), and `--sidecar-image` (HTTP 8081). Select `--cases all` or comma-separated case names. Full runs include a regular 1Gi PVC and require explicit `--allow-regular-pvc`; it uses the existing default StorageClass and the default workload SCC, without granting a new SCC. The suite creates test PVCs only when that case is selected and authorized. It does not create nodes or StorageClasses. Keep regular test storage only as long as needed for inspection.
-
-For example, with approved disposable targets and images:
-
-```sh
-python3 tools/qualify_new_app.py \
-  --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
-  --binary "$CANDIDATE_BINARY" --namespace-prefix dcmig-newapp-run \
-  --image "$HTTP_8080_DIGEST" --second-image "$SECOND_HTTP_8080_DIGEST" \
-  --sidecar-image "$HTTP_8081_DIGEST" --output ./private-newapp-evidence \
-  --cases all --allow-test-mutations --allow-regular-pvc --timeout 240
-```
-
-Apps awaiting their first binary build can generate read-only review artifacts, but cannot produce an executable live plan until the DC image controller has resolved their automatic ImageChange triggers. A new-app origin does not bypass unsupported hooks/test/custom behavior, selector/ownership checks or stale dependency checks.
-
-The `failed-initial-rollout` case deliberately exits with code 42 only when the destination migration label is present. Its source is healthy and all pre-retirement admission/capacity checks pass; actual startup fails after source retirement. The runner verifies a failed, non-ready result, retained recovery state, and explicit source/HTTP restoration. This proves a runtime failure path that quota preflight cannot replace. The feature runner's `multi-image` fixture uses a sleeping sidecar so independently updating both tags does not depend on configurable HTTP ports.
-
-The `orphan-recovery` case extends that actual startup failure: after source retirement it removes only the owned destination, introduces an idle ownerless Pod carrying the migration ID, and verifies rollback refuses to restore the source while that Pod exists. Removing the test orphan permits explicit recovery and a safe recovery rerun. It tests the missing-controller case without starting a duplicate application worker.
-
-## Multiple namespaces in one invocation
-
-The [actual multi-namespace evidence](multiple-namespaces-live-tests.md) records six passing cases on OpenShift 4.21.36.
-
-`--projects namespace-a,namespace-b,namespace-c` supports generation and live planning in one invocation. Artifacts are written under each namespace directory even when every DC has the same name. Duplicate names in the project list are processed once. Empty, skipped, failed and manual projects/workloads retain separate report entries; any failure still returns a nonzero aggregate exit while later namespaces are processed.
-
-Run `tools/qualify_namespaces.py` to verify this against actual `oc new-app --as-deployment-config` workloads. It creates six labelled namespaces: three same-named apps with distinct HTTP responses and replica counts 1/2/0, an unselected sentinel app, an unsupported test DC and an empty namespace. It checks multi-project generation/planning, nonpersistent dry runs of those plans, manual and RBAC partial failures, and isolated cutover/recovery in different orders. A test-only reader is granted DC-list permission in two namespaces and denied the third; its short-lived credential stays private.
-
-```sh
-python3 tools/qualify_namespaces.py \
-  --kubeconfig "$TEST_KUBECONFIG" --context "$TEST_CONTEXT" \
-  --binary "$CANDIDATE_BINARY" --image "$HTTP_8080_DIGEST" \
-  --namespace-prefix dcmig-namespaces-run --output ./private-namespace-evidence \
-  --allow-test-mutations --timeout 120
-```
-
-Dry run, stage, cutover and rollback each execute one reviewed `--plan-file`. The multi-namespace tests create separate health-bound plans for execution so every active app is checked through its own Route, and verify all other namespace states after every cutover/recovery. The runner retains resources and command/report/snapshot evidence, provisions no storage and grants no cluster role. Never publish its `*-credentials.json` file or kubeconfig.
-
-## Pre-retirement constraint driver
-
-`tools/qualify_constraints.py` uses the same explicit target/binary/image, unique `dcmig-*` prefix, private output and mutation acknowledgement as the other live drivers, plus `--cases all` or a comma-separated selection. It creates actual new-app sources and fixed-size source HPAs, stages at zero, then installs constraints. The negative cases verify both standalone preflight and cutover refusal, unchanged source spec/availability/HTTP and original HPA UID/spec, zero destination replicas and a still-staged journal. Positive and zero cases exercise cutover/recovery.
-
-The shared-cluster-quota case creates one ClusterResourceQuota with a unique label selector matching only its two lab namespaces, then removes that quota. The SCC case grants existing `anyuid` to one namespace test account to start its source, removes the grant, and verifies SCC refusal while the original Pod stays healthy. It does not change an SCC, use hostPath, provision storage or modify nodes. Node-capacity/selector failures use only lab namespace LimitRanges/annotations. Runtime-label NetworkPolicy and disruption-budget cases exercise namespace availability constraints. The absolute-budget overlap case is retained at a healthy completed cutover rather than automatically rolling back through a stop-first recovery. These test-setup privileges do not belong to the converter.
-
-The automatic baseline now records its quota case as `constraint-preflight`; it cannot count a pre-retirement rejection as an actual `failed-rollout`. Failed rollout remains a required release scenario with separate actual evidence. Evidence for an older binary remains historical and cannot qualify this new gate.
-
-## Removed or disabled storage plugin refusals
-
-`tools/qualify_storage.py` takes explicit `--context`, `--kubeconfig`, `--binary`, immutable `--image`, unique `--namespace-prefix dcmig-...`, private `--output`, and `--allow-test-mutations`. It renders actual `oc new-app --as-deployment-config --dry-run` objects, sets DC replicas to zero before creation, then adds an inline `cephfs`, `rbd` or `gitRepo` volume. Each case verifies preserved paused review output, manual classification, live-plan/stage refusal, unchanged source identity/spec and absence of destination/application Pods. OpenShift can retain completed deployer Pods; the driver verifies those never mount a legacy volume. It creates no PVC, PV, SCC grant or driver, and never contacts the fixture storage addresses. These are API/classification tests, not evidence that a legacy plugin can mount. Local request-contract tests separately cover admission-added legacy volumes, CephFS/RBD PV backing and old saved plans; a real CSI volume cutover/recovery must also pass on the candidate binary.
-
-## Required-SCC authorization changes
-
-`tools/qualify_admission.py` takes the same explicit target/binary/image/output arguments and requires both `--allow-test-mutations` and `--allow-scc-binding`. It uses the existing `nonroot-v2` SCC, verifies that it forbids privileged containers and host access, then creates a namespace-only Role/RoleBinding for one test service account. The converter itself never creates these grants. A real new-app source explicitly requires that SCC and uses a nonzero namespace UID. After staging, the driver revokes its test grant and observes an actual authorization denial while the source remains healthy. Both preflight and cutover must refuse without source/HPA/destination changes. Restoring the grant must allow migration and explicit recovery, with actual source/destination Pods retaining the required SCC. The final isolated fixture and namespace grant remain available for inspection; no SCC, ClusterRole or storage is created.
-
-Optional `--previous-binary` is for a known pre-fix regression artifact and runs only its read-only preflight. It demonstrates earlier acceptance of a different subject-review SCC despite denied service-account access to the workload's required SCC. That comparison is separate from current-artifact results. The driver requires admin/operator access to inspect the named SCC and create/delete its namespace-only test RBAC; these are harness permissions rather than additional converter privileges.
+Review every scenario and limitation before promoting a result. Fresh source-bound review is needed for 4.14–4.20 assumptions after relevant input changes; selected actual targets require final-artifact integrations. Update support policy only as a separately reviewed scope change. Follow [release verification](release-scope.md) for trusted external bundle integrity, frozen reproduction and manual draft preparation. Qualification does not authorize pushing, tagging or publication.

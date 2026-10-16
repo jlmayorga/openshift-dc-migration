@@ -1,3312 +1,430 @@
 {
   "schemaVersion": "v1",
-  "kind": "source-release-impact-assessment",
-  "openshiftMinor": "4.18",
-  "kubernetesMinor": "1.31",
-  "reviewedAt": "2026-10-16T05:52:27.010724+00:00",
-  "codeRevision": "0dcf787",
-  "boundedImpactAssessmentComplete": true,
-  "actualOlderServerIntegration": false,
-  "compatibilityAssumptionRecorded": false,
-  "assumptionEligibility": "conditional after PV-ZONE-TOPOLOGY is addressed, focused regressions pass, consolidated prerequisites are documented and final-client validation completes; this record itself grants no assumption",
-  "scope": "Production APIs and qualification fixture APIs listed in docs/compatibility-review.md; official minor GA/deprecation/API/feature/bug notes, extracted candidates, additional relevant OpenShift paragraphs and referenced upstream changes. Not a full cluster-upgrade certification or all-vendor advisory audit.",
+  "kind": "durable-release-impact-summary",
+  "minor": "4.18",
+  "evidenceBasis": "Completed bounded official-source review of historical production, with consolidation resolutions; not actual older-cluster integration.",
+  "currentSourceApplicability": "Requires reassessment after production layout changes.",
   "sources": [
     {
       "name": "ocp-4.18",
       "sourceCommit": "e3d56cca51bcae6fd417bde29798512fa5f40723",
-      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "retrievedAt": "2026-10-16T02:56:55.997575+00:00",
-      "sha256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-      "bytes": 352348,
-      "localFile": "ocp-4.18.adoc"
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc"
     },
     {
       "name": "kubernetes-1.31",
       "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "finalURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/CHANGELOG/CHANGELOG-1.31.md",
-      "retrievedAt": "2026-10-16T02:55:22.316067+00:00",
-      "sha256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-      "bytes": 462719,
-      "localFile": "kubernetes-1.31.md",
-      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-      "immutableBytesVerifiedAt": "2026-10-16T03:15:03.530205+00:00"
+      "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
     }
   ],
-  "coverageAudit": {
-    "initialCandidates": 104,
-    "initialExtractionSHA256": "27a47a67433c8c65922fbfbc18c3b6f545943f9349f4fb159113d618e91f1386",
-    "candidateDispositionsComplete": true,
-    "additionalOpenShiftParagraphsRead": 151,
-    "additionalExtractionSHA256": "2fb3df7ddaeb23f92c0736826aaa90a882a145b2192099847eb5c59e97fdd81f",
-    "moduleCountInSourceManifest": 40,
-    "moduleManifestSHA256": "9d01ce6fa6d8a9d44eeeb565087d13f872e0f2bbd01c824148fa82135967b6db",
-    "method": "Read all initial candidate texts, then independently search complete source and included z-stream modules for Pod/container/storage/SELinux/AppArmor/accounting/admission/token/network/endpoints fields; read full resulting non-boilerplate paragraphs and surrounding material sections. Read upstream GA API/feature/bug changes and named security notices; use source snippets to verify applicable behavior. Duplicate alpha/GA bullets are not independent findings.",
-    "extractionCorrections": [
-      "Initial selector list omitted runtime and controller fix bullets. Additional audit covers those, including UDP endpoint replacement, process namespace startup, SharedResourceCSI, crun, SELinux and token/build changes.",
-      "Comment delimiters/headings and empty boilerplate are not evidence that a feature is actually enabled. Upstream GA and reversion/default notes take priority over alpha announcement wording."
-    ]
-  },
-  "codeVerification": {
-    "tier": 2,
-    "project": "Users-jlmayorga-sandbox-personal-openshift-dc-migration",
-    "initialGraphGeneration": "2026-10-16T05:37:20Z",
-    "verifiedPaths": [
-      "baseline.go",
-      "converter.go",
-      "constraints.go",
-      "scheduling.go",
-      "quota.go",
-      "storage.go",
-      "raw_resources.go",
-      "cutover.go",
-      "preflight.go",
-      "scc.go",
-      "runtime.go",
-      "tools/qualify_new_app.py",
-      "tools/qualify_worker.py"
-    ],
-    "coverage": "metadata_match/no_recorded_issue for relied-on paths, with direct source reads for material bodies; best-effort coverage is not exhaustive proof",
-    "traces": [
-      "checkScheduling both depth1 complete (assessConstraints caller; placement/accounting/storage callees)",
-      "checkTraffic both depth1 complete (runMigration/verifyCutover callers)"
-    ]
-  },
   "findings": [
     {
       "id": "API-SERVING",
       "change": "Production and fixture API versions remain served; GA API additions and unrelated removals do not require endpoint changes.",
-      "toolPaths": [
-        "runtime.go:dcResource/deploymentResource",
-        "raw_resources.go:hpaResource/replicaSetResource",
-        "docs/compatibility-review.md:API inventory"
-      ],
       "disposition": "no-impact",
       "assessment": "The converter uses stable DC/apps/core/HPA v2/policy v1 APIs and optional discovered admin policies. It does not create admissionregistration v1beta1, APF versions, kubeadm output objects, CRDs or cloud-provider configurations. OpenShift 4.18 warns that 4.17 accidentally reintroduced admissionregistration v1beta1; that does not make it a converter dependency.",
-      "sources": [
+      "requiredAction": [],
+      "residualScope": [],
+      "references": [
         {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L16",
-          "line": 16,
-          "endLine": 16,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "85fc8fc606b8667353f40fc2b3066fc4492e9b95d91498eae68333e2d57457b9"
+          "line": 16
         },
         {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1695",
-          "line": 1695,
-          "endLine": 1725,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "d125f770963ad9c945daf6c27b2c19ba6efa4efc981dbdf561e73790a846ca06"
+          "line": 1695
         }
-      ],
-      "requiredAction": [],
-      "residualScope": []
+      ]
     },
     {
       "id": "APPARMOR",
       "change": "AppArmor gains Pod/container fields in1.30, loses NodeReady indication, and changes kubelet soft rejection to hard admission in1.31.",
-      "toolPaths": [
-        "baseline.go:validateBaseline",
-        "converter.go:Runner.Convert",
-        "constraints.go:Runner.assessConstraints (raw SCC/Pod response validation)",
-        "scheduling.go:nodeEligible"
-      ],
       "disposition": "manual",
       "assessment": "New appArmorProfile fields require manual review under the1.27 raw baseline. Upstream PR123435 pod PrepareForCreate/applyAppArmorVersionSkew copies valid beta runtime/default, localhost/<profile> and unconfined annotations to appArmorProfile when AppArmorFields is enabled; raw Pod dry-run validation therefore already catches this path. PR125776 moves the same kubelet handler from soft to hard admission: unsupported profiles already prevented startup before1.31. No newly successful-before/failing-after annotation value was established. Node-local support/profile availability is not proven by NodeReady or API acceptance.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1917",
-          "line": 1917,
-          "endLine": 1917,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "f079dd2004d1d52e5d76548ab1a1b0c6aba58b301aea5a3408c658fa771f1398"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2296",
-          "line": 2296,
-          "endLine": 2296,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "cc2f24b3a3159bca7a17838934561d520bd0804139c4877e66b8a1374af168ea"
-        }
-      ],
       "requiredAction": [
         "Add a focused contract for a valid beta annotation defaulted into a post-baseline appArmorProfile and assert refusal before source/HPA mutation. Do not add a blanket new guard solely from the hard-versus-soft wording."
       ],
       "residualScope": [
         "Older or feature-disabled annotation-only paths require reviewed node/runtime profile availability; no real older AppArmor cluster was tested."
+      ],
+      "references": [
+        {
+          "line": 1917
+        },
+        {
+          "line": 2296
+        }
       ]
     },
     {
       "id": "POD-FIELDS",
       "change": "User namespaces, recursive readonly mounts, native sidecars and newer placement/security fields change workload semantics.",
-      "toolPaths": [
-        "converter.go:Runner.Convert",
-        "baseline.go:validateBaseline",
-        "constraints.go:Runner.assessConstraints",
-        "scheduling.go:Runner.checkScheduling"
-      ],
       "disposition": "manual",
       "assessment": "Post1.27 spec fields (appArmorProfile, recursiveReadOnly, native-sidecar restartPolicy, image volumes, supplementalGroupsPolicy and newer affinity fields) are retained only for review through raw validation and cannot silently round-trip. Existing baseline hostUsers/procMount/securityContext strings are preserved, with real Pod admission determining the enabled gate/SCC/PSA contract. Runtime support for user namespaces and SELinux is a cluster prerequisite; raw validation alone does not prove it. Required inter-Pod affinity, hard topology spread, dynamic claims, scheduling gates and custom schedulers already block automated placement.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1894",
-          "line": 1894,
-          "endLine": 1897,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "da5a7cc8f387ce3a4a933dc0c1aa9ab53adf0703777a2f2292e438a29106194e"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1920",
-          "line": 1920,
-          "endLine": 1925,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "b12f1ae8cb14a1a55f754786d8b27ef1308b2021bea5f31914cee6f5d950aca3"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1960",
-          "line": 1960,
-          "endLine": 1961,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "0446f9b2f33c9a7167de7837fa57ce4e1c3264e7f86c3857a85d57274a71909f"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2064",
-          "line": 2064,
-          "endLine": 2064,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "2393cd98c1d690a554dd2d1bf1bdf13574c9759e0f57ed48f1ad8b863d9c4532"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1919",
-          "line": 1919,
-          "endLine": 1919,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "d35d0adcfe7ef98f55a26d0d78799fea4b89c0b1be8786740bdc2e1f42b62c62"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1952",
-          "line": 1952,
-          "endLine": 1952,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "e79783aefe42f06b6fe3cd7a0909f9d1394ed875784b3e1fa37c4099890e405c"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1983",
-          "line": 1983,
-          "endLine": 1987,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "c191dda3d0345d44d85d00a98124fb5d455d88888bcf14453181f381a1ccd35d"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2090",
-          "line": 2090,
-          "endLine": 2093,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "bd20c5def4ffc41e4f2c1fae6a7f936529b4c16a9e6a85853709fc2fdb943f00"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2151",
-          "line": 2151,
-          "endLine": 2151,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "7b7c60eeb063e8aa13cb4bb16dc1a6625507e67e0aa8386e6ee0828594aeacbb"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "Admission is authoritative for same-cluster execution, not evidence that feature-gated input can run across every older cluster."
+      ],
+      "references": [
+        {
+          "line": 1894
+        },
+        {
+          "line": 1920
+        },
+        {
+          "line": 1960
+        },
+        {
+          "line": 2064
+        },
+        {
+          "line": 1919
+        },
+        {
+          "line": 1952
+        },
+        {
+          "line": 1983
+        },
+        {
+          "line": 2090
+        },
+        {
+          "line": 2151
+        }
       ]
     },
     {
       "id": "ACCOUNTING",
       "change": "Native-sidecar allocation, in-place resize and DRA quota changes require the correct resource interpretation.",
-      "toolPaths": [
-        "quota.go:podResources/checkQuotas",
-        "scheduling.go:observedPodRequests/checkScheduling"
-      ],
       "disposition": "fixed",
       "assessment": "Existing podResources counts restartable init sidecars, peak non-sidecar initialization and overhead. observedPodRequests uses the larger spec/allocated/status requests. DRA destination claims already require manual review; post-baseline Pod budgets from admission are rejected. Unknown quota scopes/operators do not silently pass. Device health allocatedResourcesStatus is not a replacement quantity budget.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2047",
-          "line": 2047,
-          "endLine": 2047,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "84af896564b06cf3ab0818ad3706b081546e771cced116c8b1fc1bbc9d2c57a9"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2175",
-          "line": 2175,
-          "endLine": 2175,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "8a26bc9107e1d4b9765a2dc14ca7fc604fe27111b08f78507e9d63fdbb2065e6"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1922",
-          "line": 1922,
-          "endLine": 1922,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "72f445d086c1ebfeceab4938c2ad5679a74134f2a9e2b0ed210ea2b7e6a594cb"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1936",
-          "line": 1936,
-          "endLine": 1936,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "b21c1d147de126cab21548b6d728bf3fe09243c8778224e6f22a1b1142f81c62"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1938",
-          "line": 1938,
-          "endLine": 1939,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "ccb8d449ae74805489f4efdeae673c22f7cfcf4651155cb68bd288cf888b2ef6"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "Point-in-time quota/capacity checks reserve no resources and do not reproduce CPU/NUMA-manager or custom scheduler behavior."
+      ],
+      "references": [
+        {
+          "line": 2047
+        },
+        {
+          "line": 2175
+        },
+        {
+          "line": 1922
+        },
+        {
+          "line": 1936
+        },
+        {
+          "line": 1938
+        }
       ]
     },
     {
       "id": "HPA",
       "change": "Per-container resource metrics become stable;1.31 removes long-nonfunctional controller delay flags.",
-      "toolPaths": [
-        "raw_resources.go:getHPA/createHPAObject",
-        "cutover.go:freezeHPA/createHPA",
-        "baseline.go:validateBaseline"
-      ],
       "disposition": "no-impact",
       "assessment": "HPA autoscaling/v2 already represents ContainerResource metrics at the1.27 baseline; the converter preserves the raw-reviewed spec and changes the target. It does not set controller-manager command flags or parse kubectl HPA tables.",
-      "sources": [
+      "requiredAction": [],
+      "residualScope": [],
+      "references": [
         {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2020",
-          "line": 2020,
-          "endLine": 2020,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "4a65d9440482ee6a1c4ad28cd5b8c01c68c512875a62f83705b11c4c2c61364e"
+          "line": 2020
         },
         {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1971",
-          "line": 1971,
-          "endLine": 1971,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "22fc0d6c179b6923e7df610b2bbf77d48fec1caec152e9cb3a7772381c47fe67"
+          "line": 1971
         }
-      ],
-      "requiredAction": [],
-      "residualScope": []
+      ]
     },
     {
       "id": "AUTH",
       "change": "Bound token metadata/cleanup, authorizer and admission-policy behavior change.",
-      "toolPaths": [
-        "preflight.go:Runner.access",
-        "scc.go:Runner.authorizeRequiredSCC",
-        "runtime.go:NewRunner",
-        "constraints.go:Runner.assessConstraints"
-      ],
       "disposition": "prerequisite",
       "assessment": "Credentials are opaque kubeconfig tokens; the converter does not parse JWT claims or obtain automatic service-account token Secrets. Explicit versioned SSAR/LocalSAR checks and actual requests remain authoritative. VAP GA/default and match conditions can deny live dry runs; refusals occur before retirement. Selector-aware authorizers may deny broad Node/Pod listing to kubelet identities: grant the documented caller privileges, not node credentials. Authentication or authorization changes during a run still require failure reporting and explicit recovery.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1939",
-          "line": 1939,
-          "endLine": 1942,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "786c2ac4363ef644d1a477393dbb715ce9cf689d6cdbb08eee59939bd45154c6"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2046",
-          "line": 2046,
-          "endLine": 2046,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "3bebd5d324198dea12c7e262612aad2413d6f6caafa33bba69188a2cc30fb78f"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2068",
-          "line": 2068,
-          "endLine": 2068,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "18d853be6833c9cb10a66936f024c2e58fa2a3368658f6ee2495084fa89eebdf"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2245",
-          "line": 2245,
-          "endLine": 2250,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "7b76f0ae2720ed14005ebd13d9a8785065a66eb4c1ab202df498de37c50b8294"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1966",
-          "line": 1966,
-          "endLine": 1968,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "f3df466d479a90db143d49603967912569d62df02939f1540d5565631cffd764"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2043",
-          "line": 2043,
-          "endLine": 2045,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "593e401c0187686bdb999c6b68c0d55f0621d7e65b2311fe37871391c33d3c8e"
-        },
-        {
-          "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-33.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-33.adoc#L45",
-          "line": 45,
-          "endLine": 45,
-          "sourceSHA256": "fc2a21c1a6f5f10cc65b18fb0a598fce9d349fbfde67d0200d67deecd3bd292a",
-          "excerptSHA256": "f8387d71efd4c357ee2108dd09e2004563c1eddd787d14a1a1895b64e537ee70"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "No older-server custom-authorizer or node-bound-token integration is claimed."
+      ],
+      "references": [
+        {
+          "line": 1939
+        },
+        {
+          "line": 2046
+        },
+        {
+          "line": 2068
+        },
+        {
+          "line": 2245
+        },
+        {
+          "line": 1966
+        },
+        {
+          "line": 2043
+        },
+        {
+          "line": 45
+        }
       ]
     },
     {
       "id": "PDB",
       "change": "PDB conditions, unhealthy eviction policy and scheduler preemption are corrected or graduated.",
-      "toolPaths": [
-        "constraints.go:Runner.assessConstraints availability-budget",
-        "cutover.go:Runner.changeSource"
-      ],
       "disposition": "fixed",
       "assessment": "The converter directly scales the DC and therefore separately checks synchronized observedGeneration and the entire affected source count against disruptionsAllowed. It does not invoke Eviction or rely on the scheduler enforcing PDBs during its own controller update. GA unhealthyPodEvictionPolicy does not grant permission to bypass the converter check; preemption patch fixes improve the cluster without altering this API contract.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2119",
-          "line": 2119,
-          "endLine": 2120,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "acd86e112ab12e6a336bde62cdc2aa5454d614e7a0af84ae2ec9777bd8e0f504"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1516",
-          "line": 1516,
-          "endLine": 1516,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "6e19e8c5a00dbdd011a40d45b5dfe9278a5a9988b999a15cdfa9f4467cb5eb10"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2152",
-          "line": 2152,
-          "endLine": 2152,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "eac928ba91d41110d27291db2a233f48431a230561d892beb5a1e103ab76c1b1"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "Unrelated concurrent preemption or unhealthy nodes can still reduce availability; no old-server scheduler-preemption test was run."
+      ],
+      "references": [
+        {
+          "line": 2119
+        },
+        {
+          "line": 1516
+        },
+        {
+          "line": 2152
+        }
       ]
     },
     {
       "id": "NETWORK",
       "change": "OVN/SDN changes and Endpoints controller fixes affect actual traffic independently of resource acceptance.",
-      "toolPaths": [
-        "constraints.go:network-policy-selection",
-        "admin_policy.go:checkAdminPolicies",
-        "cutover.go:checkTraffic/checkHealth"
-      ],
       "disposition": "prerequisite",
       "assessment": "Policy selection checks already include optional ANP/BANP and unknown future pod-template-hash labels. Endpoint UID convergence and optional HTTP health checks are useful evidence but do not simulate OVN conntrack, all client protocols, secondary networks, egress-IP failover or large endpoint sets. SDN removal requires cluster network migration before DC conversion; the converter does not perform it.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1202",
-          "line": 1202,
-          "endLine": 1202,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "d1dabe53bc10bdb6bba869b9c8678d965d5ed96cd26495820695b880de5b8082"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1576",
-          "line": 1576,
-          "endLine": 1576,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "70b6b128ad428324366f27cf9dd0472bc3eb5c90670bb7004b132d3eaa391fab"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2231",
-          "line": 2231,
-          "endLine": 2231,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "70b6b128ad428324366f27cf9dd0472bc3eb5c90670bb7004b132d3eaa391fab"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2269",
-          "line": 2269,
-          "endLine": 2272,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "bc60a12949dc9552e8d4ba055a26cf7fe8dd0535b9ef86619a022c74a63720eb"
-        }
-      ],
       "requiredAction": [
         "Document protocol-specific application checks and the patch prerequisites in UDP-CONNTRACK; do not equate API Endpoints status with proof of all traffic paths."
       ],
-      "residualScope": []
+      "residualScope": [],
+      "references": [
+        {
+          "line": 1202
+        },
+        {
+          "line": 1576
+        },
+        {
+          "line": 2231
+        },
+        {
+          "line": 2269
+        }
+      ]
     },
     {
       "id": "UDP-CONNTRACK",
       "change": "OVN endpoint replacement can leave stale UDP connections or external-gateway routes.",
-      "toolPaths": [
-        "cutover.go:Runner.checkTraffic/checkHealth"
-      ],
       "disposition": "prerequisite",
       "assessment": "The4.18.32 notes fix stale UDP conntrack for Service port!=targetPort after endpoint recreation.4.18.38 fixes external gateway routing to terminated Pods while a node is inactive. The migration replaces endpoint identities, so affected workloads need the applicable cluster fixes and protocol-specific checks. The notes alone do not establish the earliest affected patch.",
-      "sources": [
-        {
-          "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L14",
-          "line": 14,
-          "endLine": 14,
-          "sourceSHA256": "0a7428ad7703f5bfdc9e5cb20d46fc4c1ae02293811ebc38dbca7491cf26db2f",
-          "excerptSHA256": "c617962699e6d4c152957eedf042a451a1a5bb722ae92060b8a004626579f348"
-        },
-        {
-          "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L30",
-          "line": 30,
-          "endLine": 30,
-          "sourceSHA256": "1c14f3baddd99aba9209a0683c3cc707b79cf251563c41ba23270eef45022673",
-          "excerptSHA256": "bc6dd42ed91a89dbcab6152569871d51b39f94dd39ba57bfdcf81336dea3351c"
-        }
-      ],
       "requiredAction": [
         "Document4.18.32/4.18.38 fixes as conditional workload prerequisites; do not claim HTTP health tests cover UDP or external-gateway traffic."
       ],
-      "residualScope": []
+      "residualScope": [],
+      "references": [
+        {
+          "line": 14
+        },
+        {
+          "line": 30
+        }
+      ]
     },
     {
       "id": "CSI-MIGRATION",
       "change": "AzureFile in-tree implementation is removed while CSI translation remains; CSI runtime configuration and attachment behavior remain prerequisites.",
-      "toolPaths": [
-        "storage.go:checkLegacyPV/unsupportedInlineVolumes",
-        "scheduling.go:Runner.checkScheduling",
-        "constraints.go:ConstraintAssessment.Warnings"
-      ],
       "disposition": "prerequisite",
       "assessment": "Upstream PR122576 changes AzureFile migration checks to unconditional true; this is not the same as Ceph/RBD becoming nonfunctional. Existing in-tree AzureFile-backed PVCs can continue through a functioning installed CSI driver. The converter reads bound PVC/PV references and PV node affinity, preserves volume settings and does not create/resize/delete production claims, alter drivers or clear finalizers. CSI attachment limits/mount success/SELinux relabeling are explicitly not simulated.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L3309",
-          "line": 3309,
-          "endLine": 3309,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "dd056d5c4a3705067aca3357c1786eade519c12903e53c27928bf1d65f654eab"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2103",
-          "line": 2103,
-          "endLine": 2103,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "5d9cddbf0ed9ba3ad054810eb1d1789cf665e023faa304f3402a78ef6292f382"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2176",
-          "line": 2176,
-          "endLine": 2176,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "5f6595c0e0d6ac4308f79a85a019ab34772322ff83b4602ec1c23a223c72b87a"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1904",
-          "line": 1904,
-          "endLine": 1906,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "46ec8f6927335c8603c8feca865f4c894527b61bb8280f39a6f56d67f882f1fd"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2155",
-          "line": 2155,
-          "endLine": 2155,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "df7e38403247b2c195ceee304c07ddc7a8c7e5c22f134ff0e17d8bdd857ee2a8"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2285",
-          "line": 2285,
-          "endLine": 2285,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "6e1f5320b46a3a5c77932d9a6612436174ee03cd0934becf3424644f3ed5ac94"
-        }
-      ],
       "requiredAction": [
         "Document installed CSI/driver health, SELinux policy and volume attach limits as prerequisites; do not expand the unconditional removed-plugin denylist to AzureFile."
       ],
-      "residualScope": []
+      "residualScope": [],
+      "references": [
+        {
+          "line": 3309
+        },
+        {
+          "line": 2103
+        },
+        {
+          "line": 2176
+        },
+        {
+          "line": 1904
+        },
+        {
+          "line": 2155
+        },
+        {
+          "line": 2285
+        }
+      ]
     },
     {
       "id": "REMOVED-STORAGE",
       "change": "CephFS and RBD volume types become nonfunctional, while SharedResourceCSI moves out of the base payload.",
-      "toolPaths": [
-        "storage.go:legacyStorageDiagnostic/checkLegacyPV/unsupportedInlineVolumes",
-        "converter.go:Runner.Convert",
-        "constraints.go:admitted volume checks"
-      ],
       "disposition": "fixed",
       "assessment": "CephFS/RBD inline sources, admission-added volumes, and PVC-backed PVs already trigger manual migration rather than unsafe automatic retirement. SharedResourceCSI is supported by the Builds1.1+ layered product after base-payload removal; it needs the installed layered driver, not a universal nonfunctional-plugin rejection.",
-      "sources": [
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1896",
-          "line": 1896,
-          "endLine": 1897,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "a6558702dd72c68fd01b09d570a867132fcf0fed68ab6ad0cfc6fed78ae50f96"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1706",
-          "line": 1706,
-          "endLine": 1707,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "8238ffd58a27e0960ebbab0516b8a3dbb905364fa7f792439317fc1787e7ccbb"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "External data migration and layered CSI installation are operator actions; API preservation cannot restore an absent driver."
+      ],
+      "references": [
+        {
+          "line": 1896
+        },
+        {
+          "line": 1706
+        }
       ]
     },
     {
       "id": "PVC-CONTROLLERS",
       "change": "PVC expansion-recovery statuses and PV reclaim/finalizer behavior change.",
-      "toolPaths": [
-        "scheduling.go:Runner.checkScheduling",
-        "constraints.go:PVC Bound/reference checks",
-        "tools/qualify_new_app.py:regular PVC fixture"
-      ],
       "disposition": "prerequisite",
       "assessment": "Production reuses already-bound claims and does not resize them, create snapshots, delete PV/PVC pairs or remove storage finalizers. Administrators must perform the documented alpha RecoverVolumeExpansionFailure status cleanup where applicable. Qualification cleanup must respect reclaim policy and must not force-remove stuck production storage finalizers.",
-      "sources": [
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1883",
-          "line": 1883,
-          "endLine": 1887,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "5b57feed562bc9d528eb9219203c93049817f81728b5a19d5e6305a20446d590"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2273",
-          "line": 2273,
-          "endLine": 2275,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "72b58211ac12c355b5eb5576a0ffe5552488df805b2e6912d6519f48eb1bf76b"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1235",
-          "line": 1235,
-          "endLine": 1240,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "2a120722518c876b380bf9306561d8ea3f223eead53a07f241e16dbf2ac0e07d"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "A Bound claim alone does not prove successful attachment/relabel/mount."
+      ],
+      "references": [
+        {
+          "line": 1883
+        },
+        {
+          "line": 2273
+        },
+        {
+          "line": 1235
+        }
       ]
     },
     {
       "id": "RUNTIME",
       "change": "New4.18 installations use crun; upgrades from4.17 keep their prior runtime; runc shareProcessNamespace regression is patched.",
-      "toolPaths": [
-        "converter.go:Runner.Convert (PodSpec preservation)",
-        "constraints.go:Runner.assessConstraints",
-        "cutover.go:Runner.waitReady"
-      ],
       "disposition": "prerequisite",
       "assessment": "Runtime class/security/process-namespace intent is preserved and actual readiness is required. The4.18.30 note fixes runc startup with shareProcessNamespace=true. The4.18.34 note fixes systemd entrypoint ConfigMap permissions. These are kubelet/runtime environment defects rather than missing Deployment API fields.",
-      "sources": [
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1004",
-          "line": 1004,
-          "endLine": 1008,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "b9813239544bc108205610396eaf1df3fcadb7c3d423103e602acb120cfc071c"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1027",
-          "line": 1027,
-          "endLine": 1029,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "efa33d3c29f0dc12a72eef5ed0e71fdf5da89a5da0bfffe8b423934461e1076d"
-        },
-        {
-          "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-30-bug-fixes.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-30-bug-fixes.adoc#L29",
-          "line": 29,
-          "endLine": 29,
-          "sourceSHA256": "5f9f8010988c10c50dc50405d397618c18db31e19603f717e09d6eda5192a094",
-          "excerptSHA256": "478112f233f6cdf9e9008c6eb23188c9c9a4862ec85df926775c287139b3de31"
-        },
-        {
-          "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L28",
-          "line": 28,
-          "endLine": 28,
-          "sourceSHA256": "c87305ccff900be5a57497c91a10261f485b6d767066fa41f17e98ab2aac994b",
-          "excerptSHA256": "020ac9ddeb0b69c2c18d63bd1cd60f631b21bc1d305083296260abe3f9e598ba"
-        }
-      ],
       "requiredAction": [
         "Apply the applicable runtime fixes for workloads using shareProcessNamespace/systemd-mounted configuration; record runtime provenance when qualifying them."
       ],
       "residualScope": [
         "Release notes do not establish every affected starting patch; do not label all earlier patches broken."
+      ],
+      "references": [
+        {
+          "line": 1004
+        },
+        {
+          "line": 1027
+        },
+        {
+          "line": 29
+        },
+        {
+          "line": 28
+        }
       ]
     },
     {
       "id": "BUILD-IMAGE",
       "change": "new-app builds, image import mode/pull tokens and registry-controller fixes affect fixtures and workload images.",
-      "toolPaths": [
-        "tools/qualify_new_app.py:NewApp.fixtures/new_app",
-        "converter.go:image trigger mapping",
-        "raw_resources.go:raw spec checks"
-      ],
       "disposition": "prerequisite",
       "assessment": "Production keeps BuildConfigs/ImageStreams and emits the supported image trigger annotation. The harness creates actual Docker/S2I builds and imports images and must retain a working registry, correct service-account ImagePullSecrets, matching CLI and trusted/reachable registries. Proxy defaults, rotation bugs and preserve-original manifest-list import affect build/pull outcomes, not the DC-to-Deployment resource version.",
-      "sources": [
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1096",
-          "line": 1096,
-          "endLine": 1105,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "089fbb379faa9ab7c796ae2031cf66ab1c447042e21793905711714e0feec076"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3563",
-          "line": 3563,
-          "endLine": 3563,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "f8d9a619484f50e01ad6f3c381353cedbe7bbeaacf7a09c52d9519e7ac3c06f6"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3923",
-          "line": 3923,
-          "endLine": 3923,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "656d15e6cf0a8d342607a5b97d0306b2d43695d69ff69eef37304a13c25dff3c"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "Build success and a single architecture image do not qualify every S2I builder, image manifest type or registry topology."
+      ],
+      "references": [
+        {
+          "line": 1096
+        },
+        {
+          "line": 3563
+        },
+        {
+          "line": 3923
+        }
       ]
     },
     {
       "id": "HARNESS-CLI",
       "change": "CLI streaming, output and authentication helpers evolve while fixture API contracts remain stable.",
-      "toolPaths": [
-        "tools/qualify_new_app.py:oc invocation",
-        "tools/qualify_worker.py:WORKER_SCRIPT/Lease fixture"
-      ],
       "disposition": "no-impact",
       "assessment": "Production does not shell out to oc. Fixture exec uses the -- command separator, not the removed legacy syntax; observations request JSON rather than parsing kubectl tables. Lease fixture explicitly uses coordination.k8s.io/v1 with resourceVersion compare-and-swap, not new coordinated LeaseCandidate election. WebSocket/SPDY proxy compatibility remains a fixture environment prerequisite.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L2054",
-          "line": 2054,
-          "endLine": 2057,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "28e18707e829e786138da466e8ed0dc4fa0247772f646b3ed54279a9d93a34b3"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L1920",
-          "line": 1920,
-          "endLine": 1920,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "dd6c762640a6827e22af39aff42b38edbfd0250b6cb5e53b091dbd56cf9fb978"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2069",
-          "line": 2069,
-          "endLine": 2072,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "eafc13925c57aa3b76b2247da8d44297cf51059b1ad95850021366b32f0a76f1"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2324",
-          "line": 2324,
-          "endLine": 2330,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "70b605158f86ff2611affe406512908a5f70b9f8e1553a87a437b9f76f1b8bc4"
-        }
-      ],
       "requiredAction": [],
-      "residualScope": []
+      "residualScope": [],
+      "references": [
+        {
+          "line": 2054
+        },
+        {
+          "line": 1920
+        },
+        {
+          "line": 2069
+        },
+        {
+          "line": 2324
+        }
+      ]
     },
     {
       "id": "PLATFORM-OTHER",
       "change": "Operator-console, installer, host provisioning, monitoring and unrelated APIs are outside the migration operations.",
-      "toolPaths": [
-        "docs/compatibility-review.md:production and fixture inventories"
-      ],
       "disposition": "no-impact",
       "assessment": "Changes scoped to CVO/OLM components, installers, VM/node creation, monitoring UIs, operator upgrades, topology displays and unrelated tools do not replace APIs called by the converter. Healthy infrastructure, current supported patches, functioning admission and application-specific runtime dependencies remain prerequisites. No compatibility claim is made for installing or upgrading these unrelated components.",
-      "sources": [],
       "requiredAction": [],
-      "residualScope": []
+      "residualScope": [],
+      "references": []
     },
     {
       "id": "SECURITY-PATCHES",
       "change": "The reviewed upstream changelogs include security fixes affecting cluster health and node credentials.",
-      "toolPaths": [
-        "runtime.go:credential loading",
-        "scheduling.go:Node/Pod read inventory"
-      ],
       "disposition": "prerequisite",
       "assessment": "The converter does not invoke kubelet checkpoint, node logs/query, mutate Node owner references or provision Windows log permissions. Named CVEs therefore require cluster/operator remediation rather than converter wire-format changes. Use patched cluster payloads; upstream Kubernetes patch numbers alone do not identify OpenShift backport status.",
-      "sources": [
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L783",
-          "line": 783,
-          "endLine": 796,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "17c85a82a02450723b2a78310c620f5052010ed86711d9f0a4bf0267f3778e4c"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L902",
-          "line": 902,
-          "endLine": 918,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "049d78dda2481de6d316e140276ec52d6398eca34d1baeb8f14394bb5ccc2b8d"
-        },
-        {
-          "source": "kubernetes-1.30.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.30.md#L1538",
-          "line": 1538,
-          "endLine": 1554,
-          "sourceSHA256": "976292faf9eab5b1b2eaf8f89ff4cc9512bc1cd6579eef525b11c855a82fef7b",
-          "excerptSHA256": "26178cfbfa2d7616a1663ee8373b129195dc7e3dfbc4a542815f70fbf9c60805"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L620",
-          "line": 620,
-          "endLine": 633,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "8bfa43d8acdb7ad842847b458b20c802a413d397d4e31a5625b9d01a6db7d4ec"
-        },
-        {
-          "source": "ocp-4.18.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3328",
-          "line": 3328,
-          "endLine": 3328,
-          "sourceSHA256": "5b18e3a7b53483cb749aa841e1973415f278fcfb610f3cd9c159e816391d2331",
-          "excerptSHA256": "c682b5524350241f571d5b83a23dca42c00c154ce420a0a4878210e120581456"
-        }
-      ],
       "requiredAction": [],
       "residualScope": [
         "This is an impact review of named retrieved notes, not a claim that every CVE/advisory for every platform dependency is absent."
+      ],
+      "references": [
+        {
+          "line": 783
+        },
+        {
+          "line": 902
+        },
+        {
+          "line": 1538
+        },
+        {
+          "line": 620
+        },
+        {
+          "line": 3328
+        }
       ]
     },
     {
       "id": "PV-ZONE-TOPOLOGY",
       "change": "Existing PV topology labels still constrain placement independently of PV nodeAffinity.",
-      "toolPaths": [
-        "scheduling.go:Runner.checkScheduling",
-        "scheduling.go:nodeEligible"
-      ],
       "disposition": "unresolved",
       "assessment": "At the reviewed0dcf787 source, checkScheduling reads PV nodeAffinity but does not evaluate legacy/beta topology labels used by the scheduler VolumeZone plugin. Removing PersistentVolumeLabel admission does not make existing volume-zone constraints disappear. Parent has separately reproduced the gap and owns a conservative refusal fix; this assessment does not claim to have run those reproductions.",
-      "sources": [
-        {
-          "source": "ocp-4.17.adoc",
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/6c0902cc63abcac6b44a6467ca42be285ec01aad/release_notes/ocp-4-17-release-notes.adoc#L1625",
-          "line": 1625,
-          "endLine": 1625,
-          "sourceSHA256": "57756df7b7ebea45274a747bb9cc1c50dff983145140f09197d84c25ef36b6aa",
-          "excerptSHA256": "1635445003200c52e70acbcad7324e61d5d3e5dac00733dd03c4bd5136548e6b"
-        },
-        {
-          "source": "kubernetes-1.31.md",
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md#L2299",
-          "line": 2299,
-          "endLine": 2299,
-          "sourceSHA256": "906f9b9e0eded59965692d4c9f60b21659b6cacbf91284d4a7f6e14ec8f9890e",
-          "excerptSHA256": "753444e71eba36de4178ddb31e50ad0b4557916a43a332f102ca56f3dad62301"
-        }
-      ],
       "requiredAction": [
         "Consolidated parent pass must guard or correctly evaluate existing PV beta/stable zone and region labels before source retirement, including old plans/admission-added PVCs as applicable.",
         "Verify exact fixed source and tests before recording a compatibility assumption."
       ],
-      "residualScope": []
+      "residualScope": [],
+      "references": [
+        {
+          "line": 1625
+        },
+        {
+          "line": 2299
+        }
+      ]
     }
   ],
-  "candidateDispositions": [
-    {
-      "candidate": 0,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 142,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "c48724df5df3d2aca33da50bef5b528eba766ed3e0b867633974f23574d5c48d"
-    },
-    {
-      "candidate": 1,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 234,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "2c983403960ad0f53c05d0af5916f9ec410c8eccae00975d836ba220f03e3412"
-    },
-    {
-      "candidate": 2,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 400,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "f7ffaf42386ba8fcdefc40987fb247fe56646c179a1d32dfd4ad3fea4abe3026"
-    },
-    {
-      "candidate": 3,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 628,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "55f6a2e65a16c5cf73e7ac1651ea83d92b51902d3844b16cfc39a31e0a403e73"
-    },
-    {
-      "candidate": 4,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 697,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "9573d8543d98e8e4a60582d03af6527d19ae586c3569c1e0b41f64bac5002fee"
-    },
-    {
-      "candidate": 5,
-      "finding": "NETWORK",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 905,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "a175fdce9c0ee83daa6d7f6e09e7ec82daa8f5166669d9186070e92d4226abd3"
-    },
-    {
-      "candidate": 6,
-      "finding": "NETWORK",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 906,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "305682d9f7fd60160c8b09525aa6da089e91e83cfdc161dc9cf22fee638c1c55"
-    },
-    {
-      "candidate": 7,
-      "finding": "NETWORK",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 907,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "82e6438092b9dc589a1d48374b7cd047593d64a32a068d3e3578bbd1b88182bf"
-    },
-    {
-      "candidate": 8,
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 1098,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "31cb2a5e0890f0e74773aee3903a2540a753e9fe9e0aeb90a19ed688630cfc17"
-    },
-    {
-      "candidate": 9,
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 1105,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "3558fedf31c50c23d6e2ee852769b57b3a7488e8984e84813bd0b61417e3827f"
-    },
-    {
-      "candidate": 10,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1290,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "fb0217f25926e82a550f5d0231caf24847bf33f4b56ab1fb0622f9554337e569"
-    },
-    {
-      "candidate": 11,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1367,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "6b78011816a99e131ce6d8044fdd8c3d34dcc2b0c5bee9ffb1325c0c7aa7eabb"
-    },
-    {
-      "candidate": 12,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1685,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "31bd86a3e5e39bf5e710f51c5bdbd467086aead41e25c614eac2e2e48b05fd7f"
-    },
-    {
-      "candidate": 13,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1697,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "8aa59f1f9de165fde45a303bd4ab90c14223e9a901ee39cdcca25c5bf23cf535"
-    },
-    {
-      "candidate": 14,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1699,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "9152ec6ca954de2df9943be6b1cadae254f13cb60ad451e7f1a35ef5a322a687"
-    },
-    {
-      "candidate": 15,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1718,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "8a7f89951e8ab84dd9382c0744321bca0adee70125de7b524373b30dc06cbd62"
-    },
-    {
-      "candidate": 16,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1720,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "ca597d14c1fc9fda54acca1bad661cd51d1f81f2f1ffab979894acbe73a6944b"
-    },
-    {
-      "candidate": 17,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1723,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "49315609e6d2c0fd52ce9c28e2a78ba0f863783c2424644efa381987783f5546"
-    },
-    {
-      "candidate": 18,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1725,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "1ee305275cab73c3acc025281a61406df407d4dddfa3c46a5ba466cf1efe4f38"
-    },
-    {
-      "candidate": 19,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1826,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "69f02b6abd3280f8aece61ff610719f0299969f61650a848c62e4135d9a77efe"
-    },
-    {
-      "candidate": 20,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 1836,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "c0faa915a3fdafd50374eb65109476e2aacd75b7e2f18e4c006791be6df36352"
-    },
-    {
-      "candidate": 21,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 2221,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "60ac465e34cc33c05714148f0d990e03642ba17fa6c586ae02a145b33726ba8b"
-    },
-    {
-      "candidate": 22,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 2236,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "215bf15e1c6ca35aafb65d8b2b8deed683efc7b958783c9b8f52e087aba64047"
-    },
-    {
-      "candidate": 23,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 2285,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "6e1f5320b46a3a5c77932d9a6612436174ee03cd0934becf3424644f3ed5ac94"
-    },
-    {
-      "candidate": 24,
-      "finding": "RUNTIME",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 3029,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "31f46c6bcd2d4c30faf48c62c291151fbef878b77954178bbd7f4b67ff7b9736"
-    },
-    {
-      "candidate": 25,
-      "finding": "RUNTIME",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 3045,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "58e80564835f76c5be28cd7f7514145a9541396456bf4b496ba98b67ffd7a592"
-    },
-    {
-      "candidate": 26,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3222,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "777359c9cb592eaecd2ab71129e781575b729e46bb5d74a133bdacab85bea71f"
-    },
-    {
-      "candidate": 27,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3288,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "1626f8b25bd3a1ed1d6083e03ff6630b7d5e392f7ee28f8d6af2995f0d4d8b1f"
-    },
-    {
-      "candidate": 28,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3335,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "b0b5ba67bd76b85c637976259cbae3ae13f8a48fe60344b4801eafc2d1d147ca"
-    },
-    {
-      "candidate": 29,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3339,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "75e78b6c185d2e477bbe9f714eeef6932a32eecd833615657608e7889e5e42fa"
-    },
-    {
-      "candidate": 30,
-      "finding": "RUNTIME",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 3375,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "57738c9505cb7956764e962db616b80bb249c78076a0c10cfc225e7bc72b149d"
-    },
-    {
-      "candidate": 31,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3391,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "e4f9bad4c34850c79dfc74f6a409587d955c02156335aa70f33d87aa73afee5f"
-    },
-    {
-      "candidate": 32,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3395,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "101ba68702781ee9cb9d66a5218750aa10e1a3c99d682a9a7ad557cf999f5b6f"
-    },
-    {
-      "candidate": 33,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3397,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "a4e06d65beae8f2915484621c27e7dbb1cecfa239f895759d6ae3edac0aafe8c"
-    },
-    {
-      "candidate": 34,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3561,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "e1241bd199fe32a64876d0c614e5dbb2e49d1b7ff06ca5b9cc18633a9fbfd7f4"
-    },
-    {
-      "candidate": 35,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3619,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "7870648644ea4a283b8ad9ab4e80714740d9e9982c6b11966700c815264c8353"
-    },
-    {
-      "candidate": 36,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3641,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "3a1c407b7211f99784f96270fef5d0f0e89cbb36dcbf9f7e93d83c3aca549f49"
-    },
-    {
-      "candidate": 37,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3764,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "81132ab2fdf802af841396437efc835ae7fdb9d7231633415424d0d601d6634f"
-    },
-    {
-      "candidate": 38,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3794,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "82680e7d610aa6f412adf1c42a775b4d99b8f458da04b67f1ed9aad35a911752"
-    },
-    {
-      "candidate": 39,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3798,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "a56fa4b001fafd9a6302d7d45846331fc47280fa98501b03184f2cca13e68d76"
-    },
-    {
-      "candidate": 40,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3800,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "fc8fb7019c37bd607d44775a12b99256abb3c8f15b7ad529d82125943e31e6e7"
-    },
-    {
-      "candidate": 41,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3870,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "64ef804ead1d5976f05f60e176b7f083e1a787c82dda11a77572b16e5719c141"
-    },
-    {
-      "candidate": 42,
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 3909,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "4d34dd823f2935980f6a32591fcad066e94aa2c9e6e24d3082ac69162b6cbc6e"
-    },
-    {
-      "candidate": 43,
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite",
-      "source": "ocp-4.18.adoc",
-      "line": 3917,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "20c698bd9f851e00d0eeb8ecefe8ed9100fddb9b04cd436bc4e54d5207bc4e1a"
-    },
-    {
-      "candidate": 44,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3986,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "072e9640a5ee6a559b2ddbc66811a41cc97f9134c88ade7e6c61fadc231262b8"
-    },
-    {
-      "candidate": 45,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 3992,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "e20876f468063df9158e7fab34fbc52b33dfa637a59653e7f4f8513386cb2a4b"
-    },
-    {
-      "candidate": 46,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 4068,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "828c20ae53f61f1b8f85568c942581edc8e5c992d0cb959c20f738a97bc5dc85"
-    },
-    {
-      "candidate": 47,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 4096,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "3dd777638840fc6d2e5653eedce733301ce7da4e1ab8c5c9783ec9201d06690d"
-    },
-    {
-      "candidate": 48,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 4208,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "729cdebb73ab233b796dbf2fdaadfe4e634107d92c67eac121801e6f5ae4d884"
-    },
-    {
-      "candidate": 49,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "ocp-4.18.adoc",
-      "line": 4252,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc",
-      "textSHA256": "058a48cd182d97aba0458c5925f18c781407afc8c562a84f331711e52ff052bf"
-    },
-    {
-      "candidate": 50,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-36.adoc",
-      "line": 36,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-36.adoc",
-      "textSHA256": "ca0080075bfc33b1fd2651938cb1eec8f155d3fe977c1e464c27055b7b5a41a9"
-    },
-    {
-      "candidate": 51,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-      "line": 28,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc",
-      "textSHA256": "ed82264ad5390718ad6f6b852cd4a62f328747d347fbd1c43af76fda73d5c01e"
-    },
-    {
-      "candidate": 52,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-49.adoc",
-      "line": 33,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-49.adoc",
-      "textSHA256": "b041bd1e2f84e1be05946f6b36e1c3f73b7f0ac6b3289ac8f67493ac6af38f86"
-    },
-    {
-      "candidate": 53,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-29-bug-fixes.adoc",
-      "line": 41,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-29-bug-fixes.adoc",
-      "textSHA256": "4659ad8e532a67065550388204d0be60f8ce32346ddec1e22aa02ea845c13359"
-    },
-    {
-      "candidate": 54,
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-31-fixed-issues.adoc",
-      "line": 14,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-31-fixed-issues.adoc",
-      "textSHA256": "5e96a45dd2f14281607177334a84e0ff4372311e8ce835b6f9c091f2198829af"
-    },
-    {
-      "candidate": 55,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-33.adoc",
-      "line": 45,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-33.adoc",
-      "textSHA256": "f8387d71efd4c357ee2108dd09e2004563c1eddd787d14a1a1895b64e537ee70"
-    },
-    {
-      "candidate": 56,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 1212,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "43b971c569db3316697df4b420e944eccc82dd693ce784275b359fc61bdbbcde"
-    },
-    {
-      "candidate": 57,
-      "finding": "PDB",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 1516,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "6e19e8c5a00dbdd011a40d45b5dfe9278a5a9988b999a15cdfa9f4467cb5eb10"
-    },
-    {
-      "candidate": 58,
-      "finding": "PVC-CONTROLLERS",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 1883,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "2588cfc0efa54e9e67c431f7d82a761db96f5a155c9d737d95d9e8f84e87022d"
-    },
-    {
-      "candidate": 59,
-      "finding": "REMOVED-STORAGE",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 1896,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "b15cfb422a8fcba21445437da3802b0ccc420cb31d6c8ee6a7cc257006a4ad32"
-    },
-    {
-      "candidate": 60,
-      "finding": "REMOVED-STORAGE",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 1897,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "8a13df2676836a5d00e4fc07f5609b87cca9528cffc286a8f615a8ec6c481690"
-    },
-    {
-      "candidate": 61,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 1904,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "2f34ec2100b66518b933a82495492aac5eba732ffcb65fa90a4d64fa00cdbd6f"
-    },
-    {
-      "candidate": 62,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 1910,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "eb2c03f72d87f2fcf0f4c65404c01dc3e6dc239b5eeabc5e0cd4102b0822dead"
-    },
-    {
-      "candidate": 63,
-      "finding": "POD-FIELDS",
-      "disposition": "manual",
-      "source": "kubernetes-1.31.md",
-      "line": 1921,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "aab9e05863b3e5140eb6c74ba83cbaf2649915a00a887f5356ec83ec556d4403"
-    },
-    {
-      "candidate": 64,
-      "finding": "ACCOUNTING",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 1922,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "72f445d086c1ebfeceab4938c2ad5679a74134f2a9e2b0ed210ea2b7e6a594cb"
-    },
-    {
-      "candidate": 65,
-      "finding": "ACCOUNTING",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 1936,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "b21c1d147de126cab21548b6d728bf3fe09243c8778224e6f22a1b1142f81c62"
-    },
-    {
-      "candidate": 66,
-      "finding": "HPA",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 1971,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "22fc0d6c179b6923e7df610b2bbf77d48fec1caec152e9cb3a7772381c47fe67"
-    },
-    {
-      "candidate": 67,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 1975,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "a5422feffe41a1ca7c9a2210f165771b2a587cc2fd53e9ecaf15ea8c3d5749d3"
-    },
-    {
-      "candidate": 68,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 1981,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "0dc2df3a133937a3151c5f99cdfc2dac8fcb5e20463d471b6b98d46e91943abb"
-    },
-    {
-      "candidate": 69,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2002,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "f3e9416a6d98ba6cf720d46a69689cb640a79e67ffb13c1e812eed4c2f6e05c7"
-    },
-    {
-      "candidate": 70,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2043,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "593e401c0187686bdb999c6b68c0d55f0621d7e65b2311fe37871391c33d3c8e"
-    },
-    {
-      "candidate": 71,
-      "finding": "POD-FIELDS",
-      "disposition": "manual",
-      "source": "kubernetes-1.31.md",
-      "line": 2093,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "45930bd1b04062784c742985ddf760f9b2c653ca2554f8802dcb1cdfeaee5bde"
-    },
-    {
-      "candidate": 72,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2123,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "cf159c56d4ac6dfc2c6e8a9d8b15f5232f2c7f5187a901f5dfbd8c38c87d6983"
-    },
-    {
-      "candidate": 73,
-      "finding": "PDB",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 2152,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "eac928ba91d41110d27291db2a233f48431a230561d892beb5a1e103ab76c1b1"
-    },
-    {
-      "candidate": 74,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2155,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "df7e38403247b2c195ceee304c07ddc7a8c7e5c22f134ff0e17d8bdd857ee2a8"
-    },
-    {
-      "candidate": 75,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2162,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "c0c4eef0d0f456e1314d4dd0b39b1b04b7b1c2d509ea47baf7d551d58fe97b34"
-    },
-    {
-      "candidate": 76,
-      "finding": "HARNESS-CLI",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2245,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "dcd470db4f1893d00114856fdcc6740b7dd709eed66e7d9cbba0f9e45205daf2"
-    },
-    {
-      "candidate": 77,
-      "finding": "ACCOUNTING",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 2264,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "376326a24b73e2a4f8eababfef4463b935ffe8e8343ddec5f0b0438c8723e65a"
-    },
-    {
-      "candidate": 78,
-      "finding": "PVC-CONTROLLERS",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2273,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "44f93bb109241040ce83be5a76952a60df4aba0455f4a90e77baddb96f0ba080"
-    },
-    {
-      "candidate": 79,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2293,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "99323e478cabe6126726f2a27e417614fb3f416626aa74e0a0500a9e2c28d0d3"
-    },
-    {
-      "candidate": 80,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2299,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "753444e71eba36de4178ddb31e50ad0b4557916a43a332f102ca56f3dad62301"
-    },
-    {
-      "candidate": 81,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2334,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "8bc8fbdc02b72e14b8f16f49dea7dc0e786935b37903764c8c8ec292568cf4c7"
-    },
-    {
-      "candidate": 82,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2353,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "80ccb355cc52f6d0022a99656dbb28a30054c7d0916b90156554391d41e66498"
-    },
-    {
-      "candidate": 83,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2361,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "07606f47dffe14509cec5441c81fe01b05e807597c5b4902a8113687da361003"
-    },
-    {
-      "candidate": 84,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2367,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "2fe649f53f3ce2fa589a2bdb9cb623a03e96d598ccf0737b6af293e713116ec9"
-    },
-    {
-      "candidate": 85,
-      "finding": "PVC-CONTROLLERS",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2690,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "874344b5e93c3e519d18794c29a60d0a9affe0035f917a5fa061ea61229f4202"
-    },
-    {
-      "candidate": 86,
-      "finding": "ACCOUNTING",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 2701,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "ea9f1b61d816124eb05437cd2ab0ca16e714ac14dc1e64a4af5e0664de71b8ce"
-    },
-    {
-      "candidate": 87,
-      "finding": "POD-FIELDS",
-      "disposition": "manual",
-      "source": "kubernetes-1.31.md",
-      "line": 2702,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "95d747628f937adbd1d080eb720cf8aaba6e9deab00454cfd836d2870d62f190"
-    },
-    {
-      "candidate": 88,
-      "finding": "ACCOUNTING",
-      "disposition": "fixed",
-      "source": "kubernetes-1.31.md",
-      "line": 2706,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "247e73f2c91721267f50d89a212fc4581dea3ddd1f4496b2bcebf78e00b132f1"
-    },
-    {
-      "candidate": 89,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 2719,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "d2d8df576ec1679a6a458cdb825ddc2ee04a934d18b2721cce34bd1f48fc9bc5"
-    },
-    {
-      "candidate": 90,
-      "finding": "POD-FIELDS",
-      "disposition": "manual",
-      "source": "kubernetes-1.31.md",
-      "line": 2744,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "4b85edc9d7681c90fd8e73bdff370b5b41612302b63f4ba3445f2a0d9cd3fbaa"
-    },
-    {
-      "candidate": 91,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 2792,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "d7dde9548d1eb319e95dfec94fe7a6e786128666027fb48c4291e26c55357e0c"
-    },
-    {
-      "candidate": 92,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3095,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "cac9e150b4033b4778778f312aa35899be5c0fc784dda50021824dd31ba0dbf1"
-    },
-    {
-      "candidate": 93,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3100,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "08d36890ff90bda13124fbbfea5d1008231777f3db299413dc851646e770516e"
-    },
-    {
-      "candidate": 94,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3120,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "6bf378edaa1585863908c16be37067a33042a754b6d31a5316d167c3f8321bc1"
-    },
-    {
-      "candidate": 95,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3400,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "f763ce32f88102e5cb7fa6599cccd5e1dbc38ebd5b7d3a2e55e218c24011270c"
-    },
-    {
-      "candidate": 96,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3418,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "77d95efc084ab65932e094ce9ff3de53f7c1fd77b5f7ac0e9fe73cb77da38d5b"
-    },
-    {
-      "candidate": 97,
-      "finding": "HPA",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3419,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "c68cb6a1ecc9a2f6c8c9207438d6fd5cab474241d3a0799171d767fda112270e"
-    },
-    {
-      "candidate": 98,
-      "finding": "AUTH",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3444,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "2b1d693de66690a09643b75bea6542b251322eb087f2f8bda9ad70fe042fd665"
-    },
-    {
-      "candidate": 99,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3465,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "6667fabc401d3a6b7e2b2b783adfaddf1f7ad0e963ef6dd08296a6df5cad13c7"
-    },
-    {
-      "candidate": 100,
-      "finding": "HARNESS-CLI",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3525,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "550c3824ae20f8c467b078770a9d8fcb54a686052287277a6d34ec4f6cf10242"
-    },
-    {
-      "candidate": 101,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3551,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "53b9df37b01d2e82aaa06b86885928750c536a680e5631bb094138f5a427f0a9"
-    },
-    {
-      "candidate": 102,
-      "finding": "API-SERVING",
-      "disposition": "no-impact",
-      "source": "kubernetes-1.31.md",
-      "line": 3579,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "451d98528296e02f7900a55c6c42f5362b7d4a015af914696e324c359f7bfe8d"
-    },
-    {
-      "candidate": 103,
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite",
-      "source": "kubernetes-1.31.md",
-      "line": 3591,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
-      "textSHA256": "d8c79d1c0eb84656ee1bab58754e6b3df69c5e67ebba84969b3344b335e8b0e1"
-    }
-  ],
-  "additionalParagraphDispositions": [
-    {
-      "entry": 0,
-      "source": "ocp-4.18.adoc",
-      "line": 57,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L57",
-      "textSHA256": "1af7d4a9bcbe8add7ec8cdf851ed46ebd7b0a51418f76456637bb03da629768c",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 1,
-      "source": "ocp-4.18.adoc",
-      "line": 102,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L102",
-      "textSHA256": "584472fdf167bb62271d814a5f6d7acbaa568ee3a2ad19da7cf35831009390f3",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 2,
-      "source": "ocp-4.18.adoc",
-      "line": 137,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L137",
-      "textSHA256": "37a650a140959a9eca035f3f51d86667e9d3dd28ff40f499751c18c6923498ac",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 3,
-      "source": "ocp-4.18.adoc",
-      "line": 208,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L208",
-      "textSHA256": "97f8fd266ce5f7cdbb14d32dfb12f45c642061a64f022d2486a9bb28ba756e6f",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 4,
-      "source": "ocp-4.18.adoc",
-      "line": 296,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L296",
-      "textSHA256": "6bc6312c14839b5d764cec18976056e3ebe85791a439b245500e00f90e21316d",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 5,
-      "source": "ocp-4.18.adoc",
-      "line": 599,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L599",
-      "textSHA256": "7be7ea8d03c20a6fd146a09304ca193830a6e904e1fc8202800eb4e894b70d8a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 6,
-      "source": "ocp-4.18.adoc",
-      "line": 609,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L609",
-      "textSHA256": "2fea5ef1ea89724060ee369273c5acab2adfc950b28dac2b6606e8b3542ffb17",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 7,
-      "source": "ocp-4.18.adoc",
-      "line": 611,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L611",
-      "textSHA256": "4bb9be84240584472bfd62c0445e62d57a67c4c0720094380ac3bee5d1e0b393",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 8,
-      "source": "ocp-4.18.adoc",
-      "line": 623,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L623",
-      "textSHA256": "21f158559eb9ab6d513a1240b103822c57f0167aa289e12c83865293aecb709b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 9,
-      "source": "ocp-4.18.adoc",
-      "line": 757,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L757",
-      "textSHA256": "77c2d44447afdd4a27246cb630343036fd6e0120bd0d75c9280a876a257f2002",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 10,
-      "source": "ocp-4.18.adoc",
-      "line": 863,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L863",
-      "textSHA256": "d5a50a23bc722d7268b1f55374b02aded4da1299f649613f08072192197d0a0e",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 11,
-      "source": "ocp-4.18.adoc",
-      "line": 891,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L891",
-      "textSHA256": "92bb59ac0349d67c2b1d8b1799f8b4dd4ef8f12e58f27c17d88aa83f64210643",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 12,
-      "source": "ocp-4.18.adoc",
-      "line": 923,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L923",
-      "textSHA256": "169dfcbc2ca298c5f142bebd205a19f32c288da901679c14bc5bc6f58fceb65c",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 13,
-      "source": "ocp-4.18.adoc",
-      "line": 928,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L928",
-      "textSHA256": "30b769a5c34494f8f9a85965c7536ff67a425d973c6c07f5b7505c6152f8332d",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 14,
-      "source": "ocp-4.18.adoc",
-      "line": 959,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L959",
-      "textSHA256": "d0851ac5db067e2bcd01b130837146cb425ea88ef5e5ad56f92ce3002e98206a",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 15,
-      "source": "ocp-4.18.adoc",
-      "line": 998,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L998",
-      "textSHA256": "da1e76dc4096d4bd7f907ffce97d2fe3dcacce3589a63099e791b6a6856c2d74",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 16,
-      "source": "ocp-4.18.adoc",
-      "line": 1006,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1006",
-      "textSHA256": "5eb00f4fff3fd6285f0be163c90d6c00329a3df1bd7ba27dac4c6e246a0df357",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 17,
-      "source": "ocp-4.18.adoc",
-      "line": 1008,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1008",
-      "textSHA256": "47c30d7a797468cb6859c8c3dbffa9b8e2b2c953fabfda3e8826f689282b5138",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 18,
-      "source": "ocp-4.18.adoc",
-      "line": 1029,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1029",
-      "textSHA256": "d42bd2db73d85786815baca2fc4e0eaf9a05049b8291495431160af6ba13c6b3",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 19,
-      "source": "ocp-4.18.adoc",
-      "line": 1160,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1160",
-      "textSHA256": "28c562fc0a83343e958aa10f55b6e56bdd6574337209b698639e9bc90de99757",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 20,
-      "source": "ocp-4.18.adoc",
-      "line": 1181,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1181",
-      "textSHA256": "0626ec9cd914f61a14d630126519d3eb13e3786a011fd100f8b268a650617c65",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 21,
-      "source": "ocp-4.18.adoc",
-      "line": 1203,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1203",
-      "textSHA256": "26e560e7a6578a2e7f7aea418ee6b7a2c50d171b667d116f4ddb67b7c56769db",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 22,
-      "source": "ocp-4.18.adoc",
-      "line": 1220,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1220",
-      "textSHA256": "882f50dd60877bd33c1061e9abe8edcef186ac3fc4f4ff3b043424a84e6acf23",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 23,
-      "source": "ocp-4.18.adoc",
-      "line": 1238,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1238",
-      "textSHA256": "3ed2523d9c7425f5497b0cbb2f790fce9b1d83c090d1e38c444b8c1f6735780a",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 24,
-      "source": "ocp-4.18.adoc",
-      "line": 1240,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1240",
-      "textSHA256": "b58077e08453968fe305fc943e71904b52f747eed7112af096db3c2bfd018c72",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 25,
-      "source": "ocp-4.18.adoc",
-      "line": 1336,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1336",
-      "textSHA256": "0cf6fc5148f8bd51a99ac258e58f83f37620d8c947a8e0891671376fe808276b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 26,
-      "source": "ocp-4.18.adoc",
-      "line": 1754,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1754",
-      "textSHA256": "9202bec62097c5367a7c0b4d91342a14470fab8c6c1afe2f2a74c3b8549e3450",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 27,
-      "source": "ocp-4.18.adoc",
-      "line": 1764,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1764",
-      "textSHA256": "a578cd7165e6086184ed0df9feb6746f40da340fe327338cdc93bbe891bb3d6f",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 28,
-      "source": "ocp-4.18.adoc",
-      "line": 1768,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1768",
-      "textSHA256": "6ca47c0a241801c129f47cf507d6476f5f01ff6b3713f0dc75b8dd46b014bc98",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 29,
-      "source": "ocp-4.18.adoc",
-      "line": 1792,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1792",
-      "textSHA256": "e11f739815c8d09acade6cb335d030acf9cbfd40249bde86a001d9c502938d09",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 30,
-      "source": "ocp-4.18.adoc",
-      "line": 1812,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1812",
-      "textSHA256": "de0ba642cc8f5f67cae8ec5d11378d26678502362cc03d1bc5c5e08b847bbfe1",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 31,
-      "source": "ocp-4.18.adoc",
-      "line": 1820,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1820",
-      "textSHA256": "82aafdeff3d93dd8bd722e99ee4d0ca64f64cd725b4ccc4d94dc136a7094a2b5",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 32,
-      "source": "ocp-4.18.adoc",
-      "line": 1842,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1842",
-      "textSHA256": "ea58ce7ce62e31ca25aeeae10b125060c8e63e8b7333e0d02e04a3541f403d89",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 33,
-      "source": "ocp-4.18.adoc",
-      "line": 1876,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1876",
-      "textSHA256": "59e03e2ca54c80eca155ab5e8be73e03ec796ed425a1b395bc33d197108b6cf4",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 34,
-      "source": "ocp-4.18.adoc",
-      "line": 1920,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1920",
-      "textSHA256": "2329075646126d056f1c89658568ffd3233d152efd157efa19c23dc671d40f94",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 35,
-      "source": "ocp-4.18.adoc",
-      "line": 1945,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L1945",
-      "textSHA256": "c707cf62986180b459bd19a5eb28d8efbdcc9ff3e2bd54834eb61c3a9e826bed",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 36,
-      "source": "ocp-4.18.adoc",
-      "line": 2023,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2023",
-      "textSHA256": "cb6414a3df840f3fbe4ef4e977a106578f8f1e2e24c2a7999a7db21928a22c61",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 37,
-      "source": "ocp-4.18.adoc",
-      "line": 2083,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2083",
-      "textSHA256": "296ac03cf6cdd4853a00d5f2ef01d7fa2e2bb72c8d50a98c9c79afd11fa55cdd",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 38,
-      "source": "ocp-4.18.adoc",
-      "line": 2087,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2087",
-      "textSHA256": "55121ad44d3d4613ed08532fdedf794e3f815b431693a3b35f3bf37a4bb9eb3b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 39,
-      "source": "ocp-4.18.adoc",
-      "line": 2091,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2091",
-      "textSHA256": "25cc209e058c46d614f50d83e35db84ea706b41a22e408ea25e392aabb0a9712",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 40,
-      "source": "ocp-4.18.adoc",
-      "line": 2109,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2109",
-      "textSHA256": "3de2adbec4703cf193bb353fc0e69a354c96a8db8bc2907795f0be8ca52d1472",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 41,
-      "source": "ocp-4.18.adoc",
-      "line": 2111,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2111",
-      "textSHA256": "0634980d4d8712d59d5c2fac3302afa786f525a8f829495d88ca27cb9fae5382",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 42,
-      "source": "ocp-4.18.adoc",
-      "line": 2115,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2115",
-      "textSHA256": "63f2d5b25f91f6d5756c263a5df094208388f783a7994a77a101f92517bcdf79",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 43,
-      "source": "ocp-4.18.adoc",
-      "line": 2117,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2117",
-      "textSHA256": "ab5800336d74668b5fb946c59aac4d528a75b0ffe0defec23bf4ce0d0e97c6ef",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 44,
-      "source": "ocp-4.18.adoc",
-      "line": 2123,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2123",
-      "textSHA256": "edf78ac90fee297fb9ffad794c47dbec64b37711c1fdb6aed4277e06fe10797d",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 45,
-      "source": "ocp-4.18.adoc",
-      "line": 2129,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2129",
-      "textSHA256": "db119bb53a23e7864881402517cd5e143f13b402283c7d16c268421bf0c09dc1",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 46,
-      "source": "ocp-4.18.adoc",
-      "line": 2144,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2144",
-      "textSHA256": "98edc02aab425a98245a0672e7e1eacabee4c0a541ebf4b72c23401c77a8e7d7",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 47,
-      "source": "ocp-4.18.adoc",
-      "line": 2156,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2156",
-      "textSHA256": "783727c81575ab6c7f2846657f7e6eee4bce8455d6292210468b93911a92e8a3",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 48,
-      "source": "ocp-4.18.adoc",
-      "line": 2219,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2219",
-      "textSHA256": "c1d7e68a375cd4ea0ace418f4dd5f0ea301fa8af6fad72a42b037cb76251c445",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 49,
-      "source": "ocp-4.18.adoc",
-      "line": 2232,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2232",
-      "textSHA256": "62e41273ba3bce3c1f1bfd18567df2fe3782e78961bcef50d2bd99c1425a6db8",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 50,
-      "source": "ocp-4.18.adoc",
-      "line": 2242,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2242",
-      "textSHA256": "eafc00f33509386f85180b333cd904244572c2c4f9ec8958a21fa86a41bd58e0",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 51,
-      "source": "ocp-4.18.adoc",
-      "line": 2289,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2289",
-      "textSHA256": "1999f342b74bbe0a73aa79ed0a543c0a2147c17f8131b6e93ba9aa0666aa2153",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 52,
-      "source": "ocp-4.18.adoc",
-      "line": 2295,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2295",
-      "textSHA256": "4d5cb45993cdb3581fc6a2196723bdf96cf0d7500a48fc59b462770170559a30",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 53,
-      "source": "ocp-4.18.adoc",
-      "line": 2328,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2328",
-      "textSHA256": "813fa76e4d9a195f93de4269d268692009d4691bad1d5223bcddb14aabe749fd",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 54,
-      "source": "ocp-4.18.adoc",
-      "line": 2746,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2746",
-      "textSHA256": "b0f60b91031de1bfaccf512343aadac8195709b4594eea95175fbdf3be140d4f",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 55,
-      "source": "ocp-4.18.adoc",
-      "line": 2816,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2816",
-      "textSHA256": "b8f92455acc027443166eac34b22b991acdad03837bc9af4bda8684f75c72a9d",
-      "finding": "RUNTIME",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 56,
-      "source": "ocp-4.18.adoc",
-      "line": 2915,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2915",
-      "textSHA256": "4bd680c361e2b36d90e9fc62a0a2f159f05a0185777ea684e7d926c4bc311a67",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 57,
-      "source": "ocp-4.18.adoc",
-      "line": 2945,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2945",
-      "textSHA256": "a738d193fc239c5d93f3c43064f109a93c1f58080a42d1cb2e65a357003e6c0a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 58,
-      "source": "ocp-4.18.adoc",
-      "line": 2947,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L2947",
-      "textSHA256": "6bee2240b4e73b9d39e2b74061a46767027df71fafe2fc3a63ceb567c07b55fd",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 59,
-      "source": "ocp-4.18.adoc",
-      "line": 3007,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3007",
-      "textSHA256": "85a726800370392641edaf3836133c4c99b44dad78b691c48b4b0d5bad9a39bf",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 60,
-      "source": "ocp-4.18.adoc",
-      "line": 3049,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3049",
-      "textSHA256": "8b88080136003b7b14f2e7dfcd7644dbe005d63d707d53fc11f57b819b1a482c",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 61,
-      "source": "ocp-4.18.adoc",
-      "line": 3058,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3058",
-      "textSHA256": "1b3781eb2664fd374a0ce8a75b289a3eb4385597b349a7a8b1d741d7e80566a9",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 62,
-      "source": "ocp-4.18.adoc",
-      "line": 3060,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3060",
-      "textSHA256": "20e24fe2ec24ce5ab8ddbbeed8b82428f28cc1e61abcc28150d25331a8b7a050",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 63,
-      "source": "ocp-4.18.adoc",
-      "line": 3218,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3218",
-      "textSHA256": "d55296ea654950235fd5d6ec41984f6c0787c19ad5e3feb8b2cab95b07a41a7b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 64,
-      "source": "ocp-4.18.adoc",
-      "line": 3250,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3250",
-      "textSHA256": "94318a12f5c1f23e80fb24217491f19b4df4751c8cf9a299b3f15d3d80e5d8ba",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 65,
-      "source": "ocp-4.18.adoc",
-      "line": 3284,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3284",
-      "textSHA256": "cd10d8c6cfeb14109bab482efe7e02637be20b25be6687c1c4023b5b86b9aa1b",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 66,
-      "source": "ocp-4.18.adoc",
-      "line": 3290,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3290",
-      "textSHA256": "44e34bb45354763853629367565e66507b8e45ecc3f404bec2d8d1b0914a9e92",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 67,
-      "source": "ocp-4.18.adoc",
-      "line": 3296,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3296",
-      "textSHA256": "75eda7748eba5cc1a88a111e6f29bc833812d5c644759f8719d76146f726ad53",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 68,
-      "source": "ocp-4.18.adoc",
-      "line": 3300,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3300",
-      "textSHA256": "b4d78ad340c83d800d30f2aeb6734423e176588241e1e439bdf70256607b7112",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 69,
-      "source": "ocp-4.18.adoc",
-      "line": 3330,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3330",
-      "textSHA256": "50c3d87ba25634f59ade1fa3498430132525da2eaa694e830bdcc2ba4e89de89",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 70,
-      "source": "ocp-4.18.adoc",
-      "line": 3337,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3337",
-      "textSHA256": "10f005fdd1984b77f3bc4ddf26aad00c6fb21f02b530fdfb95db3cd987861ffc",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 71,
-      "source": "ocp-4.18.adoc",
-      "line": 3383,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3383",
-      "textSHA256": "47923aa4f1093cd4966e2fb4019a39f5bb445c48a180a3b69e3dc2b19478df0f",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 72,
-      "source": "ocp-4.18.adoc",
-      "line": 3389,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3389",
-      "textSHA256": "09ce6638777b65001847d5e646c292c73e968da5a953f6c0853b1aa4264daf8a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 73,
-      "source": "ocp-4.18.adoc",
-      "line": 3441,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3441",
-      "textSHA256": "323ca1279c4c7d3e3a9c9f26f974df11b73599f552e464c3ca8b6464f0ee0544",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 74,
-      "source": "ocp-4.18.adoc",
-      "line": 3446,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3446",
-      "textSHA256": "9fa197a96d7d35fe7e2c52e5c868ff5b147e74c9c13309665251d9f24486f697",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 75,
-      "source": "ocp-4.18.adoc",
-      "line": 3448,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3448",
-      "textSHA256": "6c62d1329962fb3f0f596efc3ecc5c68dca76c2bb061050fe2c32a3bb2ea4d16",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 76,
-      "source": "ocp-4.18.adoc",
-      "line": 3454,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3454",
-      "textSHA256": "94f61e60229ebdab3a12f19c62eabac6201cec169e00cfe1c015101903d73a1a",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 77,
-      "source": "ocp-4.18.adoc",
-      "line": 3456,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3456",
-      "textSHA256": "926ce5521bd08f56364b6fce39b2bf63831eeeb8f417ac15225016a2e2205ee7",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 78,
-      "source": "ocp-4.18.adoc",
-      "line": 3460,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3460",
-      "textSHA256": "e20b90a5775de8fcbeeb5234429ba1150aac12067caba212cbc248f6e03649fc",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 79,
-      "source": "ocp-4.18.adoc",
-      "line": 3462,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3462",
-      "textSHA256": "753e925702b48070e44cda80c67e02b5568d21ca8c20140bb3650d12221fa52b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 80,
-      "source": "ocp-4.18.adoc",
-      "line": 3464,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3464",
-      "textSHA256": "63033177ef7e1858045e574da52f462905868e38241b0cb670cc6958dba03d26",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 81,
-      "source": "ocp-4.18.adoc",
-      "line": 3466,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3466",
-      "textSHA256": "a77e3436aa8a15fc5f4460520cb8ea1983250215f0c51291a9960e7ac6d484a9",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 82,
-      "source": "ocp-4.18.adoc",
-      "line": 3496,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3496",
-      "textSHA256": "21a4be91c98154390622d67dd9c2e70a26cec77ef9975675711a2204a23bd92f",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 83,
-      "source": "ocp-4.18.adoc",
-      "line": 3501,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3501",
-      "textSHA256": "c6c5b201ad01a411eba43a73c0122889f867770c8bd6efc4ace82c51a8663eb0",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 84,
-      "source": "ocp-4.18.adoc",
-      "line": 3517,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3517",
-      "textSHA256": "0b3e210ea95b8cfa6decb422cb6429c6b934dc4402525813149dbc1354d8fff1",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 85,
-      "source": "ocp-4.18.adoc",
-      "line": 3525,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3525",
-      "textSHA256": "88e10c381314433b7df025216cab8d018d06da9032e0888afb562d006b68beac",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 86,
-      "source": "ocp-4.18.adoc",
-      "line": 3529,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3529",
-      "textSHA256": "65b48efe1d1f2de8f1e028cda1b9fe61a146262901985e47e12b33c59479a2e8",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 87,
-      "source": "ocp-4.18.adoc",
-      "line": 3563,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3563",
-      "textSHA256": "f8d9a619484f50e01ad6f3c381353cedbe7bbeaacf7a09c52d9519e7ac3c06f6",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 88,
-      "source": "ocp-4.18.adoc",
-      "line": 3565,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3565",
-      "textSHA256": "e454c2b8ea7ac93c6d5154110c5bb7966f633c728b928993916714ffef9788c1",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 89,
-      "source": "ocp-4.18.adoc",
-      "line": 3623,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3623",
-      "textSHA256": "c662a3f1cc9ee9848357bace9c850163185430225f7ab709fee5e88665977df5",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 90,
-      "source": "ocp-4.18.adoc",
-      "line": 3637,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3637",
-      "textSHA256": "d43d9b3aa80141eaa6ee21fb6898f5cf6741e03b261cb07b117975eb97510e21",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 91,
-      "source": "ocp-4.18.adoc",
-      "line": 3639,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3639",
-      "textSHA256": "92a918c8b81bc120d7cdfda5ff910ea0312881b390657ac6f5220e318e7b4f97",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 92,
-      "source": "ocp-4.18.adoc",
-      "line": 3647,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3647",
-      "textSHA256": "aa5149a88fb7afc1bbe636815829827b0184e1294c37dbcca9cbcb25b86faf42",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 93,
-      "source": "ocp-4.18.adoc",
-      "line": 3649,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3649",
-      "textSHA256": "5a5e6aeb50ee4b5d26f85984a420dec1d291e04061e74aac7759c810f71df311",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 94,
-      "source": "ocp-4.18.adoc",
-      "line": 3651,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3651",
-      "textSHA256": "fb5a88729f741e2bd4386c80eff729b780863aff96e2b8e3d098fe9b2931f46f",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 95,
-      "source": "ocp-4.18.adoc",
-      "line": 3719,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3719",
-      "textSHA256": "31186b2450033e07f081331c623a065cae6aead6265ac9dd33ad73a60f66a16e",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 96,
-      "source": "ocp-4.18.adoc",
-      "line": 3724,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3724",
-      "textSHA256": "1516fbcbb6b69296f7b0687143aa8e2d7daa2194e298866bb9511247ea587939",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 97,
-      "source": "ocp-4.18.adoc",
-      "line": 3726,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3726",
-      "textSHA256": "7d5e15b95a4c75fec4b81884c61f6daaec0b10af58804eccaabd7418963f2648",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 98,
-      "source": "ocp-4.18.adoc",
-      "line": 3804,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3804",
-      "textSHA256": "8c366e891ea9e1efff5d63e61e14c8d3a6fec201616a8005a46b1521c36899f6",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 99,
-      "source": "ocp-4.18.adoc",
-      "line": 3834,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3834",
-      "textSHA256": "8c50832d5d10e783e0e31d43ee8e6e7d651cb120e365386379a24d28d0f9055a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 100,
-      "source": "ocp-4.18.adoc",
-      "line": 3862,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3862",
-      "textSHA256": "91a93e4176f6a061c4691bfa4233b1ea57229194945a0f8389fdf76aa058d2da",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 101,
-      "source": "ocp-4.18.adoc",
-      "line": 3866,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3866",
-      "textSHA256": "9d862975a972ac7c1edd7178f4ed1ec888c5b02ec7cf8f9a94d4bfb35e8ac37f",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 102,
-      "source": "ocp-4.18.adoc",
-      "line": 3872,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3872",
-      "textSHA256": "53ada474fdfaa97793b1bfc859340f2f0696fde77d7b556039508a5905711f5c",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 103,
-      "source": "ocp-4.18.adoc",
-      "line": 3874,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3874",
-      "textSHA256": "a3e4d7064d168046d3def4cc1a76a019bf1261d7ea8778edc673290a645171ac",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 104,
-      "source": "ocp-4.18.adoc",
-      "line": 3878,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3878",
-      "textSHA256": "50ad0c4ab0368362c3c76c3f5689bff0004abb51695cae43a59c8d63a64acc7f",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 105,
-      "source": "ocp-4.18.adoc",
-      "line": 3904,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3904",
-      "textSHA256": "f02ce9c9f3d1d90f244d6fa8b71242233037f4c4ab239514d5e961148e01cc41",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 106,
-      "source": "ocp-4.18.adoc",
-      "line": 3923,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3923",
-      "textSHA256": "656d15e6cf0a8d342607a5b97d0306b2d43695d69ff69eef37304a13c25dff3c",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 107,
-      "source": "ocp-4.18.adoc",
-      "line": 3960,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3960",
-      "textSHA256": "ff90a56a2a8c3a698d88f809329b2b744a5393ba5eee472755a5a7b18830b22e",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 108,
-      "source": "ocp-4.18.adoc",
-      "line": 3988,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3988",
-      "textSHA256": "2c48f0b3d68062787ae169df2da745ce49d6cbc8db017534bf5a3923dd99fadb",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 109,
-      "source": "ocp-4.18.adoc",
-      "line": 3994,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L3994",
-      "textSHA256": "c635c71a0e263272e85f4a0f7eefa7e0f474eb0db70b57510a946b5739b8cb3b",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 110,
-      "source": "ocp-4.18.adoc",
-      "line": 4034,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4034",
-      "textSHA256": "8b11c7fe67538f086fd8f6a9985dc19e14f2773f2c1254096cadc5c0885ddd65",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 111,
-      "source": "ocp-4.18.adoc",
-      "line": 4074,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4074",
-      "textSHA256": "8a7153e8331b80d9d038e49f02da954ad50b7c7ecff76c5ae7b443125f62f033",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 112,
-      "source": "ocp-4.18.adoc",
-      "line": 4078,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4078",
-      "textSHA256": "ff24a2c25de84145b86d1a8efe526bc062afb2ec631138880e8abe206c16cf53",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 113,
-      "source": "ocp-4.18.adoc",
-      "line": 4082,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4082",
-      "textSHA256": "b80d7d4ad1caca6d25669cf28bdd425d865e826583cbb3868e55cffbe7d3908d",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 114,
-      "source": "ocp-4.18.adoc",
-      "line": 4084,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4084",
-      "textSHA256": "372e661e6bd9b0beea543fa365e914851ead7d49a6a5aa21e43c33bfabd465a1",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 115,
-      "source": "ocp-4.18.adoc",
-      "line": 4086,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4086",
-      "textSHA256": "ea8b6d7516068754e8690c192863fd77e57a9ad4485e02e7586a0a3bcfdfc76e",
-      "finding": "BUILD-IMAGE",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 116,
-      "source": "ocp-4.18.adoc",
-      "line": 4092,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4092",
-      "textSHA256": "071555fe9fe6e35a9c2812ff19d795b68270cc8191c6f7527e2ef10157585ddd",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 117,
-      "source": "ocp-4.18.adoc",
-      "line": 4094,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4094",
-      "textSHA256": "9e23b9f49fbb4f14f997dc76ae7f4dd9a7572468d24634bd9300e49b09e8a5c3",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 118,
-      "source": "ocp-4.18.adoc",
-      "line": 4122,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4122",
-      "textSHA256": "426ebd8b1693d835fcc6ad7f22fc59e3820665c79e9ecb5e9452978ed7f29758",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 119,
-      "source": "ocp-4.18.adoc",
-      "line": 4149,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4149",
-      "textSHA256": "937bf8a26a65f4f7bd08ff01aaadf099a94cda1c76c51e75229e49e1911eb356",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 120,
-      "source": "ocp-4.18.adoc",
-      "line": 4205,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4205",
-      "textSHA256": "cc5bf4c1f89778f95883c6019a65da0a78650b245cd3b8ccc2d7dfb44d6b0de8",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 121,
-      "source": "ocp-4.18.adoc",
-      "line": 4210,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4210",
-      "textSHA256": "5bd38656d61d3bae2a8fca4ae5d01418d7877bc3f9e85c2cd52a5fc0d40155d7",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 122,
-      "source": "ocp-4.18.adoc",
-      "line": 4212,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4212",
-      "textSHA256": "dca29d24eadb93c8a8f94ae390a028fa60c5cfc5187d007e24c80f8ba66ce5c5",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 123,
-      "source": "ocp-4.18.adoc",
-      "line": 4360,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4360",
-      "textSHA256": "36d3c6b42c79bff5735de388007d221adc0e17c6e61fcc70cd7982db92beb524",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 124,
-      "source": "ocp-4.18.adoc",
-      "line": 4372,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4372",
-      "textSHA256": "86e90f6024d1c5322e2b100fc7d1589bfbba5a04ee426474a7c1eae5f3a9ee4d",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 125,
-      "source": "ocp-4.18.adoc",
-      "line": 4376,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4376",
-      "textSHA256": "61d3cdd428984c8e586a0ae74e62dc04a8efaa67e98f7ad2fbedcf02cae4500b",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 126,
-      "source": "ocp-4.18.adoc",
-      "line": 4390,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4390",
-      "textSHA256": "29da4ca890506bb0ff191b9d683a8d19b56b8a135638a58d26f5184b093137c9",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 127,
-      "source": "ocp-4.18.adoc",
-      "line": 4392,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/release_notes/ocp-4-18-release-notes.adoc#L4392",
-      "textSHA256": "5c001752b27a087e76557627e2289c57888f4ba4f50ef2b4c4e1ccc84a893812",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 128,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-30-bug-fixes.adoc",
-      "line": 29,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-30-bug-fixes.adoc#L29",
-      "textSHA256": "478112f233f6cdf9e9008c6eb23188c9c9a4862ec85df926775c287139b3de31",
-      "finding": "RUNTIME",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 129,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-30-enhancements.adoc",
-      "line": 12,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-30-enhancements.adoc#L12",
-      "textSHA256": "11ddd924d649c27ceee582f4bdb6fb9dea3b7d39cfa5cb7dcd9763cd4d257738",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 130,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-31-fixed-issues.adoc",
-      "line": 24,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-31-fixed-issues.adoc#L24",
-      "textSHA256": "7069b3b012ffc0d6af182375946882cda675d0562710f35a70dd24bd56caaa23",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 131,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-31-known-issues.adoc",
-      "line": 14,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-31-known-issues.adoc#L14",
-      "textSHA256": "4e00613112dea489e6ec186a0abdc84c6935e2ac6ffb93c3b2a060e5c75321db",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 132,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
-      "line": 14,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L14",
-      "textSHA256": "c617962699e6d4c152957eedf042a451a1a5bb722ae92060b8a004626579f348",
-      "finding": "UDP-CONNTRACK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 133,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
-      "line": 18,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L18",
-      "textSHA256": "a4e16a86c60e2f266d51a43b9f9b6495de88b5f98d0c55c79bbf77664956163c",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 134,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
-      "line": 22,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L22",
-      "textSHA256": "146d595313894bd55a9b9587b20267b968856fc31660a79c9da6ba037afc577a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 135,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-33.adoc",
-      "line": 51,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-33.adoc#L51",
-      "textSHA256": "e38ca4a24731fc38f0f5e8acc4375a431bd913becb55088b23e6d456ead7b1e9",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 136,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-      "line": 28,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L28",
-      "textSHA256": "020ac9ddeb0b69c2c18d63bd1cd60f631b21bc1d305083296260abe3f9e598ba",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 137,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-      "line": 34,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L34",
-      "textSHA256": "f6fba7f35e484930a7a46db92de86cdee171ce32f57840447e26af230e83969a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 138,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-      "line": 38,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L38",
-      "textSHA256": "eefc9d10a8cb1a133fa8606ade574226ba6f7ff9b32606b9d3c8e8d3da6164dc",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 139,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-      "line": 40,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L40",
-      "textSHA256": "81c75cf008bc5246e052ca13a743811497d7b46da72fc9bd20715221c06d163a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 140,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-36.adoc",
-      "line": 26,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-36.adoc#L26",
-      "textSHA256": "54df787540eef0fb15afdf012127d3da809bf2fc3977f087269522daf51ace1a",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 141,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-36.adoc",
-      "line": 32,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-36.adoc#L32",
-      "textSHA256": "c32f39d78015dc042785e81a796f8c3a82e0aa8bc5a45e9e4619e81e5d34af84",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 142,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-36.adoc",
-      "line": 38,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-36.adoc#L38",
-      "textSHA256": "77b9dc2460dbbb38973e8ff84e9819e40466d1c34f20fbc2151450ed75c677de",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 143,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-      "line": 30,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L30",
-      "textSHA256": "bc6dd42ed91a89dbcab6152569871d51b39f94dd39ba57bfdcf81336dea3351c",
-      "finding": "UDP-CONNTRACK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 144,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-      "line": 32,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L32",
-      "textSHA256": "e767307666cc57d38f54feacf6cdc03b1f6d107355b78958f5a4b430b3233377",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 145,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-      "line": 34,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L34",
-      "textSHA256": "e9e743e460c29b7a9cc22a21545396839513f6f956be69707347ed335d7caef8",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 146,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-39.adoc",
-      "line": 30,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-39.adoc#L30",
-      "textSHA256": "50943e149d533d1207f707e2fb1d3907e602159810e2de27f5e01ed448d66eb3",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 147,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-43.adoc",
-      "line": 39,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-43.adoc#L39",
-      "textSHA256": "c047b301a0a5c08e141708c2177431f6480f40489ddb239bf2f5f6dfe568e389",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    },
-    {
-      "entry": 148,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-44.adoc",
-      "line": 26,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-44.adoc#L26",
-      "textSHA256": "6a1d2577fbda8c46ef29408ac7dab2f4cd388a22ec23262596045b378db589a8",
-      "finding": "CSI-MIGRATION",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 149,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-48.adoc",
-      "line": 26,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-48.adoc#L26",
-      "textSHA256": "b4270a3f236881dc17025fdee6f03d1c5db28d4c48b4a443ac7623bbe6ee895e",
-      "finding": "NETWORK",
-      "disposition": "prerequisite"
-    },
-    {
-      "entry": 150,
-      "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-49.adoc",
-      "line": 35,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-49.adoc#L35",
-      "textSHA256": "265b4bf8d42abc236c09961ed9a0acc5813b7ee9cb0df301be29d024980a1b93",
-      "finding": "PLATFORM-OTHER",
-      "disposition": "no-impact"
-    }
-  ],
-  "consolidationActions": [
-    {
-      "kind": "production-fix",
-      "finding": "PV-ZONE-TOPOLOGY",
-      "action": "Parent owns conservative refusal for PV topology-label placement that the reviewed0dcf787 preflight cannot assess."
-    },
-    {
-      "kind": "focused-regression",
-      "finding": "APPARMOR",
-      "action": "Simulate server annotation-to-appArmorProfile conversion in raw Pod admission; prove source/HPA/target immutability on refusal."
-    },
-    {
-      "kind": "documentation",
-      "finding": "UDP-CONNTRACK",
-      "action": "Record applicable patch prerequisites and protocol-specific validation limitation."
-    },
-    {
-      "kind": "documentation",
-      "finding": "RUNTIME",
-      "action": "Record conditional runtime patch prerequisites and no universal pre-cutover startup guarantee."
-    },
-    {
-      "kind": "documentation",
-      "finding": "CSI-MIGRATION",
-      "action": "Distinguish transparent CSI migration/installed-driver prerequisites from nonfunctional Ceph/RBD."
-    }
-  ],
-  "remainingScope": [
-    "Parent consolidation and tests for any selected changes, maintained-client dependency decision and exact-artifact live qualification remain outside this delegated source-review result.",
-    "No actual4.17/4.18 cluster integration, historical CPU-manager/UDP regression reproduction or arbitrary custom admission/runtime certification is claimed."
-  ],
-  "patchPrerequisites": [
-    {
-      "documentedFixRelease": "4.18.30",
-      "conditionalWorkload": "shareProcessNamespace=true with affected runc",
-      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-65976",
-      "source": {
-        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-30-bug-fixes.adoc",
-        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-30-bug-fixes.adoc#L29",
-        "line": 29,
-        "endLine": 29,
-        "sourceSHA256": "5f9f8010988c10c50dc50405d397618c18db31e19603f717e09d6eda5192a094",
-        "excerptSHA256": "478112f233f6cdf9e9008c6eb23188c9c9a4862ec85df926775c287139b3de31"
-      },
-      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
-    },
-    {
-      "documentedFixRelease": "4.18.32",
-      "conditionalWorkload": "OVN UDP Service port differs from targetPort",
-      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-70346",
-      "source": {
-        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-32-fixed-issues.adoc",
-        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-32-fixed-issues.adoc#L14",
-        "line": 14,
-        "endLine": 14,
-        "sourceSHA256": "0a7428ad7703f5bfdc9e5cb20d46fc4c1ae02293811ebc38dbca7491cf26db2f",
-        "excerptSHA256": "c617962699e6d4c152957eedf042a451a1a5bb722ae92060b8a004626579f348"
-      },
-      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
-    },
-    {
-      "documentedFixRelease": "4.18.34",
-      "conditionalWorkload": "systemd entrypoint ConfigMap mount permissions",
-      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-69672",
-      "source": {
-        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-34.adoc",
-        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-34.adoc#L28",
-        "line": 28,
-        "endLine": 28,
-        "sourceSHA256": "c87305ccff900be5a57497c91a10261f485b6d767066fa41f17e98ab2aac994b",
-        "excerptSHA256": "020ac9ddeb0b69c2c18d63bd1cd60f631b21bc1d305083296260abe3f9e598ba"
-      },
-      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
-    },
-    {
-      "documentedFixRelease": "4.18.38",
-      "conditionalWorkload": "external-gateway stale route after Pod deletion while node inactive",
-      "issueURL": "https://issues.redhat.com/browse/OCPBUGS-81329",
-      "source": {
-        "source": "redhat-modules/ocp-4.18/modules/zstream-4-18-38.adoc",
-        "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/e3d56cca51bcae6fd417bde29798512fa5f40723/modules/zstream-4-18-38.adoc#L30",
-        "line": 30,
-        "endLine": 30,
-        "sourceSHA256": "1c14f3baddd99aba9209a0683c3cc707b79cf251563c41ba23270eef45022673",
-        "excerptSHA256": "bc6dd42ed91a89dbcab6152569871d51b39f94dd39ba57bfdcf81336dea3351c"
-      },
-      "qualification": "Use a cluster payload carrying this fix when the condition applies, or a reviewed manual migration. The release-note fix does not establish the earliest affected patch; no older-server reproduction is claimed."
-    }
-  ],
-  "implementationSources": [
-    {
-      "file": "125776-files.json",
-      "url": "https://api.github.com/repos/kubernetes/kubernetes/pulls/125776/files",
-      "sha256": "b6c9423d7977dbb55049fe4213f9ba45fb735747e431b6f5eeb1fc4534fe0142"
-    },
-    {
-      "file": "122576-files.json",
-      "url": "https://api.github.com/repos/kubernetes/kubernetes/pulls/122576/files",
-      "sha256": "06b6bd8b77ad20ed9d938f38f3a3278bd0291fb8cb55c4198b9c11359197bcad"
-    },
-    {
-      "file": "1.30.0-validate.go",
-      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.30.0/pkg/security/apparmor/validate.go",
-      "sha256": "00a68c3e50f5a3b17c99f219244ba565ed46071065a4230d5d08f3a7eec754a2"
-    },
-    {
-      "file": "1.31.0-validate.go",
-      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.31.0/pkg/security/apparmor/validate.go",
-      "sha256": "b812b47fb0501edf5b4e4caad3c8205e07f79429ebf7627cfcc437961199ef99"
-    },
-    {
-      "file": "1.31.0-helpers.go",
-      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.31.0/pkg/security/apparmor/helpers.go",
-      "sha256": "a381ee2239346ce327568b4258183d1bfc16722fcfd6eb08bd5c594a0271aaf0"
-    },
-    {
-      "file": "123435-files.json",
-      "url": "https://api.github.com/repos/kubernetes/kubernetes/pulls/123435/files?per_page=100",
-      "sha256": "486677df026184411fb5997db6c0e728c43bf3aa941a2913c282e8dcdf6cea71"
-    }
-  ]
+  "consolidatedPrerequisites": "docs/compatibility-review.md",
+  "historicalSnapshots": "Exact snapshots and source-bound resolution overlays require the external evidence bundle."
 }

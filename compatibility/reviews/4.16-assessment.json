@@ -1,53 +1,18 @@
 {
   "schemaVersion": "v1",
-  "kind": "version-release-note-impact-assessment",
-  "openshiftMinor": "4.16",
-  "kubernetesMinor": "1.29",
-  "reviewedAt": "2026-10-16T05:55:46.426800+00:00",
-  "productionRevision": "0dcf787d58c03c50a11275941881d73e57ebdf47",
-  "status": "bounded reviewer assessment complete; consolidated resolution required",
-  "reviewerScopeComplete": true,
-  "globalReleaseQualificationComplete": false,
-  "actualIntegrationResult": "not-run",
-  "assumedCompatible": false,
-  "conditionalReviewConclusion": "No directly used API removal identified. Review-based assumption for the reviewed source can be recorded after STORAGE-PV-TOPOLOGY-LABELS is resolved and consolidated source/contract validation is complete, retaining documented manual features and platform prerequisites. Adoption of an unqualified newer client candidate is not required to reach that source-specific conclusion. This record does not create an integration pass.",
-  "reviewMethod": {
-    "sources": "Official immutable OpenShift release notes and downloaded z-stream modules; complete initial extracted candidates plus wider keyword/heading review and relevant primary issue/implementation sources.",
-    "initialCandidateCount": 111,
-    "initialCandidateCollectionSHA256": "9096dfb154f3e74d88f92ae4b636de2ea6a5805e5f41ab0bc936333c06248589",
-    "widerBulletCount": 193,
-    "widerCollectionSHA256": "172f4eea5b179ba6ca4e26ce73bcc54110265b7094aef8f4e2ba6d3ac8f01658",
-    "duplicateHandling": "Repeated upstream PR entries are assessed as the same change; source occurrence indices/hashes remain distinct. Commented removal tables are not active API-removal announcements.",
-    "materialCodeVerification": "Tier2 graph metadata_match/no_recorded_issue at generation2026-10-16T05:37:20Z for all cited production paths; full material source reads of access, quota, scheduling, baseline, SCC and constraint excerpts. Best-effort graph coverage is not proof of exhaustive code completeness.",
-    "codeFileSHA256": {
-      "baseline.go": "49a264d54400d82d852c16f1d908c3f2bdef3057b6f42015ccaeb1d4abf9dbd9",
-      "preflight.go": "6aac6036a5daa82c60caa688accf4c0a155298095a1ce8e947a5b22723372657",
-      "constraints.go": "a37e16cc51f455fbe916bc69302e56eb33823d8fba8945a50cf2e05a98e277fb",
-      "scheduling.go": "2faaec91da408919b63fb810e19d79571d6ccc9e04e6afd87078c49e5fa8ea4e",
-      "quota.go": "b5cacb97d4a1c716b21e4a98ff1bd1c22623d188ca812cba72e92a4cfb3321ae",
-      "storage.go": "173f351a076767a1fa8dfecff24adbe4c6d00bddea81cff7dc676a55ec77eafe",
-      "scc.go": "e1b302a57bc035123fe8324955e753b8e39fcf884cf213ee399ee1169d011c0d",
-      "raw_resources.go": "3d572a365f7c12d1d58420aab364eb9d7e7bdf5996a06e676be0e4253b35ceac",
-      "runtime.go": "be2277cc1dbf08eff6669fc3ac942351b6aeff49debbcbd6e780a510b4d5ac5e",
-      "admin_policy.go": "0ba488ac0420478bf991e29b534db1ce76a665cd3383a3bd70e35db1674a0ab2",
-      "cutover.go": "e65963d60105fbc8647e355811355d11bddac3f4e97c7fb84340d05c3616e183"
-    },
-    "snapshotPolicy": "Source basis is0dcf787. Parent changes made concurrently are intentionally resolved in a separate consolidation overlay; no working-tree changes are silently included in this historical review snapshot.",
-    "scopeLimit": "Compatibility assessment of converter/qualification interfaces and named platform prerequisites. Does not audit all third-party add-ons, every dependency advisory, driver data safety or arbitrary unfixed server patches. Actual old clusters unavailable."
-  },
+  "kind": "durable-release-impact-summary",
+  "minor": "4.16",
+  "evidenceBasis": "Completed bounded official-source review of historical production, with consolidation resolutions; not actual older-cluster integration.",
+  "currentSourceApplicability": "Requires reassessment after production layout changes.",
   "sources": [
     {
       "name": "ocp-4.16",
       "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "retrievedAt": "2026-10-16T02:56:55.680521+00:00",
-      "sha256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e"
+      "url": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc"
     },
     {
       "name": "kubernetes-1.29",
       "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "retrievedAt": "2026-10-16T02:55:22.001600+00:00",
-      "sha256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
       "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1"
     }
   ],
@@ -57,3211 +22,388 @@
       "change": "PV zone/region metadata labels constrain VolumeZone scheduling independently of spec.nodeAffinity; Kubernetes1.29 adds missing-beta-node-key fallback to the corresponding GA key.",
       "disposition": "unresolved",
       "toolImpact": "checkScheduling currently appends only PV.spec.nodeAffinity. It can credit spare capacity on a node outside a label-constrained PV zone and pass preflight before source retirement. This is a baseline gap exposed by the1.29 note, not a newly removed API.",
-      "toolPaths": [
-        "scheduling.go:checkScheduling",
-        "scheduling.go:nodeTermsMatch"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/pkg/scheduler/framework/plugins/volumezone/volume_zone.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/volume_zone-v1.27.16.go",
-          "sourceSHA256": "c58ca58da342ce9188411ced32a725112ae75a470c4da972536f84b7f1f9c70e",
-          "line": 79,
-          "endLine": 84,
-          "excerptSHA256": "dd61bc00e5a6225f5adcd664a3f2aaafdae0441baf8a6ffc0971be2e11d5af4c"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/pkg/scheduler/framework/plugins/volumezone/volume_zone.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/volume_zone-v1.27.16.go",
-          "sourceSHA256": "c58ca58da342ce9188411ced32a725112ae75a470c4da972536f84b7f1f9c70e",
-          "line": 153,
-          "endLine": 166,
-          "excerptSHA256": "392b151aae7c35f6ecc6db6b474df619ca948a6d778c1a9ee712499fc03df302"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.29.0/pkg/scheduler/framework/plugins/volumezone/volume_zone.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/volume_zone-v1.29.0.go",
-          "sourceSHA256": "0402ddef311a80f9f32db7ce304eea48d4006685719be108cbae5711b15856b5",
-          "line": 223,
-          "endLine": 246,
-          "excerptSHA256": "125fc7e4c0dde2ecaddb6debed843ca5a6087455d6674eea31baf34831067f1c"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.29.0/staging/src/k8s.io/cloud-provider/volume/helpers/zones.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/zones-v1.29.0.go",
-          "sourceSHA256": "2d7a43730e4603d4bff256b3fc70000ddb6d49739c31e8c7e938a048f4b5dbbe",
-          "line": 32,
-          "endLine": 64,
-          "excerptSHA256": "3ffbbadad8b2b186674fb4e07ce56b20b9cf88cb612dcb572b231b596b3682a7"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.29.0/staging/src/k8s.io/cloud-provider/volume/constants.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/constants-v1.29.0.go",
-          "sourceSHA256": "9edcb5e4eb3a6e15be4e9a938a597da1a1d585f9f1e28fdebe9327c7945226a8",
-          "line": 24,
-          "endLine": 26,
-          "excerptSHA256": "075fe49164aa268bc6635a7a52b1159ab7f590d92e990021e3757310f26470b6"
-        }
-      ],
       "requiredAction": "Parent consolidated implementation pass must add conservative manual refusal for these labels, or verified version-aware matching. Do not mark resolved in this reviewer snapshot.",
-      "validation": [
-        "Add a Bound CSI claim/PV with a topology label and no nodeAffinity; only wrong-zone spare capacity must not permit cutover.",
-        "Cover all four keys, multiple __-delimited zones, empty/malformed values, and PVs that also carry nodeAffinity.",
-        "Assert DC/HPA/paused-target identities and specs remain unchanged on refusal; unlabeled supported CSI cases remain usable."
-      ],
-      "residualScope": "Known keys: failure-domain.beta.kubernetes.io/zone, failure-domain.beta.kubernetes.io/region, topology.kubernetes.io/zone, topology.kubernetes.io/region. Terms are ANDed, allowed values ORed.1.27 requires exact node keys;1.29 falls back only when a beta node key is absent. Nodes with no topology keys skip this scheduler plugin. Conservative refusal avoids guessing patch/plugin semantics."
+      "residualScope": "Known keys: failure-domain.beta.kubernetes.io/zone, failure-domain.beta.kubernetes.io/region, topology.kubernetes.io/zone, topology.kubernetes.io/region. Terms are ANDed, allowed values ORed.1.27 requires exact node keys;1.29 falls back only when a beta node key is absent. Nodes with no topology keys skip this scheduler plugin. Conservative refusal avoids guessing patch/plugin semantics.",
+      "references": [
+        {
+          "line": 79
+        },
+        {
+          "line": 153
+        },
+        {
+          "line": 223
+        },
+        {
+          "line": 32
+        },
+        {
+          "line": 24
+        }
+      ]
     },
     {
       "id": "QUOTA-PRIORITYCLASS-FLOOR",
       "change": "Kubernetes1.28 fixes PriorityClass-scoped quota usage aggregation; backport117825 delivered the fix in1.27.2.",
       "disposition": "no-impact",
       "toolImpact": "quotaApplies uses nonempty priorityClassName for Exists, its inverse for DoesNotExist, and explicit In/NotIn values. Those semantics match the fixed server. The original bug was missing Exists in spec.scopes usage-stat evaluation, not a general difference in explicit Exists/DoesNotExist matching. Official OpenShift4.14.0 starts with Kubernetes1.27.6, beyond the upstream fix.",
-      "toolPaths": [
-        "quota.go:quotaApplies",
-        "quota.go:quotaHeadroom",
-        "quota.go:checkQuotas"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "56ac36a059f960dd61cb8c4bdbf443749cf1e33cd541029ad89dd8794c30fce9",
-          "line": 2371,
-          "endLine": 2371,
-          "excerptSHA256": "a6097fdfbde9ba452b4ea33193450b659d43febfdd5cdb528dafc996674945b0"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c",
-          "line": 2071,
-          "endLine": 2071,
-          "excerptSHA256": "0d568bfa94fe87841a389273460a7abc2f04294b07d7284f41dfa8a88c24ad42"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.27.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "40ef3d8ae717001e058711fd45977088ae5244cc5791794cd452ee565952aa5c",
-          "line": 2158,
-          "endLine": 2158,
-          "excerptSHA256": "c4561620c68a66914d93f7c51c38277c5b313f31d3c10b9f0b1cda6ac72a7f1c"
-        },
-        {
-          "sourceURL": "https://api.github.com/repos/kubernetes/kubernetes/pulls/117825",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/kubernetes-pr-117825.json",
-          "sourceSHA256": "a9dc7e2981ab4b34c015d8cd1200717d0f14802e356d04fb1bc931535d6ccc22",
-          "line": 1,
-          "endLine": 1,
-          "excerptSHA256": "a9dc7e2981ab4b34c015d8cd1200717d0f14802e356d04fb1bc931535d6ccc22"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.2/pkg/quota/v1/evaluator/core/pods.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/pods-v1.27.2.go",
-          "sourceSHA256": "0f1224529a5869f55b9c9f1c221e0ba405fa3814b608065c1eeb1b8923a401d3",
-          "line": 330,
-          "endLine": 336,
-          "excerptSHA256": "413e92df56250a7a30b9c08dc334d844a644bc1233ad219b7a3c8a127c5c38cc"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/staging/src/k8s.io/apiserver/pkg/quota/v1/generic/evaluator.go",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/evaluator-v1.27.16.go",
-          "sourceSHA256": "b7a0b88c14568812c7d062cbee2d68a5eb62f8e1812846ad867e67fcb5f8ea34",
-          "line": 199,
-          "endLine": 215,
-          "excerptSHA256": "5b46a151ce582c64ad7a9cce660e56b3f8e0bd5c5afd2a2a47109ebd71941e79"
-        },
-        {
-          "sourceURL": "https://amd64.ocp.releases.ci.openshift.org/releasestream/4-stable/release/4.14.0?from=4.14.0-rc.6",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/ocp4140-release.html",
-          "sourceSHA256": "b0e5dd772e334bfd65db4d5283add66c9072234b485b16b845f81414514b7cda",
-          "line": 47,
-          "endLine": 47,
-          "excerptSHA256": "0bc3a11df5736584eaa98843588da387c7d6273bb81def33ad2a27718884c83f"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [
-        "Existing TestQuotaFullReplicaDemandAndScopes verifies aggregate demand and synchronized accounting.",
-        "Add focused PriorityClass Exists/DoesNotExist/In/NotIn cases to pin the primary-source comparison; no new runtime refusal is justified by this patch."
-      ],
-      "residualScope": "The fix is present before the supported OpenShift floor. This does not prove all server quota counters or concurrent admission remain synchronized."
+      "residualScope": "The fix is present before the supported OpenShift floor. This does not prove all server quota counters or concurrent admission remain synchronized.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2371
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2071
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2158
+        },
+        {
+          "line": 1
+        },
+        {
+          "line": 330
+        },
+        {
+          "line": 199
+        },
+        {
+          "line": 47
+        }
+      ]
     },
     {
       "id": "AUTH-ACCESS-REVIEW-VERSION",
       "change": "The webhook-authorizer SAR default for an omitted resourceAttributes.version changes to wildcard in1.28.",
       "disposition": "fixed",
       "toolImpact": "Runner.access now explicitly supplies the version used by each actual endpoint: v1, autoscaling/v2, or optional admin-policy/v1alpha1; required-SCC LocalSAR already uses v1. Fix0dcf787 prevents version-sensitive authorizers from falsely refusing an allowed operation.",
-      "toolPaths": [
-        "preflight.go:Runner.access",
-        "scc.go:authorizeRequiredSCC"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.28.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "56ac36a059f960dd61cb8c4bdbf443749cf1e33cd541029ad89dd8794c30fce9",
-          "line": 2288,
-          "endLine": 2288,
-          "excerptSHA256": "64b44977e4067f4896316d4bdacd880b5fa327800cfa9328caee253c7e44cbaa"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [
-        "TestAccessReviewUsesActualResourceVersionAcrossServerDefaults reproduces pre-fix refusal and post-fix success under local empty/wildcard profiles.",
-        "TestPermissionReviewMatchesEndpointGroupVersion"
-      ],
-      "residualScope": "Actual API operations still enforce authorization; local profiles do not constitute an older-server/custom-webhook integration test."
+      "residualScope": "Actual API operations still enforce authorization; local profiles do not constitute an older-server/custom-webhook integration test.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2288
+        }
+      ]
     },
     {
       "id": "RAW-BASELINE-ADMISSION",
       "change": "New Pod/init/affinity/security fields and admission-policy capabilities may exist without changing the stable API version.",
       "disposition": "manual",
       "toolImpact": "validateBaseline checks raw source/admission objects against the1.27 catalog before typed conversion; unsupported post-floor semantics require review. Deployment/ReplicaSet/HPA raw guards detect unfamiliar response fields. Strict server dry runs of source retirement, destination activation and actual proposed Pod precede source mutation.",
-      "toolPaths": [
-        "baseline.go:validateBaseline",
-        "raw_resources.go",
-        "constraints.go:assessConstraints",
-        "scc.go:authorizeRequiredSCC"
-      ],
-      "sources": [
+      "requiredAction": "No additional production change identified for this named change.",
+      "residualScope": "Admission outcomes remain controller/name/identity specific; dry run is point-in-time evidence and cannot certify every third-party webhook.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
           "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2989,
-          "endLine": 2989,
-          "excerptSHA256": "48ffc6580129edf5606e93a580efc9408767380da3a5a8ab2165abb4e720aa15"
+          "line": 2989
         },
         {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
           "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2374,
-          "endLine": 2377,
-          "excerptSHA256": "7f9232b6df308ed89ec961ca196215ebe500454b4a78dae877601fbc9a0f0a3f"
+          "line": 2374
         }
-      ],
-      "requiredAction": "No additional production change identified for this named change.",
-      "validation": [
-        "TestAdmissionFieldsCannotBypassBaselineOrPreRetirementChecks",
-        "TestRawWorkloadAdmissionCannotHideNewFields",
-        "TestRequiredSCCCannotUseCallerPrivilegesAsServiceAccountProof"
-      ],
-      "residualScope": "Admission outcomes remain controller/name/identity specific; dry run is point-in-time evidence and cannot certify every third-party webhook."
+      ]
     },
     {
       "id": "NATIVE-SIDECARS",
       "change": "Restartable init sidecars are introduced in1.28 and enabled by default as beta in1.29, with HPA resource calculation and termination-order fixes.",
       "disposition": "manual",
       "toolImpact": "The post-floor init-container restartPolicy is not silently dropped: source/admitted sidecars require manual migration. podResources and observed allocation accounting include sidecar demand for other existing Pods.",
-      "toolPaths": [
-        "baseline.go:validateBaseline",
-        "quota.go:podResources",
-        "scheduling.go:checkScheduling"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2146,
-          "endLine": 2146,
-          "excerptSHA256": "c3753db3a0e84fda922cc4c2fd0ef37038a1d1f67595f6054773053e77f885ec"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2147,
-          "endLine": 2147,
-          "excerptSHA256": "affba9d096df393af8893ae4f442910f412dcde7a22108878918573c5d53fe2e"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2156,
-          "endLine": 2156,
-          "excerptSHA256": "886e5df7c63d91ec66d9e60e63f96459619b73230155092fa69f9ad06e2d392d"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [
-        "TestPodAccountingIncludesInitSidecarsAndOverhead",
-        "TestAdmissionFieldsCannotBypassBaselineOrPreRetirementChecks"
-      ],
-      "residualScope": "No claim of automatic native-sidecar conversion or old-server native-sidecar runtime qualification."
+      "residualScope": "No claim of automatic native-sidecar conversion or old-server native-sidecar runtime qualification.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2146
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2147
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2156
+        }
+      ]
     },
     {
       "id": "SCHEDULING-RUNTIME",
       "change": "Scheduler hint/plugin interfaces, resource claims, CPU Manager/cgroup behavior and node-availability fixes change independently of Pod API serving.",
       "disposition": "prerequisite",
       "toolImpact": "Converter is not a scheduler plugin and imports no scheduling framework. checkScheduling rejects custom schedulers, hard inter-Pod affinity/spread, gates and dynamic claims; nodeSelector/nodeName/taints/capacity are evaluated against observed admitted Pod and current allocations. It does not reserve capacity or simulate NUMA, devices or custom plugins.",
-      "toolPaths": [
-        "scheduling.go:checkScheduling",
-        "scheduling.go:nodeEligible",
-        "quota.go:podResources",
-        "constraints.go:assessConstraints"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 1978,
-          "endLine": 1980,
-          "excerptSHA256": "08e2a7676dee28957b3f6f839b80604de115a337531ab72f9f8fb2a0225f2608"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 3324,
-          "endLine": 3324,
-          "excerptSHA256": "85ade4083e8f766d23fcfe8007e0fd597a2520bdf8aa90086d1485c3947ad25e"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 3348,
-          "endLine": 3348,
-          "excerptSHA256": "bf4aa93a5ab63768205ced9ec0bdbe99b4810a76c9d12943b5a8b039f959290f"
-        }
-      ],
       "requiredAction": "Require healthy, appropriately patched nodes and workload-specific hardware/runtime validation; retain explicit warning that capacity assessment is not reservation.",
-      "validation": [
-        "TestNodeEligibilityRejectsHardPlacementConstraints",
-        "TestPodAccountingIncludesInitSidecarsAndOverhead"
-      ],
-      "residualScope": "Automatic mode does not promise scheduler/plugin equivalence or continued node health.4.16 exclusive-CPU replacement startup note is handled by complete old-Pod termination in exclusive cutover, but CPU Manager defects remain a platform prerequisite."
+      "residualScope": "Automatic mode does not promise scheduler/plugin equivalence or continued node health.4.16 exclusive-CPU replacement startup note is handled by complete old-Pod termination in exclusive cutover, but CPU Manager defects remain a platform prerequisite.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 1978
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 3324
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 3348
+        }
+      ]
     },
     {
       "id": "PDB-SERVICE-CONTROLLERS",
       "change": "PDB draining/preemption fixes, terminating endpoint routing, Service finalizer/address handling and cloud load-balancer bugs affect controllers.",
       "disposition": "no-impact",
       "toolImpact": "Production uses stable policy/v1 PDB selectors and synchronized disruptionsAllowed to assess planned scaling; it does not call eviction/drain, create Services, change finalizers, or delete/reallocate Service addresses. Existing Service selectors and actual endpoint Pod identities are checked; route/HTTP validation remains runtime evidence.",
-      "toolPaths": [
-        "constraints.go:assessConstraints",
-        "cutover.go:checkTraffic",
-        "cutover.go:checkHealth"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2264,
-          "endLine": 2264,
-          "excerptSHA256": "c8aae4322dc5cc867d9bc15050bed2204db38631457461e905a171b0ed84fc09"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2242,
-          "endLine": 2242,
-          "excerptSHA256": "145b55cc1ef5adcb00f9b5eabfbfd90696a11b5bf9c0484fa36658914e268d42"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1397,
-          "endLine": 1401,
-          "excerptSHA256": "e0931c37ec7bd13f9d73e56a6e1cf0502392871b428ae987ac0f9e005bb02554"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [],
-      "residualScope": "No zero-downtime guarantee is derived from API acceptance; patched CNI/load balancer and real health checks remain prerequisites."
+      "residualScope": "No zero-downtime guarantee is derived from API acceptance; patched CNI/load balancer and real health checks remain prerequisites.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2264
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 2242
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 1397
+        }
+      ]
     },
     {
       "id": "FIXTURE-INFRASTRUCTURE",
       "change": "Installer, operator, console, monitoring, cluster-upgrade and scheduler metric changes are distinct from converter APIs.",
       "disposition": "no-impact",
       "toolImpact": "Neither production inventory nor qualification creates machines, configures control planes, installs storage/network operators, manages OLM Bundle APIs or scrapes scheduler metrics. HPA console controls, image-output UI links and web-console duplicate imagePullSecrets fixes do not change the direct JSON REST migration protocol.",
-      "toolPaths": [
-        "runtime.go:Runner.connect",
-        "docs/compatibility-review.md:production-and-harness-inventory"
-      ],
-      "sources": [
+      "requiredAction": "No additional production change identified for this named change.",
+      "residualScope": "A healthy installed cluster is still required; irrelevant interfaces are not a general claim that all platform defects cannot affect workloads.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1438,
-          "endLine": 1443,
-          "excerptSHA256": "c6510ab1ff7b3fdcd3d8fd4f825680f7b7776675342dff00f87b0516fa908cfb"
+          "line": 1438
         },
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 2444,
-          "endLine": 2444,
-          "excerptSHA256": "0fda5cc9960cd95ed8a29fa835ad6f16ff2e36f04bad38213fc890d9705e0c81"
+          "line": 2444
         }
-      ],
-      "requiredAction": "No additional production change identified for this named change.",
-      "validation": [],
-      "residualScope": "A healthy installed cluster is still required; irrelevant interfaces are not a general claim that all platform defects cannot affect workloads."
+      ]
     },
     {
       "id": "ADMIN-NETWORK-POLICIES",
       "change": "Cluster AdminNetworkPolicy/BaselineAdminNetworkPolicy availability expands from Technology Preview to generally available in4.16.",
       "disposition": "fixed",
       "toolImpact": "Optional capability discovery plus selector assessment in93efcf3 checks admin-policy subjects/peers as well as namespace NetworkPolicies before source retirement.132542b requires manual review for selectors depending on the Deployment-generated future pod-template-hash label. Denied or unassessed capabilities cannot be treated as policy absence.",
-      "toolPaths": [
-        "admin_policy.go:adminPolicyResources",
-        "admin_policy.go:checkAdminPolicies",
-        "constraints.go:assessConstraints"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 854,
-          "endLine": 857,
-          "excerptSHA256": "ff59be12ed941fe379d55672905cfac5144e8bfe05161c9bc1408cc77abe0a15"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [
-        "TestAdminPolicyChangeBlocksBeforeSourceRetirement",
-        "TestAdminPolicyAssessmentFailureIsNotAbsence",
-        "TestEquivalentAdminPolicySelectionAllowsMigration"
-      ],
-      "residualScope": "Selector equivalence is not complete network priority/traffic simulation. Actual policy live evidence stays tied to its recorded4.21 binary."
+      "residualScope": "Selector equivalence is not complete network priority/traffic simulation. Actual policy live evidence stays tied to its recorded4.21 binary.",
+      "references": [
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 854
+        }
+      ]
     },
     {
       "id": "API-REMOVALS-DC-CAPABILITY",
       "change": "DeploymentConfigs remain deprecated and capability dependent; removed APIs do not intersect production or fixture inventory.",
       "disposition": "prerequisite",
       "toolImpact": "Live DC discovery must succeed, with unavailable capability distinguished from denial/expiry. Offline exported-input conversion remains possible and cannot execute an incomplete plan.1.29 flowcontrol/v1beta2 and ClusterCIDR removal, scheduler component-config removals and RukPak Bundle removal are outside both inventories.",
-      "toolPaths": [
-        "preflight.go:Runner.access",
-        "runtime.go",
-        "planning.go",
-        "docs/compatibility-review.md:production-and-harness-inventory"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1929,
-          "endLine": 1947,
-          "excerptSHA256": "5b4dcc89907e87b0f278d82ef370fab45c020e65b2f2b47c06d08c8b89153a55"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 1971,
-          "endLine": 1971,
-          "excerptSHA256": "bf3094963d3154f389d47c212e18d2004013d3d084510a1fb74ea9ebaefb0c25"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1805,
-          "endLine": 1805,
-          "excerptSHA256": "668a61ff8c20e22aa6ebb588e8d1bfa38388447f3e8a559e45cafee3fb1dd2e4"
-        }
-      ],
       "requiredAction": "Do not infer that a disabled DeploymentConfig or Build capability can be restored by the converter.",
-      "validation": [
-        "Existing missing-capability, denied-discovery, expired-token, empty-namespace and offline contract cases"
-      ],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 1929
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 1971
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 1805
+        }
+      ]
     },
     {
       "id": "AUTH-TOKEN-AND-IMAGE-PULL",
       "change": "Automatic SA secret creation changes; legacy token cleanup and bound image-pull token refresh replace implicit long-lived Secret dependencies.",
       "disposition": "prerequisite",
       "toolImpact": "Runner.connect loads kubeconfig and treats bearer tokens as opaque. Converter preserves workload SA/projection/imagePullSecrets and does not select the first generated SA Secret. Test drivers explicitly use TokenRequest. Expired credentials or unavailable image credentials fail visibly; the converter does not re-enable old tokens.",
-      "toolPaths": [
-        "runtime.go:Runner.connect",
-        "converter.go",
-        "tools/qualify_permissions.py",
-        "docs/compatibility-review.md:authentication-and-disabled-capabilities"
-      ],
-      "sources": [
+      "requiredAction": "Use valid credentials and working image-pull configuration. Build/new-app fixtures additionally require enabled Build/ImageRegistry capabilities.",
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1404,
-          "endLine": 1427,
-          "excerptSHA256": "8619055d6a0b408ac4f9cc424fd99d03397470607554e24aeb4b6a8984d2c565"
+          "line": 1404
         },
         {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
           "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 2172,
-          "endLine": 2180,
-          "excerptSHA256": "19a7c43f028b497970990cc0252700a091c96797debc7227983d09da58357729"
+          "line": 2172
         }
-      ],
-      "requiredAction": "Use valid credentials and working image-pull configuration. Build/new-app fixtures additionally require enabled Build/ImageRegistry capabilities.",
-      "validation": [
-        "Historical actual signed-token-expiry and recovery evidence applies only to its recorded binary."
-      ],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      ]
     },
     {
       "id": "STORAGE-CSI-SELINUX-RWOP",
       "change": "RWOP/SELinux mount optimizations, retroactive StorageClass assignment, CSI migration, detachment and driver-specific topology requirements affect runtime storage.",
       "disposition": "prerequisite",
       "toolImpact": "Production reads existing Bound claims and backing PVs, preserves volume/security configuration, and does not provision/resize/delete storage or edit CSIDriver/StorageClass. Ephemeral claim provisioning is manual. CephFS/RBD and gitRepo require replacements through existing guards. API success alone cannot prove mount, relabel, attachment-slot or node-failure behavior.",
-      "toolPaths": [
-        "constraints.go:assessConstraints/storage-references",
-        "scheduling.go:checkScheduling",
-        "storage.go:unsupportedInlineVolumes",
-        "storage.go:checkLegacyPV"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 959,
-          "endLine": 971,
-          "excerptSHA256": "3f6b9eb31310f3aa9c0010bc0dfc54e239e601b7f06c9ae60d0583cacbf92153"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 3041,
-          "endLine": 3041,
-          "excerptSHA256": "5fb43d48e67f45c1bb733b7b4ddc4cfb86944cab3313558da23f7890c15fd75c"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 2627,
-          "endLine": 2631,
-          "excerptSHA256": "59fce6fc8bb68a08b8dee96e362be91ec2557001049acda7241647e86a4ef3d8"
-        }
-      ],
       "requiredAction": "Require reviewed existing CSI storage and a workload-specific mount/data check; vSphere tags and driver prerequisites must be correct. A single regular-PVC test does not qualify every driver, RWOP or SELinux mode.",
-      "validation": [
-        "TestSupportedStorageStillPassesPreCutoverChecks",
-        "TestLegacyInlineVolumesRequireManualMigration",
-        "TestAdmissionAddedLegacyStorageBlocksBeforeRetirement"
-      ],
-      "residualScope": "Separate actionable PV metadata-topology gap is STORAGE-PV-TOPOLOGY-LABELS. Driver attachment limits/mounting remain explicitly unsimulated."
+      "residualScope": "Separate actionable PV metadata-topology gap is STORAGE-PV-TOPOLOGY-LABELS. Driver attachment limits/mounting remain explicitly unsimulated.",
+      "references": [
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 959
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 3041
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 2627
+        }
+      ]
     },
     {
       "id": "IMAGE-BUILD-CONTROLLERS",
       "change": "Build-controller image-pull secret lookup, cloud registry auth, disconnected imports and mirror/TLS fixes affect image availability.",
       "disposition": "prerequisite",
       "toolImpact": "Production preserves image references and emits image.openshift.io/triggers; it neither performs builds nor imports ImageStreamTags. Real new-app/rebuild/trigger qualification additionally exercises build/image controllers, registry credentials and disconnected-mirror configuration; those must be assessed separately from production RBAC.",
-      "toolPaths": [
-        "converter.go:image-trigger-conversion",
-        "tools/qualify_new_app.py",
-        "docs/compatibility-review.md:harness-inventory"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1416,
-          "endLine": 1419,
-          "excerptSHA256": "48dab78abd1080b7ce2f4dd466b9a363396cac9aa54eae4b2554b6b4387c9a2c"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-28.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "63d592ce4475b093cfacfd8f4b373fba964b75cca42ccd6b861e25ac11f58f00",
-          "line": 45,
-          "endLine": 45,
-          "excerptSHA256": "dc04edb162d60dc5b375eb0045d070db3199330f814731f794da86265af872c8"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-49.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "7203868c72be294c57bfd1b3ad4200a04edb80606049a456fc34c19f65418437",
-          "line": 33,
-          "endLine": 33,
-          "excerptSHA256": "a1e351c82874a08661673d8be4c63aca5469e49cb12e3e340174e980a9e1b7a7"
-        }
-      ],
       "requiredAction": "Do not rely on implicit general-purpose SA Secret linking for builds. Preserve explicit imagePullSecrets; require functioning imports/builds before migration.",
-      "validation": [
-        "Existing live new-app/image-trigger evidence must be rerun for the final artifact; it is not an older-server integration pass."
-      ],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 1416
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 45
+        },
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 33
+        }
+      ]
     },
     {
       "id": "SERVER-PATCH-SECURITY",
       "change": "Patch notes cover SA mountable-secret envFrom enforcement, Windows security defects, HTTP/2 protections, duplicate-keyed-list/Pod-GC regressions and scheduler crashes.",
       "disposition": "prerequisite",
       "toolImpact": "CVE-2024-3177 can cause stricter Pod admission for envFrom; the same source workload can be rejected by corrected policy, so live preflight must validate it before source changes. Windows node/log/storage vulnerabilities, CNI/CSI runtime failures and server transport limits are platform patch responsibilities. Converter does not call node logs/query or manage runtime binaries. Dependency scanner results remain separate evidence.",
-      "toolPaths": [
-        "constraints.go:assessConstraints/pod-admission",
-        "runtime.go:Runner.connect",
-        "raw_resources.go",
-        "docs/compatibility-review.md"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 1513,
-          "endLine": 1525,
-          "excerptSHA256": "f35b98c122a22cc5f64ec23ffdca2772790c517ab1c6bbf13228febc3a65543f"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 604,
-          "endLine": 614,
-          "excerptSHA256": "1dc58c6bc1857f66938414b36db483a072957744b42121606764fc901ff87a8d"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 1191,
-          "endLine": 1201,
-          "excerptSHA256": "6d22fd8acd3caeee7e6a4a78d80e736a9cd6391cd02fea3472b592e0f88ff557"
-        },
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 3037,
-          "endLine": 3040,
-          "excerptSHA256": "66af7ecc0bd19f75d6443aca28bd61440d09a8e914583ab643616c046b4b2768"
-        }
-      ],
       "requiredAction": "Use a maintained vendor-patched release and validate corrected Pod admission. Do not derive an OpenShift fix patch solely from an upstream Kubernetes version because downstream backports differ.",
-      "validation": [
-        "Retain pre-retirement server rejection contracts and current govulncheck/gosec results; those cannot certify server patch installation."
-      ],
-      "residualScope": "This is a bounded compatibility/security-interface assessment of named changelog advisories, not an exhaustive audit of every cluster dependency, third-party add-on or later advisory."
+      "residualScope": "This is a bounded compatibility/security-interface assessment of named changelog advisories, not an exhaustive audit of every cluster dependency, third-party add-on or later advisory.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 1513
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 604
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 1191
+        },
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 3037
+        }
+      ]
     },
     {
       "id": "SCC-READMISSION-AND-ROLES",
       "change": "4.16 fixes SCC readmission on OVN informative annotations, upgraded SCC ephemeral/CSI volume entries and hostmount-anyuid role naming.",
       "disposition": "prerequisite",
       "toolImpact": "Converter authorizes actual workload SA and required SCC, evaluates current raw SCC, and dry-runs the proposed Pod. It does not repair built-in SCCs/ClusterRoles. Optional hostmount fixture must discover/use an existing correctly configured role; ordinary production operation does not require that fixture role.",
-      "toolPaths": [
-        "constraints.go:assessConstraints",
-        "scc.go:authorizeRequiredSCC"
-      ],
-      "sources": [
+      "requiredAction": "Keep converter authorization/admission checks and existing-policy discovery; leave platform SCC/role repair to the operator.",
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1985,
-          "endLine": 1991,
-          "excerptSHA256": "8e2b967aff5ea05600c46dd49b52a46e5bb9cbc7617852d6d2004b817cc0896d"
+          "line": 1985
         },
         {
-          "sourceURL": "https://api.github.com/repos/openshift/apiserver-library-go/pulls/117/files",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/apiserver-library-go-pr-117-files.json",
-          "sourceSHA256": "b55491b45e849f1d44d8fbf71560694acc423b5cbfa9594b7cb85e9741fdceb7",
-          "line": 1,
-          "endLine": 1,
-          "excerptSHA256": "b55491b45e849f1d44d8fbf71560694acc423b5cbfa9594b7cb85e9741fdceb7"
+          "line": 1
         }
-      ],
-      "requiredAction": "Keep converter authorization/admission checks and existing-policy discovery; leave platform SCC/role repair to the operator.",
-      "validation": [
-        "TestRequiredSCCCannotUseCallerPrivilegesAsServiceAccountProof",
-        "TestPinnedSCCUsesItsOwnDefaultsAfterServiceAccountAuthorization"
-      ],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      ]
     },
     {
       "id": "HYPERSHIFT-EVICTION-NOTE",
       "change": "4.16.50 OCPBUGS61582 release-note wording mentions malformed YAML and eviction; primary issue and HyperShift6797 instead identify node-monitor grace period.",
       "disposition": "no-impact",
       "toolImpact": "The fix changes hosted-control-plane KCM --node-monitor-grace-period only for IBMCloud (50s to55s); it does not change DC/Deployment YAML schemas, taint parsing or converter request formatting. Current node health/capacity checks and explicit readiness failure/recovery remain applicable but cannot eliminate node-health races.",
-      "toolPaths": [
-        "scheduling.go:nodeEligible",
-        "cutover.go:sourceStopped"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-50.adoc",
-          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "c6944d43252db32d0f444fb99f0ff57ffde5dc9e8a423f1a0c21ab78575398c2",
-          "line": 31,
-          "endLine": 31,
-          "excerptSHA256": "a8f154faf423ec72271f995e0664150f9a4c67648e0a2c2addb5eb750b9b2016"
-        },
-        {
-          "sourceURL": "https://issues.redhat.com/rest/api/2/issue/OCPBUGS-61582?fields=summary,description,fixVersions,issuelinks",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/hypershift-eviction-issue.json",
-          "sourceSHA256": "e249a25a012bd6ca8f520e93c020f89d849dda79de48fe0b714026890586e629",
-          "line": 1,
-          "endLine": 1,
-          "excerptSHA256": "e249a25a012bd6ca8f520e93c020f89d849dda79de48fe0b714026890586e629"
-        },
-        {
-          "sourceURL": "https://api.github.com/repos/openshift/hypershift/pulls/6797/files",
-          "retainedFile": ".scratchpad/parallel-release-review-20261016/415-416/hypershift-pr-6797-files.json",
-          "sourceSHA256": "b9fdd0dd637f132b8745044550467755eb9a2d540990d58638b5c16d16ca0ccb",
-          "line": 1,
-          "endLine": 1,
-          "excerptSHA256": "b9fdd0dd637f132b8745044550467755eb9a2d540990d58638b5c16d16ca0ccb"
-        }
-      ],
       "requiredAction": "No additional production change identified for this named change.",
-      "validation": [],
-      "residualScope": "Issue fixVersion is4.16.z; release module identifies4.16.50. No fabricated general invalid-YAML workaround or universal data-loss guarantee."
+      "residualScope": "Issue fixVersion is4.16.z; release module identifies4.16.50. No fabricated general invalid-YAML workaround or universal data-loss guarantee.",
+      "references": [
+        {
+          "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
+          "line": 31
+        },
+        {
+          "line": 1
+        },
+        {
+          "line": 1
+        }
+      ]
     },
     {
       "id": "ROUTE-SHA1-RUNTIME",
       "change": "HAProxy2.8 rejects SHA-1 route certificates;4.16.43 also rejects SHA-1 CA certificates to avoid reload interruptions.",
       "disposition": "prerequisite",
       "toolImpact": "Production keeps Services/Routes and performs configured HTTP health checks; it does not generate/replace certificates or patch router configuration. Qualification creates Routes as fixture exposure. A broken TLS route may prevent health verification even when API migration fields are valid.",
-      "toolPaths": [
-        "cutover.go:checkHealth",
-        "tools/qualify_openshift.py"
-      ],
-      "sources": [
+      "requiredAction": "Use functioning supported TLS certificates and validate the exact configured health endpoint before cutover.",
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 1354,
-          "endLine": 1364,
-          "excerptSHA256": "6f2d4ca12a12a7e6f4e82e89b8a66caee812108f73b560ff27d8479e7d819be0"
+          "line": 1354
         },
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-43.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "3d02a1fe6cdeb602d5c09bf6f26487e08270930438bd770b97907dc6e739fbb9",
-          "line": 34,
-          "endLine": 34,
-          "excerptSHA256": "8b403c0b541554a7c6d45b33f1393ec02c0b0e6582bc63f1d41f66dea7cb2539"
+          "line": 34
         }
-      ],
-      "requiredAction": "Use functioning supported TLS certificates and validate the exact configured health endpoint before cutover.",
-      "validation": [],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      ]
     },
     {
       "id": "CLI-DRYRUN-AND-QUOTA-FIXTURES",
       "change": "4.16.52 fixes oc delete istag --dry-run=server actually deleting; foreground ClusterResourceQuota deletion and several UI scale controls are fixed.",
       "disposition": "no-impact",
       "toolImpact": "Production does not delete ImageStreamTags, invoke oc CLI or delete ClusterResourceQuotas. It reads AppliedClusterResourceQuotas only. Qualification may delete owned CRQs, so cleanup completion must be observed rather than assumed. Production dry-run HTTP calls target DC/Deployment/HPA/RS/Pod APIs, not the affected CLI istag command.",
-      "toolPaths": [
-        "quota.go:checkQuotas",
-        "constraints.go:assessConstraints",
-        "tools/qualify_constraints.py"
-      ],
-      "sources": [
+      "requiredAction": "Preserve fixture cleanup verification and never use the affected istag dry-run CLI command as a nonmutation proof.",
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-52.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "a5c61c1634aeab5f06be89e0ba5cb9c319b24edc63496dad878791fd0f1c578d",
-          "line": 30,
-          "endLine": 30,
-          "excerptSHA256": "ae008360d0f9422ed6c8ae010091377dfeb5f0d261510196e0d211c3e920b933"
+          "line": 30
         },
         {
-          "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
           "sourceCommit": "d8ed17c431a59e24ff889c58eb03d8d4e5068d70",
-          "sourceSHA256": "54b6935247ffb06f0425ef0072970079ef610de5d090eb27f6c88212ca2c2a7e",
-          "line": 2340,
-          "endLine": 2340,
-          "excerptSHA256": "8962500fb004d5e60e7ad2e92f00f6b1baba44056c1ee076bdee401ad708e9b3"
+          "line": 2340
         }
-      ],
-      "requiredAction": "Preserve fixture cleanup verification and never use the affected istag dry-run CLI command as a nonmutation proof.",
-      "validation": [],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      ]
     },
     {
       "id": "CLIENT-GO-VOLUME-RESOURCE-TYPE",
       "change": "1.29 Go APIs replace PVC ResourceRequirements with VolumeResourceRequirements; REST request fields remain resources.requests/limits.",
       "disposition": "no-impact",
       "toolImpact": "Current aligned Kubernetes libraries are already0.31.3 and production only reads existing PVCs. Qualification PVC manifests use JSON field names. No1.29 Go compile migration remains in this source. JSON content/accept types are explicitly set, so server support is assessed by actual endpoints/field guards rather than a matching client version.",
-      "toolPaths": [
-        "go.mod",
-        "runtime.go:Runner.connect",
-        "scheduling.go:checkScheduling"
-      ],
-      "sources": [
-        {
-          "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
-          "sourceSHA256": "4f76db493839abe8973fa6a973199cb9b46bcea53e24ea5c9324dcf07c7e0bb9",
-          "line": 3555,
-          "endLine": 3555,
-          "excerptSHA256": "36f13d49fc5b4c6266caab86e2e39ebffcf7142738198a2c16c0e736fc892fee"
-        }
-      ],
       "requiredAction": "Parent still owns maintained-client selection and final contract/live reruns; this named source-type migration is not a reason to pin0.31.3.",
-      "validation": [],
-      "residualScope": "Review evidence; no older-cluster integration result."
+      "residualScope": "Review evidence; no older-cluster integration result.",
+      "references": [
+        {
+          "sourceCommit": "aea561709867d4039260bd462cb456b9b46906a1",
+          "line": 3555
+        }
+      ]
     }
   ],
-  "candidateDispositions": [
-    {
-      "collection": "initial",
-      "index": 0,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 132,
-      "textSHA256": "686a365668fd243eebafb917d9d7ca003afceda99632f7004790b26e176a59d0",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 1,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 134,
-      "textSHA256": "800ef497bb146bf661441fa06d5ca9c1eae2be53585d7919a5c8835d1df4ff90",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 2,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 504,
-      "textSHA256": "f7ffaf42386ba8fcdefc40987fb247fe56646c179a1d32dfd4ad3fea4abe3026",
-      "findingRef": "PDB-SERVICE-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 3,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 766,
-      "textSHA256": "accf29a67bf0907ad0d4a664c2db7b43897825a43ef266f76612facfba9a7ba8",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 4,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 854,
-      "textSHA256": "be97c64c9af0c32a2802e55b3b59cf7bfb8a86399b1097fea480527ab57bdaa3",
-      "findingRef": "ADMIN-NETWORK-POLICIES"
-    },
-    {
-      "collection": "initial",
-      "index": 5,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 857,
-      "textSHA256": "55d825e2691801e95a6db2f504b298a452d6f5ff2d0b798db571207176c1eec1",
-      "findingRef": "ADMIN-NETWORK-POLICIES"
-    },
-    {
-      "collection": "initial",
-      "index": 6,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 864,
-      "textSHA256": "d8ce279f5e4c6257f2f5b3989df21f32567ad89c3081b6af19eff560f2ad285e",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 7,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 968,
-      "textSHA256": "4f9500650f0e75ce7543931559bf269fbf8fa5963bb893c40dd627b71cd7e2e9",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 8,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1225,
-      "textSHA256": "0cd259ef4e55dbd0d39c325b1d84afd3ed1088b8c40acab2402d263315d44e27",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "initial",
-      "index": 9,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1287,
-      "textSHA256": "9816353855ab907347524bc856a850389802eabbbd967a011a77449876cf2bf5",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 10,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1409,
-      "textSHA256": "51089b3912eade8ac0a6127f1fc4503b3b08cf526810a6bd8d6feef239e9c6ed",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 11,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1439,
-      "textSHA256": "c463240d1aef73384376be43ceeae32ab592fb7d63fd76e5121f40e09224b1c7",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 12,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1441,
-      "textSHA256": "aecd071b72286c66fbaf97b383c90a5ad111a78c57163fb50936f7585c5ce8bb",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 13,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1485,
-      "textSHA256": "6b78011816a99e131ce6d8044fdd8c3d34dcc2b0c5bee9ffb1325c0c7aa7eabb",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 14,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1805,
-      "textSHA256": "8a15d8ce1a6230afb9343eda071aeac266aca60fadfeadf7af59ff25fc418abd",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 15,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1884,
-      "textSHA256": "0e7b130bf71120f4dfe0713a9b736a39480353aa27c7ebda24e81ab4444e52ad",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 16,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1928,
-      "textSHA256": "741202a2a4ab22201e833f035ef92321661e9710929725aed90c4e75f99162a5",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 17,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1929,
-      "textSHA256": "0db73c40ff514de8bd07f12173ee3bc5cb7d11ebaed3399718e62914880203b4",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 18,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1931,
-      "textSHA256": "4419f06df12c597231fca7b797ffc7dc4583b549be813aa567609c220037f8d2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 19,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1933,
-      "textSHA256": "60990c94753b9a245ef9fed6ba7544c5c49ad3aad291517d993ba1ab3de16197",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 20,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1938,
-      "textSHA256": "4197433dcab77e83dbf9c88cd10de573a5c1f48c8141488de43813805cdad514",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 21,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1943,
-      "textSHA256": "fccf4e88ca8a1afda49b7a2228f61b8bf4036cc6995e5a98143f4335fd4d0b70",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 22,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1952,
-      "textSHA256": "a581e4239579dcd57944726b980168a33ebe55db100ebba839e8031bebcb97d8",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 23,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1985,
-      "textSHA256": "9a5d3489fc460a35aa7d269e7428a226f51718780d685282827bd87b4a67a419",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "initial",
-      "index": 24,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1989,
-      "textSHA256": "7ff2f947d03a033c2ddd6786ea77e324e3dd2b1d0b60b35de7582cbd1f7ab52a",
-      "findingRef": "SCC-READMISSION-AND-ROLES"
-    },
-    {
-      "collection": "initial",
-      "index": 25,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1991,
-      "textSHA256": "8b83954feb348d7ac1ee8ddfcfc3bdc079154b0065b1d25f34c186551f966eb1",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "initial",
-      "index": 26,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 1997,
-      "textSHA256": "dba389a1bb08e48ae984f693714de733bf2de5b5a56065f6c99dddf166de5b3d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 27,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2005,
-      "textSHA256": "25f8665d954cd2eb16cf5933f306763b467a1c5dac32be8837b2e950e08d7a6f",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 28,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2064,
-      "textSHA256": "f28297777cb5977697e1e8cce272a75adf3b8c7365d1d85638080cd0bf41ebe9",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 29,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2072,
-      "textSHA256": "0fdcffca0697db42ec8c26595f68f4f098235a3153ba9408c1b1b54ea0e140d6",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 30,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2104,
-      "textSHA256": "2f2ab1e9dc004574ebefe275fdc9534e1c1038d2d3713f3c46ab1bf4a60fc63e",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 31,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2120,
-      "textSHA256": "b5e38ed7b99c56494355283f74407fe46a9a4a2727d9c69ed81be9bbf03b1e8f",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 32,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2164,
-      "textSHA256": "8dfa0f934b4e3a2c3c2242076efcd305951a99d3c764fd52d248aa1321f1dd3e",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 33,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2176,
-      "textSHA256": "bd70259e62649cbfae890f9cee2d58c56d87f4f08e3aaa75e1688ac20304e0b1",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 34,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2274,
-      "textSHA256": "f0dc057f2cb2c762f38da1cf9c2a1b95ea1e660a3fd051ed6b574a461612258d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 35,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2340,
-      "textSHA256": "8962500fb004d5e60e7ad2e92f00f6b1baba44056c1ee076bdee401ad708e9b3",
-      "findingRef": "QUOTA-PRIORITYCLASS-FLOOR"
-    },
-    {
-      "collection": "initial",
-      "index": 36,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2444,
-      "textSHA256": "0fda5cc9960cd95ed8a29fa835ad6f16ff2e36f04bad38213fc890d9705e0c81",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 37,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2472,
-      "textSHA256": "7f145f00581eb1a4b505750c727c942e574a2df9387bdae5b7704ed8b62daa00",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 38,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2478,
-      "textSHA256": "aeb3c4636b8875229d5ab510bdbccca1525ece42d5c2a304ba0d8dd5918f4597",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 39,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2486,
-      "textSHA256": "3201aa25a9a6ba8972e37879966125e0f7f09654d45887b9b079315ea0dd0f73",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 40,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2701,
-      "textSHA256": "73dfe1767f307cfc07d6069d8a5705e5b4a04fcbe13cfe91daeb312564677318",
-      "findingRef": "ADMIN-NETWORK-POLICIES"
-    },
-    {
-      "collection": "initial",
-      "index": 41,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 3348,
-      "textSHA256": "4c8eb733421027fae87dd950c06cf8974e75a127523b7354534e9e316b6ef93e",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 42,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-40.adoc",
-      "line": 47,
-      "textSHA256": "ea478e55b6c24ce8afaa31d537583d2904738a718034ae67a016062e9da50b24",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 43,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-12.adoc",
-      "line": 47,
-      "textSHA256": "fd49c26235387d945255d48be8205ab420a1e1fa897e55aaf34efd5e45053d0c",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 44,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-19.adoc",
-      "line": 28,
-      "textSHA256": "56cae1b69722609b1675a6d66b050927da2e4dfd5135dadab687baa2f45a51ec",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 45,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-3.adoc",
-      "line": 34,
-      "textSHA256": "2f844e63fd8a4584efd391d3a33b0d059e2fdfc8f1c578a609adcfd488549dd7",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "initial",
-      "index": 46,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-3.adoc",
-      "line": 44,
-      "textSHA256": "f01f568bdcb19fc5885e9fd367c03cc67a0909ab1858968135882a97277ae2a2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 47,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-4.adoc",
-      "line": 30,
-      "textSHA256": "ca3e2be3d884d64af9cd2fbb6628697f4cf3ea1bccfc3bf96bb8a19864f3ee99",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 48,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-4.adoc",
-      "line": 40,
-      "textSHA256": "4e6a1d1fed94a06e66d4058d7eef48d2bf7da2fcb68409220eda5db1bbe599e7",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 49,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-50.adoc",
-      "line": 29,
-      "textSHA256": "f77922be20f5e80feb915d2900f51482386547b711686dfb6d3019a695bc1ee3",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 50,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-50.adoc",
-      "line": 31,
-      "textSHA256": "a8f154faf423ec72271f995e0664150f9a4c67648e0a2c2addb5eb750b9b2016",
-      "findingRef": "HYPERSHIFT-EVICTION-NOTE"
-    },
-    {
-      "collection": "initial",
-      "index": 51,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-50.adoc",
-      "line": 35,
-      "textSHA256": "ed246a8a15381ba40a62ad724925ed1f62ed29ce26ca5f232d5c00137bb94699",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 52,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-35.adoc",
-      "line": 30,
-      "textSHA256": "402eb1a79ca0aa9a85b72341f02a129c48a93460194a78696e259cd98bf50912",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "initial",
-      "index": 53,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-32.adoc",
-      "line": 36,
-      "textSHA256": "a5fa2f91563fc05f4f34c6bbee1b6974f92a8e5fe2a754157d9d08aeb02be5cf",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 54,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-54.adoc",
-      "line": 48,
-      "textSHA256": "76efc403888604a9174b6c9c7690bfdae9a4b074565315062e3f3adf2e1de6e7",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "initial",
-      "index": 55,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-8.adoc",
-      "line": 34,
-      "textSHA256": "24393845451f132b4d02137fb1892417e28cd5b275b3c20072a0df504024740b",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 56,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-21.adoc",
-      "line": 34,
-      "textSHA256": "468f7bddf80f90632b7d2d1c99ed3378f988f6ef247dc3dc133a15083c0b5e60",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 57,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-14.adoc",
-      "line": 52,
-      "textSHA256": "1dd7a05c7ba22db7d3f15556c86db19266277e6def8a8ccd944496ee5a01fd49",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 58,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-58.adoc",
-      "line": 26,
-      "textSHA256": "0ef331ffc43bb246c6b4c8b2a4f3dec1ccd32680cf5fc2518d6d44615d7501e5",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 59,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-38.adoc",
-      "line": 26,
-      "textSHA256": "27ecb98177bea10a42e5ded44e819fdbcec901f0f268ba88434004b1ba757d54",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 60,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-38.adoc",
-      "line": 56,
-      "textSHA256": "61d47d163f603b4bca7a01f51a8054b84d3a68efa2a3448df52b6ff19c0b4f72",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "initial",
-      "index": 61,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-38.adoc",
-      "line": 68,
-      "textSHA256": "5b10bff038b1e571ba30b2ccda7ea0984c2cb6a0c560c52e61bd5a380ef71d1e",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 62,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-11.adoc",
-      "line": 33,
-      "textSHA256": "40d3c57f56dbb46a425b6b5eff609adf9d7e53e3adb93e64f88ab25f9c3d7438",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 63,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-49.adoc",
-      "line": 33,
-      "textSHA256": "a1e351c82874a08661673d8be4c63aca5469e49cb12e3e340174e980a9e1b7a7",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "initial",
-      "index": 64,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-27.adoc",
-      "line": 34,
-      "textSHA256": "831e145c326c588718f1f460fb68cb4d30bcf33b50ea7f1ceec4361bec010b8d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 65,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 813,
-      "textSHA256": "707c0ea7c9a90d3fa11fced0ffa3bbdb7522b332184bf4d1742da2770da90cff",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "initial",
-      "index": 66,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1232,
-      "textSHA256": "44f93bb109241040ce83be5a76952a60df4aba0455f4a90e77baddb96f0ba080",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 67,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1850,
-      "textSHA256": "9495b130c7a4879085f91b0a5aaa22573a0854d6a245a2172ca8ad7ac560f8c4",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 68,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1971,
-      "textSHA256": "bf3094963d3154f389d47c212e18d2004013d3d084510a1fb74ea9ebaefb0c25",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 69,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1984,
-      "textSHA256": "97a8433f552f33425a02bbe54b929a12cfc298f61000b2f1b9772d462b39fe58",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 70,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2004,
-      "textSHA256": "eca51512669753bc299ec40475ecc39ea6e396d13d29b2677ec4804ecce254ab",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 71,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2145,
-      "textSHA256": "87bda674f17970055c25946a2216ae7e8eddb87451b34251cf8b51d871a49b1a",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 72,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2146,
-      "textSHA256": "c3753db3a0e84fda922cc4c2fd0ef37038a1d1f67595f6054773053e77f885ec",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 73,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2156,
-      "textSHA256": "886e5df7c63d91ec66d9e60e63f96459619b73230155092fa69f9ad06e2d392d",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 74,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2162,
-      "textSHA256": "44aeb88035b334c5850eca7fdc7e2e9039311e7f20faade33485de41fd9a5ae8",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 75,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2172,
-      "textSHA256": "62b2ba89d7e7ad406601df0073dfc3256eab3b614353ae5cc1a18dc122ff3683",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 76,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2178,
-      "textSHA256": "e4bdce8031786f9a747a15189c24bdb00a69e00bb582777b1e7f6672b4d56564",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 77,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2203,
-      "textSHA256": "58fe9ac716065ca216d151ab05bd33c3c51f9868519a6161ee4a297a2209a96d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 78,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2240,
-      "textSHA256": "ef4fb7da7ed78534956035884713a687da1ca9a8602afe0fe433dd370e94cd5c",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 79,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2242,
-      "textSHA256": "145b55cc1ef5adcb00f9b5eabfbfd90696a11b5bf9c0484fa36658914e268d42",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 80,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2264,
-      "textSHA256": "c8aae4322dc5cc867d9bc15050bed2204db38631457461e905a171b0ed84fc09",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 81,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2266,
-      "textSHA256": "28a51e40d9587561baaa227d39c77449a85a1009f9856c6070c89259b6514016",
-      "findingRef": "QUOTA-PRIORITYCLASS-FLOOR"
-    },
-    {
-      "collection": "initial",
-      "index": 82,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2299,
-      "textSHA256": "8334feb92db05470331b39806d552a77e19076aaadae37c171b9af928468b746",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 83,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2329,
-      "textSHA256": "ddca2d25bfe762b2af0574be02b85705bb57f4b278825a51276cc359326bd831",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 84,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2345,
-      "textSHA256": "5673a1fda9bb1bc9c3c42b122f54a790b96317b8c204e5389b97ef3e045e77c8",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 85,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2348,
-      "textSHA256": "d8642740af6690fb0e4612820c6f484e1a134f540e0c8e06ce74cc234c54c562",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 86,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2352,
-      "textSHA256": "df3567d39d1bf07ed39237cc425921ec87bfe39ad4e0ad7ac4c14d13dfb98a69",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 87,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2355,
-      "textSHA256": "903131e35d0721a0c529d43dc626590bf7c6fbcd06e9a32f1b1b0e0e6cf2188a",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 88,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2358,
-      "textSHA256": "8591b5b3ef969ad80b75463e07a3fd1a0d70523ea8a5cf00815efad6eadc1673",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 89,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2380,
-      "textSHA256": "92ea6220bb93bdb95c51646036ee0a9331b59432cd6d1cc6b247ddf3f1c98fed",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 90,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2944,
-      "textSHA256": "aaf851422c30c6a4683bfc3f7339429b16d190ee6fad72f4231ee28a0eed64e3",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 91,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2983,
-      "textSHA256": "b401c6b47f73e247eccb1bb25eafeb3a52ec2ef12a246c167981787846026327",
-      "findingRef": "API-REMOVALS-DC-CAPABILITY"
-    },
-    {
-      "collection": "initial",
-      "index": 92,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3028,
-      "textSHA256": "73999bfa4494dcd6082f5f3a01d74d39e8b746901d67685657bacd8774078965",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 93,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3037,
-      "textSHA256": "66af7ecc0bd19f75d6443aca28bd61440d09a8e914583ab643616c046b4b2768",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 94,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3044,
-      "textSHA256": "cb222e9cd626a6b48ca2e0b268088b6a30cdc42a2b7b7d5cbf9dfd4bfb8eee3d",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 95,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3047,
-      "textSHA256": "ce541589364167c08118b5f5feb3987a5219d65729b37e14b5d09a62175d057b",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "initial",
-      "index": 96,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3058,
-      "textSHA256": "be3b2eadfdddee54b4627b3b73bc02469d0b9256e90e696ac51af03347f02750",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 97,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3066,
-      "textSHA256": "313061a481818b171fa930cef1a263504cd860a6913b482bea563d37cd868a4d",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 98,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3091,
-      "textSHA256": "ddee9acceff5603cee023689fb79712e13a83732d7ef2938713998744f5985d9",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "initial",
-      "index": 99,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3131,
-      "textSHA256": "0d21045296fe56479d74e14535116ff9ace2c2427d4793482946673508e27126",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 100,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3132,
-      "textSHA256": "97301df5ba012f9c52df16109d47d563125d09cfeb9660e96f928b3ef3807120",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "initial",
-      "index": 101,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3135,
-      "textSHA256": "7e214430cf7470a86fc0cd5c8c75719a473224f5f32ffe025d52d5f49d85f8ca",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 102,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3142,
-      "textSHA256": "59b1fabfcea7f6f9b1d2f114afcea042e22f36dbb31663d3ce9740a08710b8b7",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 103,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3607,
-      "textSHA256": "cef419c4902424cec9efc440a9ecc9927517ffaaa43e8f51f9697db73c70b537",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 104,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3618,
-      "textSHA256": "c162ab32ac60c43e0dfbbaf4e7cf717212d8cc8bf4ffbc232c751fd7071ad765",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 105,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3643,
-      "textSHA256": "b7cb81ee56b3379273eb7b39d04d4fe8f1172c6e8cef63e9b7afd78cbc2bf4f7",
-      "findingRef": "QUOTA-PRIORITYCLASS-FLOOR"
-    },
-    {
-      "collection": "initial",
-      "index": 106,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3645,
-      "textSHA256": "a51d4abcd4b4e75ab0fa164d9111f86fd69d9e4cf6c35e7f94897c5efd1dec0d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 107,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3665,
-      "textSHA256": "ea6397a839723e4710dd0e42c587d8a1cf413c47ae6d3c05b319d80abdf5327a",
-      "findingRef": "QUOTA-PRIORITYCLASS-FLOOR"
-    },
-    {
-      "collection": "initial",
-      "index": 108,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3686,
-      "textSHA256": "23f8449a8617ba273c0e2f66e2a006300d8a933d56e88b6e602abd71d4282a76",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 109,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3697,
-      "textSHA256": "5967822e3826a1f4d95ae545c8ab1258d0bd14d192addce39bb0124751c10b76",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "initial",
-      "index": 110,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3702,
-      "textSHA256": "6cd0763101c4309c3084e0b45c5ec0e82c9f31469accec295665754a3dda2a8c",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 0,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 211,
-      "textSHA256": "0217f2a743c0d17950664cc57bad838156f2f1bcb2b8422e73419c08cc08a81d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 1,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 985,
-      "textSHA256": "85e784160c5a103f0002fa64bdfd49c93a9b9036834395283a6a430c25f49990",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 2,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 986,
-      "textSHA256": "bdda80f08393ca44bc4f4a669548e48d348eb648f3c3b546e4c01d6cc1bda3a6",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 3,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2046,
-      "textSHA256": "7f36182f5b009b87b06766f85b9bc81265f656565d6f5a3429c83f3df3d65062",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 4,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2058,
-      "textSHA256": "faed067dbc5f938635a127a8163ad4823ca8acbfc6e48d45e8c28dabf5969b9b",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 5,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2196,
-      "textSHA256": "ff9afa955a9b8035c1b2bdf533d3f40178cbbf56a06da7758a58b3f011b6fbdd",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 6,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2218,
-      "textSHA256": "86b63dfa91f14a36321f6fbddcaece7874c399259293cfa8d94f1f53f5163628",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 7,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2340,
-      "textSHA256": "4397a0e9ad956d58cfc33d1b079d22d00f340a46b585b842a0656fff753b96fc",
-      "findingRef": "QUOTA-PRIORITYCLASS-FLOOR"
-    },
-    {
-      "collection": "wider",
-      "index": 8,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2386,
-      "textSHA256": "6295cc1991270a0f5f666f52da3a4214c8637929bd82a831d94736599a4bc2dd",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 9,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2412,
-      "textSHA256": "0f668ec47d60f496849d1f341156f989ec395cb0b72353766c3cb039ddec791d",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 10,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2422,
-      "textSHA256": "13a9cc79ba4b65727801f46954a42d9e025d81c785bbe163e025bf64520fcc8b",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 11,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2436,
-      "textSHA256": "b9e28bb5f060b38b71d2b8bf4b159eeec561792fc1661cfcdc94d2f73bdc3985",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 12,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2571,
-      "textSHA256": "9c90e2397d9ceda148b246c84f1f02b5ee38ca27e67752fd09a56f8f0af44535",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 13,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2613,
-      "textSHA256": "4b488be2809764dbccd23f22f6fc0b1817b6d538798b8602dc4f2bf51c8429d7",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 14,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2625,
-      "textSHA256": "95e562c8fe7ec48159e06d0fcd47452d5ccf06dad6f7ef8733b28c4212d047ca",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 15,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2627,
-      "textSHA256": "37be64247aa7963275e2919587a663bd879a4b8f4c011a348a150fa123573d35",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 16,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 2631,
-      "textSHA256": "98ff8a06a4620e2a07e59072ffca3dc548e57aefdf50327f718dd16b578dd160",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 17,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 3297,
-      "textSHA256": "be6a048f13b53ec31efafe0b432df0010aa2ea7c767aec1cdf57c8c410f14f4a",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 18,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 3324,
-      "textSHA256": "85ade4083e8f766d23fcfe8007e0fd597a2520bdf8aa90086d1485c3947ad25e",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 19,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/release_notes/ocp-4-16-release-notes.adoc",
-      "line": 3344,
-      "textSHA256": "812e36026d6690aad67e9113d3d4fde31a765fc58c78df152554b11010abc1b0",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 20,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 812,
-      "textSHA256": "cd8770a0603c0471c402b3964a912967a7e96f9605ae459a4a01597b5d08923b",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 21,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 813,
-      "textSHA256": "fd92cca9b5f2c8db423bbcb1b4056e2c271d7ff9ec597d0a40e0cde58d823a86",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 22,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 911,
-      "textSHA256": "fe64677116ad6f47170ec7e6cdbba2806640ce6261c06975c9f890f99a54fb66",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 23,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1006,
-      "textSHA256": "65565e3550f959bb7d3b8897dc87c26a248b92876b8c0396a97f991a53777595",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 24,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1095,
-      "textSHA256": "d41b68c4b4deea165165cd911f1a693886f8b80c9f11323dccf5b282a2fddfcc",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 25,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1105,
-      "textSHA256": "4765bbb3afffa31afdf5fded3db5dc21b96388e90abd05d15676b46b579f6fd2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 26,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1225,
-      "textSHA256": "8abba83f4431791d203823aeabcc79b81301929b64e0517cb3c5ea4df468cbdb",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 27,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1232,
-      "textSHA256": "5a1f100d9943fdacb34a0314117475308261c7a8fe0d28634c107c96cfc4d15e",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 28,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1321,
-      "textSHA256": "cfa5bc40240d1abdf73d48adf4f332572d1caa295af69ac7aa8f284d4543edff",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 29,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1333,
-      "textSHA256": "4df3b5c1b7bb8afe779aab499345b43e93e9225169b322720c5d5b3e7477204e",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 30,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1334,
-      "textSHA256": "905c050d19591bb6429edd5c398fb02e19f693bf08b8fbddc3be3aabc825f2ba",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 31,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1336,
-      "textSHA256": "094524eeabba08b7c239b93aa8486bf454d9c0500e5bc23ec7e931425c9f7b85",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 32,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1422,
-      "textSHA256": "a3dc44bcf6178dfac6f63a8ae5a37b9872788e045890cd5c0b91f18a15869edd",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 33,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1423,
-      "textSHA256": "3ff21f14c0b9363d6c12fd9ca6fe9055c4785a6c7330f0c84f31b6bfe4b32146",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 34,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1541,
-      "textSHA256": "880a57f03b57d8b92205381008e9419f3af741dedbaa4d24dea8bfa28aa41ded",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 35,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1542,
-      "textSHA256": "81dd2bb88016b11c9b3519bf0b7a94e6157684d1fecc81288197812c4f0f650a",
-      "findingRef": "SERVER-PATCH-SECURITY"
-    },
-    {
-      "collection": "wider",
-      "index": 36,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1646,
-      "textSHA256": "3525eec7815b042bed34ed544f963fe1d0de90ec4d5159807f7fc1e7ea51065e",
-      "findingRef": "SERVER-PATCH-SECURITY"
-    },
-    {
-      "collection": "wider",
-      "index": 37,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1743,
-      "textSHA256": "7ae29638a1ec8106635b652592f1e9e0346a533408e14099f96c3f70fc377d6c",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 38,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1744,
-      "textSHA256": "d94176ace01e3b0f4b1a20d8e2c9905ed5e0631377b6d060fee86ce83e4259a9",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 39,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1750,
-      "textSHA256": "00343941e17a2dbabc9989d57649284d744f0b7a72a1ba559bace3c2bbe58b95",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 40,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1848,
-      "textSHA256": "1f63d966332bd630ad9185ed61661b4b514ee53edb4fe05fb7527fce21c1e10f",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 41,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1851,
-      "textSHA256": "facb34318abbb98239b8a533e6339ede2d652b79f1dfb841a6ec1e3cd98df9d4",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 42,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1852,
-      "textSHA256": "c5efe4da59bfd5d6bc1839cf2703af8ff8c2ae4288105fdc08ad6c4353824f66",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 43,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1970,
-      "textSHA256": "d0314e3b54e5b1820e9f94d93cacab74f6776fac5b68c333a55be277e3251cf1",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 44,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1978,
-      "textSHA256": "b648f87e0e04bb3c545a4a23b69a58b05e5f579e43f82cb4582a64c2df73832b",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 45,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1982,
-      "textSHA256": "39f110e3d4975eb20db71925276a6ccbd10aca9be0db508564551715e96cb3aa",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 46,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 1993,
-      "textSHA256": "3fa58e0f72809ac41a18ba2c152e2b282ce3fe67188887f67d3ce59836441639",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 47,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2010,
-      "textSHA256": "34392bf1e8fb45559614fcb688c0004289f0ecb4a56e2515b96c1ab8384e46fa",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 48,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2013,
-      "textSHA256": "31f290833f004a62f89cabd4b9ff7173cc17d886fb80ac030d13b5aaacaff9fe",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 49,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2016,
-      "textSHA256": "12e0974dad54320b3b343816a049ab1bfe151ccf84bca83dcb16af84c258fdd4",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 50,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2017,
-      "textSHA256": "d5c4291d6b4d8d259585c56bb4fa68046c94834f326e7be273db9c6cae56d373",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 51,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2018,
-      "textSHA256": "9738ae56441b05382e1d0931557405e24393764a9c2c6e6deed57b11db3ffdfa",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 52,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2019,
-      "textSHA256": "335415f1362ec74a8ae4e6b03c0e96390c25ae9e9280b8e81882af352af90e4a",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 53,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2041,
-      "textSHA256": "947cbf5f37248ea23d011cb6a575c2bdde2d6a0f2d1bfe6d0941a0de658477b2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 54,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2060,
-      "textSHA256": "26066444b17f681e85a2a668d56fab51ffc82bbb9d9c2fbde14f96f23ba1febe",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 55,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2072,
-      "textSHA256": "aa4df4a2c79139a4b456f233259989e894685789fc431442f1bb90dd2c7f4cf5",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 56,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2073,
-      "textSHA256": "38f9964bcd531b5dc8ce8a4aac81abcfb7ceb8b7bfc98f106f547cd9df38c801",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 57,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2100,
-      "textSHA256": "831051e9ffa1af7c638d0c52778d66809cd4fc7ca954c562d7cd1502530ea6ca",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 58,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2123,
-      "textSHA256": "925b20c1fe84a1e2d0235993d9cf77dc27ea2cd945e86f7d291e179783b21c8e",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 59,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2124,
-      "textSHA256": "1388e2ccd8d3de80ac7bc0166daaf24a46ebfa3c7cf72bea7a2c4e513f3ec585",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 60,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2136,
-      "textSHA256": "fba4aa519d4deab68ccad86da316d81146e6d9d7dee4c4c80d0c3581dadb8f29",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 61,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2137,
-      "textSHA256": "2c71e62fedc3d1f85c6fe4f729526975298c2c6b8286ed47709845a51af7ccd1",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 62,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2138,
-      "textSHA256": "09531ded047ae250a2082c90a9ae0d4f9fcfa13cfc8b5a505cadfa646687f97d",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 63,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2147,
-      "textSHA256": "affba9d096df393af8893ae4f442910f412dcde7a22108878918573c5d53fe2e",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "wider",
-      "index": 64,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2158,
-      "textSHA256": "131e48edc1ec64d94410811c5ad9aaf049297bacd4f9e7512dd8f45b2f2f646e",
-      "findingRef": "STORAGE-PV-TOPOLOGY-LABELS"
-    },
-    {
-      "collection": "wider",
-      "index": 65,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2168,
-      "textSHA256": "5cc3c96e924dd68c81aa734ef8fcb0deab27d3452d5718f04ffd92d43651571f",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 66,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2169,
-      "textSHA256": "f43cdc4673541c7f06bcb703cc98ff224b6cd8001513179175c95e8f38d900c3",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 67,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2170,
-      "textSHA256": "51011de992c095ab9b370b4263198a8dc71f779a492e6c81c4a6c5493e829cb3",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 68,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2181,
-      "textSHA256": "9ff6a9af22a08f4c2b565e2efe078a114edae0a8dbae9a6bdf459ced8c84f21d",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 69,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2184,
-      "textSHA256": "21d196c9690fc4291dacfadf0aca8964697dca29a69cb66795a43b11e8d4996b",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 70,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2192,
-      "textSHA256": "ac9b9373a05ff978eb9f4f7252a1180e8f16c20e8fba1f7eea63664103cf2d4c",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 71,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2195,
-      "textSHA256": "93ce976cd28aefaa308efc35fa5e7976f9bbad9c1090475c213fe1efc5ddc859",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 72,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2210,
-      "textSHA256": "202a780da0d7d25b0cc89bf9a6872118bf8d0a1df5591bfe8f4fa1ef2eb9838e",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 73,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2224,
-      "textSHA256": "825905316b50b7f2cd545382074366c2795d77335a18c7b9aaa2501744351f0c",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 74,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2234,
-      "textSHA256": "6c74bf39163878cc6f4f086722f609103bd0a050adc4c8d0ba1c8b12d0dbbf69",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 75,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2235,
-      "textSHA256": "dc8451cf69909e331d5a86fbb6280ac30ef8cc3ef3fed15f406bd8f4697e56d4",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 76,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2236,
-      "textSHA256": "c4f63392279102b97fe7cd1abaf67da8bc5bd26f4d297a049d41ef7a3767a514",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 77,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2239,
-      "textSHA256": "3e5f5ac8f8f160ec15c69ba21e0ba85421ef6c974553e16d67ebd9cef47beedd",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 78,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2244,
-      "textSHA256": "4ad7a831fbab5f870352a6818515458cbebbadac0c6f877d0e024832a0593b60",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 79,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2259,
-      "textSHA256": "086d0cb69e70700eb3e66aebb7d051c6933acf51b122c7f70103d109cd405f95",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 80,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2263,
-      "textSHA256": "850a5e525f395bdbfd66639ffa496f92131f76cf66c31d5fb9d2b2c679f0cb0c",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 81,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2290,
-      "textSHA256": "3b0ad49eb202289553402936e67ace200082f2bf82ade708487c2270963007ab",
-      "findingRef": "SERVER-PATCH-SECURITY"
-    },
-    {
-      "collection": "wider",
-      "index": 82,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2291,
-      "textSHA256": "d97747abd144501c3b505f2e44dcef0aa0bb981f37c7bc51a21a3ca50c2e3c07",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 83,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2293,
-      "textSHA256": "1a34a570fc5baab962468507ca3abc3cd3925c6f59ef9497e9ad4ad2666d3cc7",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 84,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2294,
-      "textSHA256": "d3e9b37dfa31c78cb1318db1d510fb76d6d97526deb8093a728ca3cf9bec72f9",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 85,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2318,
-      "textSHA256": "520ca394c0ecaa443b2abc5be3d270dd5e3fbcfe5a70a0261931fd52aa1d1284",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 86,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2320,
-      "textSHA256": "a7ae209f86c707969f9e5861c432a6f44ed9b5e3dc11274e0bbf0229ce42f30b",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 87,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2333,
-      "textSHA256": "d4d255c55497854c81e23230f97e0893dc3dba474ac5c00c2b8865ebc881764f",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 88,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2343,
-      "textSHA256": "9a2432de350a0d34b501a53c46376d826c0605792021bded7516495f4e4f2a60",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 89,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2344,
-      "textSHA256": "8c9e7692f4e4cc14fe274a81050aa2568536b63d7e108d1bd512d7150eb3e386",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 90,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2346,
-      "textSHA256": "c155e61ce0070df936dc7ade77ac3c6c21c40afa772d21bcc585d9bbef004df8",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 91,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2362,
-      "textSHA256": "20a58fa8a1314c99cac86870dc1261e51f1a543a930dfc1e1c8c05dc539a03dd",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 92,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2369,
-      "textSHA256": "345fbddfcf49a176049e70aed0e9567d37ed0fb1d0b81e764205c2fe49fe51a1",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 93,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2374,
-      "textSHA256": "7f9232b6df308ed89ec961ca196215ebe500454b4a78dae877601fbc9a0f0a3f",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 94,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2383,
-      "textSHA256": "cd2149b00312d9bd0d48db3aa654a88d9ce92df589e7deb1e98b5598b8c37fb6",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 95,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2387,
-      "textSHA256": "4ec0066ebe93422fe179da25ec57da65b66a3e5363307376a2d8464a84abd749",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 96,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2418,
-      "textSHA256": "68ac2ab73f0479e9b9ffd3726daf28ff294caba7d2af986e7595e1cf3221cf57",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 97,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2489,
-      "textSHA256": "ea88dc50d1499b121816928e1ad8871150831173a0f17b013b79764f7ce16755",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 98,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2538,
-      "textSHA256": "8e3d44bad649ec5198a99a564d484a33e77d4fd96cc870931f25424bb68576fd",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 99,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2834,
-      "textSHA256": "7eca8fdb985485db10c819bc3e2acb889b2b6c18f9b7a66ebad4478b504f6de0",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 100,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2846,
-      "textSHA256": "d3e9b37dfa31c78cb1318db1d510fb76d6d97526deb8093a728ca3cf9bec72f9",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 101,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2943,
-      "textSHA256": "ce2d9cdbc32f628c421b407cf00f7eaa9109f688c9798b28c219526875f4c784",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 102,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2952,
-      "textSHA256": "39f110e3d4975eb20db71925276a6ccbd10aca9be0db508564551715e96cb3aa",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 103,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2959,
-      "textSHA256": "7d271d71c72e76aee110628979659cb9fa7c083b011461aa40ce559c0a4266c7",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 104,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2960,
-      "textSHA256": "201ddb2aa14e91e54a910ea1f5ae3474aa4e0e1594aaed4ae0c8ecd559a876bf",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 105,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2962,
-      "textSHA256": "3a75651e1c6fb18f30ab42a402bab6523e89dccfc25d4f21e2e2675e40c1c149",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 106,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2981,
-      "textSHA256": "898c438c4887e9f4c4e1f3910952de50b88948e8e9eb83244f9cad86920886e0",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 107,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2989,
-      "textSHA256": "48ffc6580129edf5606e93a580efc9408767380da3a5a8ab2165abb4e720aa15",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 108,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2990,
-      "textSHA256": "a9cd6efbaf1504fd701e79382cca5260334aa59be92d156d268969e5bd8d324e",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 109,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 2995,
-      "textSHA256": "947cbf5f37248ea23d011cb6a575c2bdde2d6a0f2d1bfe6d0941a0de658477b2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 110,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3031,
-      "textSHA256": "5c4bbcd6419d2fe5ee4cee56795ead5715ca43d26890ce71095a7cb971373331",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 111,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3032,
-      "textSHA256": "0e61db3abd6e87097e4e7fc4a80145cdcd48d82f4ebf218b1dd2a7963d124f34",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 112,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3034,
-      "textSHA256": "e6bd82b4344fce5fb6d1b39294f870eb041349dbab6f0ee381ae458bbc0da170",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 113,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3041,
-      "textSHA256": "5fb43d48e67f45c1bb733b7b4ddc4cfb86944cab3313558da23f7890c15fd75c",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 114,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3048,
-      "textSHA256": "012a0cb38aee31e2f2e9f5283d5fb40fe70399c3d1b0d39c44208527c87ea85c",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 115,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3053,
-      "textSHA256": "6692bf2052146be378e0e624a19aa9b33f9a8ea5be61900eca2f9e2eda80fca4",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 116,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3054,
-      "textSHA256": "47779315f2127c483427909662bf2354748b0888ae5ea0cb294ead1009ff6d5b",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 117,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3063,
-      "textSHA256": "209e9f3eef253a4bee91177e2b48455a9d7c9b0c7be78bc59851534337986d6a",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "wider",
-      "index": 118,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3068,
-      "textSHA256": "ed78d6fe3920d7da959c6670c92c2109149f60156088f807debd2f84913f6b48",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 119,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3090,
-      "textSHA256": "23b4665dd92f77a469741e9267d43783a5568176262c1ab272dc670191062f5d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 120,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3096,
-      "textSHA256": "9c0186d362d496803747119e97e6d038681aac45a3cd5664eb3eeee0b077b839",
-      "findingRef": "PDB-SERVICE-CONTROLLERS"
-    },
-    {
-      "collection": "wider",
-      "index": 121,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3099,
-      "textSHA256": "c6ff4942bedd41fd67a6905bebd66a595033250f8d5b23f413ebc8b05c729143",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 122,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3104,
-      "textSHA256": "6a50c5ae8d8715fd865bbf5733155db3aeea1574daee3a75a1933a7994428e6b",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 123,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3115,
-      "textSHA256": "bcf16c3c3c5d7eedc457cdde2347de253c68586e013235859577de08a0e2f3fc",
-      "findingRef": "SERVER-PATCH-SECURITY"
-    },
-    {
-      "collection": "wider",
-      "index": 124,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3124,
-      "textSHA256": "ae95a467c35697ac392d70b7eb8b165902ff66ba19d7f872bf9683bb2f1fd118",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 125,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3126,
-      "textSHA256": "62d624c7cadbf9d27f26a9846afc501f5e076609e41039a1a4206fcc04b1c6e2",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 126,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3130,
-      "textSHA256": "9a2432de350a0d34b501a53c46376d826c0605792021bded7516495f4e4f2a60",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 127,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3173,
-      "textSHA256": "68ac2ab73f0479e9b9ffd3726daf28ff294caba7d2af986e7595e1cf3221cf57",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 128,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3244,
-      "textSHA256": "ea88dc50d1499b121816928e1ad8871150831173a0f17b013b79764f7ce16755",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 129,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3410,
-      "textSHA256": "0fcd9baf658b163ed7faed44199616d093e8c45cdf70df6f57a1b25a5a9ae78b",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 130,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3422,
-      "textSHA256": "10136bba2894f9b6d252cc6e394260bd3ddc450cb78c6b79cd2fd785a523e93f",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 131,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3555,
-      "textSHA256": "36f13d49fc5b4c6266caab86e2e39ebffcf7142738198a2c16c0e736fc892fee",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 132,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3557,
-      "textSHA256": "dccbc384cc58af509351e591fdc4fa1d38e73edb80ef2abb5ea2325519e79d5c",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 133,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3559,
-      "textSHA256": "d8a17431c74ffe87751d9f32582d79fcef785e58d2b6fa2a7838294e7041d580",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 134,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3560,
-      "textSHA256": "8d4dc66981b10038d1393fc77797bcbab545666b101ef38500a3c3c7549e1ea0",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 135,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3565,
-      "textSHA256": "548e88b0fa3d71be3f0f73ace83932abe1aa85599f6cf742f545268ab8941162",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 136,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3591,
-      "textSHA256": "9ab07f7ae0f8fb55344315e3a7b6d3b9e45e9eaabda7babdf029a8b0b8cc1365",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 137,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3592,
-      "textSHA256": "9e9f074c58a8bc46bb2ce78c8e3757e206716d210ed56c3bb11e4a6c8fa4de9c",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 138,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3603,
-      "textSHA256": "8d6c9b5d83684aea600414b820804cbfa43472cce789114614a1fa953471baa2",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 139,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3604,
-      "textSHA256": "8a450107e51f859ff3b6ee78dbd76bc3b1f87f2093ee1851999ac40c2dd276e9",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 140,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3606,
-      "textSHA256": "ccf7d54153e87472593c150eadcda14c8581ed64b2292e7958fe0f0c3ce7c883",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 141,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3614,
-      "textSHA256": "fc52c2ad0d9ca5926dbfe7da2bcf479eba2a3c5f1288a91fd312db88fb99c8ab",
-      "findingRef": "STORAGE-PV-TOPOLOGY-LABELS"
-    },
-    {
-      "collection": "wider",
-      "index": 142,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3622,
-      "textSHA256": "418bf3921a569752bbb14b24e85928651bb3309733f47dec4039916949b1dbb3",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 143,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3631,
-      "textSHA256": "6dc5672952a858cb3a820476ea3c97ca90322d3ffaea98fa97ed78201f43b26a",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 144,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3633,
-      "textSHA256": "6c334ca8a42bb2f4924379243c0af23c8f13ffb882bb3b0804ff88493087d46b",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 145,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3639,
-      "textSHA256": "8defaba78b74e20c14008c634afd5d306d01ad042c8d73e963637030898e69a9",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 146,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3640,
-      "textSHA256": "aa5c8f9e36d91717fe106642d6fe2b36146843a1c4098f5d3ad090851456c7ed",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 147,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3662,
-      "textSHA256": "0f296513f89023fff4ec5fb0b7299555ab11316420d95ac0ee15e5c45105e612",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 148,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3663,
-      "textSHA256": "bade286d647e4488360a073586caf040d206d53b20745ae820e57b22fb2dee55",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 149,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3664,
-      "textSHA256": "c49735011615736fd50100e8bb71d6d35f4604d33b59cd92c90982d51f99568d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 150,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3666,
-      "textSHA256": "86c0b6c0fd05aa19d5e71502cf81afa35c2dbebc6fb5b9a2e72c85d233d2695f",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 151,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3669,
-      "textSHA256": "7f8055e7c1fa63fc032118622986e90c58ac051674cd3072a4e4491f75559000",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 152,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3679,
-      "textSHA256": "0ad1e61c11dcce72adc6035540a2386f0e191cd49b7ec68d1b08d808b3d753ee",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 153,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3687,
-      "textSHA256": "894a387ca087444849775d8c30136c3205858874aa01aecc76c83d8103081990",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 154,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3689,
-      "textSHA256": "1f66b5d7a9f64c9c8ffcae2ccebf4cd6d4a01e8c4171e52c692a82d149377e4c",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 155,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3690,
-      "textSHA256": "c155e61ce0070df936dc7ade77ac3c6c21c40afa772d21bcc585d9bbef004df8",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 156,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3693,
-      "textSHA256": "bd4eacd20c1056bd3b19c36eb96f153dabbe4f9b52c6c22a3a2e5d715a5e3afc",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 157,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3696,
-      "textSHA256": "20a58fa8a1314c99cac86870dc1261e51f1a543a930dfc1e1c8c05dc539a03dd",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 158,
-      "sourceURL": "https://raw.githubusercontent.com/kubernetes/kubernetes/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.29.md",
-      "line": 3717,
-      "textSHA256": "8e3d44bad649ec5198a99a564d484a33e77d4fd96cc870931f25424bb68576fd",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 159,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-10.adoc",
-      "line": 34,
-      "textSHA256": "41997d5d8f84dd763a4e7c68ee2067d9bdd77a3fe3a8c7011350d93a0e58a893",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 160,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-14.adoc",
-      "line": 26,
-      "textSHA256": "3fb0fe7b4a53313b0a548e4e7d6aebd46c8d6aac7b08b5274b65b5476e9f317d",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 161,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-14.adoc",
-      "line": 46,
-      "textSHA256": "db45446acfe3ef4bfb2e9138b7515a8e1fb7709f57bd90705fe649e0743066ec",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 162,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-17.adoc",
-      "line": 36,
-      "textSHA256": "ea31e9f65626be528d0f000d0777e071bfa6df63c3a8ea472e470b7512878f09",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 163,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-19.adoc",
-      "line": 26,
-      "textSHA256": "791193be3766deb2d9e1d210b4dd77be12f6c52114db246b93ec3be4cafae813",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 164,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-23.adoc",
-      "line": 26,
-      "textSHA256": "7676aebb272495df1fca9c41c998d4e85dac5e624fa010fd5b68440e6ef7abec",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 165,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-24.adoc",
-      "line": 26,
-      "textSHA256": "369cb0beca140a59ea385ab6efff53a2ce693e9f35b9b40303128b506de41ce8",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 166,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-25.adoc",
-      "line": 30,
-      "textSHA256": "32b4ec6e5f01186d6380f72d000844e44ab68f66b020457a9b498210d321ff47",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 167,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-27.adoc",
-      "line": 32,
-      "textSHA256": "55852c360420812fe970308906d957f16150f1be291c2d85ef5161118c987829",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 168,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-28.adoc",
-      "line": 31,
-      "textSHA256": "1e7fd7f1bc4735ca607f760e233821c6aa6835bbc7ef4694c452b035b4e48cbf",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 169,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-28.adoc",
-      "line": 45,
-      "textSHA256": "dc04edb162d60dc5b375eb0045d070db3199330f814731f794da86265af872c8",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "wider",
-      "index": 170,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-33.adoc",
-      "line": 30,
-      "textSHA256": "3381b938636d5a3456fd72b20f607748090bfebc149d6a6ed5e27169105c1358",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 171,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-38.adoc",
-      "line": 34,
-      "textSHA256": "37c14bd7636561200e480d6f8acbe213cbf902cd19b657a9b829c872683c5955",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 172,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-38.adoc",
-      "line": 72,
-      "textSHA256": "1dd34d5f9272098c2b9bfb4f140986c6798ba1177a4ede885b17fbc6b5e34311",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 173,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-39.adoc",
-      "line": 48,
-      "textSHA256": "8f80b6992b453f370c3abb6715f90315f43fab0c1f8e3567e7923c71a1d85835",
-      "findingRef": "RAW-BASELINE-ADMISSION"
-    },
-    {
-      "collection": "wider",
-      "index": 174,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-4.adoc",
-      "line": 26,
-      "textSHA256": "8a34991a5b83d4af6707629799432e2e81f3e4525a2600961bc5335e528da175",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 175,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-40.adoc",
-      "line": 39,
-      "textSHA256": "9b191798e1888b308a6d760455e8e39edb7084e4c2b22d470df8378c7515b7a8",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 176,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-40.adoc",
-      "line": 41,
-      "textSHA256": "3b159ab151d30bcb34e6972684dff370c196db03786ed3697f4761a25174f605",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 177,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-40.adoc",
-      "line": 43,
-      "textSHA256": "6308bffb0738f53a5b5874cee380e2567011cd0036b38c59cfef310e33cc43ef",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 178,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-43.adoc",
-      "line": 34,
-      "textSHA256": "8b403c0b541554a7c6d45b33f1393ec02c0b0e6582bc63f1d41f66dea7cb2539",
-      "findingRef": "ROUTE-SHA1-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 179,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-47.adoc",
-      "line": 24,
-      "textSHA256": "1b26caeca1d934a152c11f27a42eb842149d550b52e0805ff3c76a4870bf3a44",
-      "findingRef": "IMAGE-BUILD-CONTROLLERS"
-    },
-    {
-      "collection": "wider",
-      "index": 180,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-47.adoc",
-      "line": 26,
-      "textSHA256": "77d87d03c5d55f84320c301b389d6818c7f9113f2bf2a7f40002b939fcec5e18",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 181,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-47.adoc",
-      "line": 30,
-      "textSHA256": "09d3f01a62dc4c31cf3855954e9a25bcb5df896f05ebe155272bf0f0ec0776bc",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 182,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-47.adoc",
-      "line": 32,
-      "textSHA256": "3ab82b6ee1adce685dff4c5e1bbe63f0fa41e14900df988c7b095569440cb133",
-      "findingRef": "NATIVE-SIDECARS"
-    },
-    {
-      "collection": "wider",
-      "index": 183,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-48.adoc",
-      "line": 35,
-      "textSHA256": "af63789192373066b69b4b0e8beb8652bbdbcfcb4af9b030761348dc069fc0c3",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 184,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-49.adoc",
-      "line": 26,
-      "textSHA256": "e47a91e75223cee538810afe7162198920756e47d338b7484d88e5681df36bfc",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 185,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-49.adoc",
-      "line": 31,
-      "textSHA256": "c35ecd904b7782ac3e64dcffe6ae6c021d7fd0dd31bd87526b7ce800e24aee55",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 186,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-52.adoc",
-      "line": 30,
-      "textSHA256": "ae008360d0f9422ed6c8ae010091377dfeb5f0d261510196e0d211c3e920b933",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 187,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-54.adoc",
-      "line": 24,
-      "textSHA256": "a2a41b877ab9cfd3c13c290330f595d113e2c5b051c04b820da08429b24328ce",
-      "findingRef": "SCHEDULING-RUNTIME"
-    },
-    {
-      "collection": "wider",
-      "index": 188,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-58.adoc",
-      "line": 30,
-      "textSHA256": "121391392a5372f8e8556c0720df47f36c21fe18ed51a2e8d30ce1ec657fc08f",
-      "findingRef": "AUTH-TOKEN-AND-IMAGE-PULL"
-    },
-    {
-      "collection": "wider",
-      "index": 189,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-59.adoc",
-      "line": 30,
-      "textSHA256": "3f6475b7e61d17917907275935fe8017e74a6b13b02f0be518c4600da0999c4f",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 190,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-6.adoc",
-      "line": 58,
-      "textSHA256": "c742fc5fe4804d1df8bf80d9dba33eb9243b3c2378041fa1d1cb8045a2132a95",
-      "findingRef": "FIXTURE-INFRASTRUCTURE"
-    },
-    {
-      "collection": "wider",
-      "index": 191,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-6.adoc",
-      "line": 66,
-      "textSHA256": "b870038cb119e2caec5ddfffafc3c803b8a58876b29e46a28d3cf896e00b2946",
-      "findingRef": "STORAGE-CSI-SELINUX-RWOP"
-    },
-    {
-      "collection": "wider",
-      "index": 192,
-      "sourceURL": "https://raw.githubusercontent.com/openshift/openshift-docs/d8ed17c431a59e24ff889c58eb03d8d4e5068d70/modules/zstream-4-16-7.adoc",
-      "line": 54,
-      "textSHA256": "b9c3db8e07bda130873b14cb817e33017a759ea593dfa44acb7c76bd8b2ceb0a",
-      "findingRef": "SCHEDULING-RUNTIME"
-    }
-  ],
-  "openActions": [
-    {
-      "findingID": "STORAGE-PV-TOPOLOGY-LABELS",
-      "owner": "parent consolidated implementation pass",
-      "required": "Refuse or correctly evaluate metadata topology labels before source/HPA mutation; preserve positive CSI cases."
-    },
-    {
-      "findingID": "QUOTA-PRIORITYCLASS-FLOOR",
-      "owner": "parent consolidated validation pass",
-      "required": "Focused scope-selector contract coverage recommended; upstream floor fix is verified."
-    },
-    {
-      "findingID": "CLIENT-MAINTENANCE",
-      "owner": "parent dependency work",
-      "required": "Maintain the separate dependency decision and qualification record. A newer client candidate is not adopted or required by this assessment."
-    }
-  ],
-  "qualificationPolicy": "Keep review assumptions separate from actual integration; final supported range and gate policy owned by parent consolidation."
+  "consolidatedPrerequisites": "docs/compatibility-review.md",
+  "historicalSnapshots": "Exact snapshots and source-bound resolution overlays require the external evidence bundle."
 }

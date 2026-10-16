@@ -1,30 +1,26 @@
-# Completed maintenance release scope
+# Historical release policy
 
-On 2026-10-16 the owner narrowed the goal to the completed maintenance and available OpenShift 4.21 testing, and authorized opening the release gate. The active [release policy](../compatibility/release-scope.json) implements that decision. The maintenance goal is complete within this scope; broader qualification remains in the [follow-up backlog](backlog.md).
+The completed historical scope covers exactly Linux amd64 and Darwin arm64 binaries on OpenShift 4.21.36 / Kubernetes v1.34.9. OpenShift 4.14–4.20 have completed source-review assumptions with [prerequisites](compatibility-review.md). OpenShift 4.22 and other platforms remain outside that scope. Current maintenance candidates require reassessment and new qualification.
 
-The scoped gate passes for these exact binaries on **OpenShift 4.21.36 / Kubernetes v1.34.9**. Each passed all 22 actual scenario groups, including new-app workloads, constraints before source retirement, migration/recovery and multiple namespaces. The [Linux report](linux-execution-tests.md) and [native/source-conflict report](source-conflict-live-tests.md) retain the detailed evidence and limitations.
+The immutable [scope policy](../compatibility/release-scope.json) binds exact binary bytes, tested revision, production source, dependencies, fixtures and actual records. The [matrix](../compatibility/matrix.json) pins the review overlay and provenance chain. Do not update frozen hashes to match current source.
 
-| Platform | Binary SHA-256 |
-| --- | --- |
-| Linux amd64 | `cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c` |
-| Darwin arm64 | `158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17` |
+## Explicit historical operations
 
-The minimum remains 4.14 / Kubernetes 1.27. OpenShift 4.14–4.20 retain their separately labelled source-review assumptions and prerequisites, with no actual older-cluster passes. OpenShift 4.22, Linux arm64, Darwin amd64, Windows amd64 and next-development smoke remain untested and outside this release. The matrix keeps its full inventory and `not-run` results; the active policy chooses the smaller release scope without relabelling the newest GA version.
-
-## Reproduce and check the qualified candidates
-
-From the repository root, with Go 1.27.2:
+Provide a trusted external bundle root containing original `compatibility/evidence/` records and exact historical `compatibility/reviews/` snapshots. Missing or changed files fail closed. The bundle is optional for ordinary development. Do not substitute current durable assessment summaries for the pinned historical snapshots.
 
 ```sh
-python3 tools/build_qualified.py --output dist
-python3 tools/release_gate.py --artifacts dist --export-evidence evidence
-python3 -m unittest discover -s tools -p 'test_*.py'
+python3 tools/build_qualified.py --output frozen-dist --evidence-root /path/to/bundle
+python3 tools/release_gate.py --artifacts frozen-dist --evidence-root /path/to/bundle --historical-source
 ```
 
-The builder emits only the two qualified platforms and verifies their bytes against the approved hashes. It preserves the tested version `maintenance-source-retry`, commit `eb8fb9d` and default build-date metadata, using `CGO_ENABLED=0`, `-mod=readonly`, `-trimpath` and `-buildvcs=false`. A new tag or documentation commit does not restamp the executable. Provenance records the tested source revision separately from the policy revision. Requiring the exact output hashes also prevents a host/toolchain difference from silently producing an unqualified release.
+Reproduction extracts the tested revision from local Git objects into temporary storage and builds with its frozen metadata. Fetch that revision if absent; never rebuild HEAD under historical labels. Verification with `--historical-source` also checks those immutable inputs. Omit that option to check current production identity; changed source is rejected by the old scope. `--full-matrix` remains the stricter wider check and requires additional actual evidence under the declared root.
 
-The gate validates the current production source, dependency and fixture hashes, pinned canonical evidence files, exact cluster/platform identity, all required scenarios and the existing hash-checked source assessments. Missing, changed or additional release binaries fail. Production changes or different linker metadata require new qualification and an explicit policy update. Documentation and release-policy commits can advance while the tested production bytes remain frozen.
+Candidate builds, historical reproduction, eligibility verification and draft preparation are separate operations. Manual workflows consume selected artifacts and trusted evidence. Draft preparation uses an existing tag and never publishes; publication requires a separate maintainer action. Local verification does not establish that a GitHub release workflow ran.
 
-`--export-evidence` copies the validated policy, matrix, actual records and review assessments alongside a machine-readable `gate-result.json`. `--full-matrix` retains the broader policy and currently fails because required 4.22 qualification is unavailable. It cannot be used to claim those tests passed.
+## Workflows and artifact selection
 
-The Build and Release workflow reproduces these candidates, runs security/quality checks and this scoped gate, then permits a **draft** release on an authorized tag. Optional cluster requalification uses the scoped 4.21 platform targets. An executed GitHub workflow, push, tag or publication is not claimed by this local work; those remain maintainer actions.
+The ordinary candidate workflow builds current source without evidence and uploads unqualified binaries, checksums, provenance and security results. Manual `reproduce.yaml` instead takes an `evidence_run_id` containing a trusted `qualification-bundle` artifact and uploads the reproduced historical candidates. Both use the artifact name `release-candidates`; select the originating run deliberately.
+
+Manual `release.yaml` takes that trusted evidence run, the selected candidate run and an existing tag. It verifies frozen artifact bytes and archived source through `--historical-source`, exports validated evidence and prepares only a draft in the protected `release-review` environment. An ordinary changed-source candidate cannot pass the historical gate. No published binary installation method is implied by these workflows. Review and publication remain separate maintainer actions.
+
+`--evidence DIRECTORY` selects replacement actual-record files from a directory **relative to `--evidence-root`**. It does not disable pinned scope or review checks. Paths and symlinks must stay inside the declared root. The default full-matrix record directory is `compatibility/results` inside that root. `--export-evidence DIRECTORY` writes only validated policy/records and gate results for private review. Never supply synthetic unit-test records as trusted evidence.

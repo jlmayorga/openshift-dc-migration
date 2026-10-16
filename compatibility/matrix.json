@@ -8,316 +8,106 @@
     {
       "minor": "4.14",
       "releaseRequirement": "floor",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.14-dc.yaml",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.14-dc.yaml",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.27"
+      "reviewedKubernetesMinor": "1.27",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.15",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.15-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.15-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.28"
+      "reviewedKubernetesMinor": "1.28",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.16",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.16-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.16-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.29"
+      "reviewedKubernetesMinor": "1.29",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.17",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.17-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.17-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.30"
+      "reviewedKubernetesMinor": "1.30",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.18",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.18-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.18-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.31"
+      "reviewedKubernetesMinor": "1.31",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.19",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.19-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.19-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.32"
+      "reviewedKubernetesMinor": "1.32",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.20",
       "releaseRequirement": "required",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No actual integration on this older release; assumption applies only to the source/dependency/fixture hashes in the consolidated review.",
-        "Manual feature guards and conditional platform/runtime/network/storage prerequisites apply; see docs/compatibility-review.md."
-      ],
-      "fixture": "testdata/ocp-4.20-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "compatibilityReview": "compatibility/evidence/2026-10-16-source-retry-review.json",
+      "fixture": "internal/migration/testdata/ocp-4.20-dc.json",
       "qualificationPolicy": "review-assumption",
       "reviewEvidence": "compatibility/evidence/2026-10-16-source-retry-review.json",
       "compatibilityAssumption": "assumed compatible from release-note review, with documented prerequisites",
-      "reviewedKubernetesMinor": "1.33"
+      "reviewedKubernetesMinor": "1.33",
+      "reviewEvidenceSHA256": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "4.21",
       "releaseRequirement": "required",
-      "openshiftPatch": "4.21.36",
-      "kubernetesVersion": "v1.34.9",
-      "dependencyVersions": {
-        "k8s.io/api": "v0.37.1",
-        "k8s.io/apimachinery": "v0.37.1",
-        "k8s.io/client-go": "v0.37.1"
-      },
-      "testedAt": "2026-10-16T15:52:40.405271+00:00",
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "passed (all22scenarioIDs separately on current Darwin/arm64 and Linux/amd64 artifacts; other platforms untested)",
-      "limitations": [
-        "Current Darwin arm64 and Linux amd64 artifacts each passed all 22 required scenario groups on OpenShift 4.21.36 / Kubernetes v1.34.9.",
-        "Linux arm64, Darwin amd64 and Windows amd64 cross-compiled only; actual execution and integration are not-run.",
-        "OpenShift 4.22 has no actual cluster results on any platform; full release gate remains closed.",
-        "OpenShift 4.14\u20134.20 retain source-bound release-review assumptions, not actual integration passes.",
-        "Historical and targeted-session records retain their original artifact/provenance; authoritative full Linux result is the primary evidence record.",
-        "Worker/volume ownership sampling and point-in-time preflight have the limits described in the actual evidence."
-      ],
-      "fixture": "testdata/ocp-4.21-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-linux-current-full-4.21.36.json",
-      "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
-      "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
-      "additionalEvidence": [
-        "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
-        "compatibility/evidence/2026-10-16-source-conflicts-linux-4.21.36.json",
-        "compatibility/evidence/2026-10-16-client-upgrade-4.21.36.json",
-        "compatibility/evidence/2026-10-16-linux-full-4.21.36.json",
-        "compatibility/evidence/2026-10-16-linux-stage-4.21.36.json",
-        "compatibility/evidence/2026-10-16-pv-topology-4.21.36.json",
-        "compatibility/evidence/2026-10-16-admin-policy-4.21.36.json",
-        "compatibility/evidence/2026-10-16-raw-responses-4.21.36.json",
-        "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
-        "compatibility/evidence/2026-10-16-storage-guard-4.21.36.json",
-        "compatibility/evidence/2026-10-16-worker-expiry-4.21.36.json",
-        "compatibility/evidence/2026-10-16-runtime-recovery-4.21.36.json",
-        "compatibility/evidence/2026-10-16-preflight-4.21.36.json",
-        "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
-        "compatibility/evidence/2026-10-15-4.21.36.json",
-        "compatibility/evidence/2026-10-16-multiple-namespaces-4.21.36.json"
-      ],
-      "platformResults": [
-        {
-          "platform": "linux/amd64",
-          "integrationResult": "passed",
-          "artifactSHA256": "cdbd5358de223a8120e5defdb415813e54250b0d368a3d02455cce4f5913e02c",
-          "evidence": "compatibility/evidence/2026-10-16-linux-current-full-4.21.36.json",
-          "buildResult": "built and executed",
-          "limitations": []
-        },
-        {
-          "platform": "linux/arm64",
-          "integrationResult": "not-run",
-          "artifactSHA256": "c9894fff5f86cd908f4b140db951b07dc3e089ee8d2f64d267841250eeb70c63",
-          "evidence": null,
-          "buildResult": "cross-compiled only",
-          "limitations": [
-            "No native platform runner configured; actual execution and live qualification not-run"
-          ]
-        },
-        {
-          "platform": "darwin/amd64",
-          "integrationResult": "not-run",
-          "artifactSHA256": "24585aa916aaa057e16a90c567b9110d4e6255c86ed9495ed081d27abb5de663",
-          "evidence": null,
-          "buildResult": "cross-compiled only",
-          "limitations": [
-            "No native platform runner configured; actual execution and live qualification not-run"
-          ]
-        },
-        {
-          "platform": "darwin/arm64",
-          "integrationResult": "passed",
-          "artifactSHA256": "158b35236ef40ed00d5a4ad705a76979ab69aa55791089903e1bd4f3428f7d17",
-          "evidence": "compatibility/evidence/2026-10-16-source-conflicts-4.21.36.json",
-          "buildResult": "built and executed",
-          "limitations": []
-        },
-        {
-          "platform": "windows/amd64",
-          "integrationResult": "not-run",
-          "artifactSHA256": "2a99fe01355fded82ee1a1b32d5525419d7ef48b0ed8b3cc6d05198652dccf1b",
-          "evidence": null,
-          "buildResult": "cross-compiled only",
-          "limitations": [
-            "No native platform runner configured; actual execution and live qualification not-run"
-          ]
-        }
-      ]
+      "fixture": "internal/migration/testdata/ocp-4.21-dc.json",
+      "coverageSummary": "docs/compatibility.md",
+      "historicalQualification": "passed only for frozen Linux amd64 and Darwin arm64 on 4.21.36; current candidates require new qualification"
     },
     {
       "minor": "4.22",
       "releaseRequirement": "newest",
-      "openshiftPatch": null,
-      "kubernetesVersion": null,
-      "dependencyVersions": null,
-      "testedAt": null,
-      "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
-      "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
-      "integrationResult": "not-run",
-      "limitations": [
-        "No explicitly authorized test-cluster context supplied"
-      ],
-      "fixture": "testdata/ocp-4.22-dc.json",
-      "fixtureTestDate": "2026-10-15",
-      "platformResults": [
-        {
-          "platform": "linux/amd64",
-          "integrationResult": "not-run",
-          "limitations": [
-            "No authorized OpenShift 4.22 test cluster available"
-          ]
-        },
-        {
-          "platform": "linux/arm64",
-          "integrationResult": "not-run",
-          "limitations": [
-            "No authorized OpenShift 4.22 test cluster available"
-          ]
-        },
-        {
-          "platform": "darwin/amd64",
-          "integrationResult": "not-run",
-          "limitations": [
-            "No authorized OpenShift 4.22 test cluster available"
-          ]
-        },
-        {
-          "platform": "darwin/arm64",
-          "integrationResult": "not-run",
-          "limitations": [
-            "No authorized OpenShift 4.22 test cluster available"
-          ]
-        },
-        {
-          "platform": "windows/amd64",
-          "integrationResult": "not-run",
-          "limitations": [
-            "No authorized OpenShift 4.22 test cluster available"
-          ]
-        }
-      ]
+      "fixture": "internal/migration/testdata/ocp-4.22-dc.json",
+      "coverageSummary": "docs/compatibility.md"
     },
     {
       "minor": "next",
       "releaseRequirement": "development",
-      "integrationResult": "not-run",
-      "limitations": [
-        "Discover next development release and record metadata before smoke testing"
-      ]
+      "coverageSummary": "docs/compatibility.md"
     }
   ],
   "inventorySource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.22&arch=amd64",
   "nextChannelSource": "https://api.openshift.com/api/upgrades_info/v1/graph?channel=stable-4.23&arch=amd64",
-  "latestAvailablePatch": "4.22.18",
-  "inventoryNote": "2026-10-15: public stable-4.22 graph includes 4.22.18; stable-4.23 graph has no nodes. Metadata observation only; no cluster qualification.",
-  "activeReleaseScope": "compatibility/release-scope.json"
+  "activeReleaseScope": "compatibility/release-scope.json",
+  "reviewProvenanceSHA256": {
+    "compatibility/evidence/2026-10-16-client-upgrade-review.json": "295bf8addaa737e70d71db5412b4fd6197d84346c7a87f4d092c2671583bafb5",
+    "compatibility/evidence/2026-10-16-parallel-release-review.json": "b24564b59fa8e6ebc6de73c211e71f91177fbeb176b9ac352801a5708fe547bb",
+    "compatibility/evidence/2026-10-16-source-retry-review.json": "713bb8405b5dba036bfaf32a7365e58c364f41bd6bbdd05c060b26811d6a1056",
+    "compatibility/evidence/2026-10-16-release-notes-review.json": "57f44cbf2d6bb703e8f0b187f62b1473bedd423100fea38f2b4a58836b8d0650"
+  }
 }

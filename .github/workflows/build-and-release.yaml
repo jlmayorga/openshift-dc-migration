@@ -1,7 +1,7 @@
-name: Build and Release
+name: Build candidates
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,47 +20,12 @@ jobs:
           go -C tools/security build -mod=readonly -o /tmp/security-tools/govulncheck golang.org/x/vuln/cmd/govulncheck
           go -C tools/security build -mod=readonly -o /tmp/security-tools/gosec github.com/securego/gosec/v2/cmd/gosec
           /tmp/security-tools/govulncheck -json ./... > dist/govulncheck.json
-          python3 tools/check-vulnerabilities.py dist/govulncheck.json
-          /tmp/security-tools/gosec -fmt=json -out=dist/gosec.json ./...
+          python3 tools/check_vulnerabilities.py dist/govulncheck.json
+          /tmp/security-tools/gosec -fmt=json -out=dist/gosec.json ./cmd/... ./internal/...
       - run: |
           PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_*.py'
-          PYTHONDONTWRITEBYTECODE=1 python3 tools/build_qualified.py --output dist
+          PYTHONDONTWRITEBYTECODE=1 python3 tools/build_candidates.py --output dist
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-candidates
           path: dist/
-  qualification:
-    permissions:
-      contents: read
-      actions: read
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
-        with:
-          name: release-candidates
-          path: dist
-      - run: python3 tools/release_gate.py --artifacts dist --export-evidence evidence
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: compatibility-results
-          path: evidence/*.json
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: [build, qualification]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
-        with:
-          pattern: '*'
-          merge-multiple: true
-          path: dist
-      - env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          gh release create "$RELEASE_TAG" dist/* --draft --verify-tag --title "$RELEASE_TAG" --notes 'Scoped maintenance candidate: Linux amd64 and Darwin arm64 qualified on OpenShift 4.21.36. Frozen tested build metadata is retained. OpenShift 4.14–4.20 use source-review assumptions; 4.22 and other platforms remain untested. See attached release-scope.json and gate-result.json. Review before publishing.'
