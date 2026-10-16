@@ -12,7 +12,7 @@ The native artifact recorded in those reports additionally passed [26 constraint
 
 The legacy-storage guards described in [conversion behavior](feature-mapping.md) were added after that artifact. Its 48 targeted cases remain evidence for its recorded hash, not qualification of the subsequent source. The rebuilt artifact has [four verified storage outcomes and 13 automatic baseline scenarios](storage-guard-live-tests.md), including documented follow-up inspections after TLS failures; supplemental variants still require requalification on that exact artifact.
 
-Raw admission-field validation and required-SCC service-account authorization were added after the storage-guard artifact. Its live evidence remains historical for the recorded hash; fresh exact-artifact qualification is required for these additional guards.
+Raw admission-field validation and required-SCC service-account authorization were added after the storage-guard artifact. The newer [admission/SCC session](admission-scc-live-tests.md) passed two targeted cases and completed 13 automatic baseline scenario IDs on its recorded hash, including actual permission revocation followed by refusal and recovery after grant restoration. Earlier evidence remains historical; supplemental variants still require exact-artifact requalification.
 
 ## Running on a disposable cluster
 

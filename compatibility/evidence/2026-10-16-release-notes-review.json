@@ -2,8 +2,8 @@
   "schemaVersion": "v1",
   "kind": "release-note-compatibility-review",
   "status": "in-progress",
-  "updatedAt": "2026-10-16T03:21:33.403974+00:00",
-  "codeRevisionAtInventory": "4ce61e7063ec550b844e4c5766e61850aa8d4590",
+  "updatedAt": "2026-10-16T04:03:20.324756+00:00",
+  "codeRevisionAtInventory": "618831fe76f52bb382ea0163ebfd74d761927cb9",
   "range": {
     "minimum": "4.14",
     "maximum": "4.20"
@@ -302,11 +302,13 @@
     {
       "groupVersion": "authorization.k8s.io/v1",
       "resources": [
-        "selfsubjectaccessreviews"
+        "selfsubjectaccessreviews",
+        "localsubjectaccessreviews"
       ],
-      "operations": "ephemeral permission reviews",
+      "operations": "ephemeral caller reviews; optional namespaced review of workload SA use of its required SCC when the subject review selected another policy",
       "sourceFiles": [
-        "runtime.go"
+        "preflight.go",
+        "scc.go"
       ],
       "releaseAssessmentStatus": "pending"
     },
@@ -386,8 +388,13 @@
     {
       "id": "SCC-01",
       "change": "OCP4.20 user namespaces and new SCCs; assess raw/typed default handling",
-      "status": "impact assessment pending",
-      "evidence": "https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-new-features-and-enhancements.adoc"
+      "status": "raw-field and pinned-SCC guards implemented; per-release assessment still pending",
+      "evidence": "https://github.com/openshift/openshift-docs/blob/08bc31a85b65f871838334f1cfd911ef08e77f69/modules/rn-ocp-release-notes-new-features-and-enhancements.adoc",
+      "mitigations": [
+        "278d942 validates complete raw SCC/Pod specs before typed decoding.",
+        "618831f verifies service-account use of a mismatched required SCC using namespaced LocalSubjectAccessReview, then uses pinned-policy Pod defaults."
+      ],
+      "liveEvidence": "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json"
     },
     {
       "id": "AUTH-01",
@@ -400,10 +407,37 @@
       "change": "OCP4.15 does not create deployer SA when DC capability disabled",
       "status": "impact assessment pending",
       "evidence": "https://raw.githubusercontent.com/openshift/openshift-docs/ed0612e21c09eafcc9492f79195fa38254c3e1f9/release_notes/ocp-4-15-release-notes.adoc"
+    },
+    {
+      "id": "ADMISSION-01",
+      "change": "Admission can add post-baseline volume/security fields absent from reviewed input; typed clients can discard newer fields or leave their semantics unassessed.",
+      "status": "SCC and Pod response guards implemented",
+      "guardCommit": "278d942",
+      "scope": "Raw SCC-defaulted and Pod-admitted specs only; Deployment/HPA typed response boundaries still need review.",
+      "evidence": [
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.31.md",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.32.md",
+        "https://github.com/kubernetes/kubernetes/blob/aea561709867d4039260bd462cb456b9b46906a1/CHANGELOG/CHANGELOG-1.33.md"
+      ]
+    },
+    {
+      "id": "SCC-02",
+      "change": "Actual SCC subject review may select a policy other than openshift.io/required-scc; caller Pod dry run is not workload SA authorization proof.",
+      "status": "implemented and actual regression verified",
+      "guardCommit": "618831f",
+      "evidence": "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
+      "authorizationFloorSource": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.27.16/staging/src/k8s.io/api/authorization/v1/types.go",
+        "sha256": "3511fb1e6fceca98829f7101c8d06e308e948ba09bf42ed50929e43c1965321b",
+        "retrievedAt": "2026-10-16T03:44:55.137376+00:00",
+        "bytes": 14523,
+        "finding": "authorization.k8s.io/v1 LocalSubjectAccessReview and needed user/groups/namespaced resource attributes are present at the baseline source tag."
+      }
     }
   ],
   "remaining": [
     "Complete each minor/resource/operation assessment, applicable advisories and referenced migration guidance.",
+    "Audit raw Deployment/HPA admission responses before typed decoding; current raw spec guard covers SCC and Pod responses, not every typed resource boundary.",
     "Review SCC/admission raw-to-typed fields, scheduling/accounting, controller and trigger behavior.",
     "Complete detailed harness-only operation inventory.",
     "Decide aligned Kubernetes client version from compatibility evidence.",

@@ -4,7 +4,7 @@ Convert exported or live `apps.openshift.io/v1` DeploymentConfigs into baseline 
 
 The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. Newer clusters are accepted through API discovery without an arbitrary maximum version. **Full release qualification remains incomplete.** Actual live tests on **OpenShift 4.21.36 / Kubernetes v1.34.9** cover migration, routing, SCC defaults, triggers, failures and recovery; see the [live evidence](docs/live-tests-2026-10-15.md) and [actual `oc new-app` tests](docs/new-app-live-tests.md), including Docker/S2I rebuilds and a regular CSI volume, for exact results and limits. Fixtures and HTTP simulations remain separate from these cluster observations. See the [qualification matrix](compatibility/matrix.json) and [release requirements](docs/qualification.md). Tool compatibility is separate from Red Hat's support lifecycle for a cluster.
 
-The [release-note review for 4.14–4.20](docs/compatibility-review.md) is in progress and has identified legacy storage changes requiring manual migration. The resulting [storage-guard binary's live evidence](docs/storage-guard-live-tests.md) is recorded separately; earlier binaries' results do not automatically qualify the changed source.
+The [release-note review for 4.14–4.20](docs/compatibility-review.md) is in progress and has identified legacy storage changes and admission/SCC gaps requiring explicit handling. See the [storage tests](docs/storage-guard-live-tests.md) and the newer [actual SCC revocation/refusal/recovery evidence](docs/admission-scc-live-tests.md). Earlier binaries' results do not automatically qualify changed source.
 
 Use Go **1.27.2**:
 

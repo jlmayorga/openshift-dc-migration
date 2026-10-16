@@ -2,7 +2,7 @@
 
 - [ ] **Review assumed compatibility for OpenShift 4.14–4.20 using official release notes.** Older clusters are unavailable. Review every minor in this inclusive range and its corresponding Kubernetes releases against the APIs, fields and behavior used by the migration tool. If the review identifies no applicable breaking changes, record those releases as **assumed compatible from release-note review**. Keep actual live-test results separately identified.
 
-  In progress: [review findings and API inventory](compatibility-review.md), with [structured source/progress evidence](../compatibility/evidence/2026-10-16-release-notes-review.json). The first pass found and addressed legacy volume-plugin changes; per-release assessment and compatibility assumptions remain unfinished.
+  In progress: [review findings and API inventory](compatibility-review.md), with [structured source/progress evidence](../compatibility/evidence/2026-10-16-release-notes-review.json). Initial passes addressed legacy volume-plugin changes, raw SCC/Pod fields and required-SCC authorization, including a live revocation regression. Per-release assessment and compatibility assumptions remain unfinished.
 
   Scope and deliverables:
 
