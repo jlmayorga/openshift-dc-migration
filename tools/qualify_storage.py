@@ -2,7 +2,7 @@
 """Live API refusal tests for removed/disabled volume plugins.
 
 Render actual oc new-app objects, set replicas to zero before creation, and add
-one legacy inline volume. No Pod, PVC, PV or driver is provisioned. This tests
+one legacy inline volume. No application Pod, PVC, PV or driver is provisioned. This tests
 classification and staging refusal, not whether a legacy plugin can mount.
 """
 
@@ -69,6 +69,24 @@ def main():
         "rbd": {"monitors": ["192.0.2.1:6789"], "image": "fixture-only"},
         "gitRepo": {"repository": "https://example.test/repo.git", "revision": "main"},
     }
+
+    def no_application_pods():
+        pods = json.loads(live.oc("get", "pods", "-o", "json").stdout)["items"]
+        # A zero-replica DC still launches and retains its deployer. It must
+        # finish, must not be an application Pod, and must not mount test data.
+        return all(
+            pod.get("status", {}).get("phase") == "Succeeded"
+            and pod["metadata"]
+            .get("labels", {})
+            .get("openshift.io/deployer-pod-for.name")
+            and not any(
+                plugin in volume
+                for volume in pod["spec"].get("volumes", [])
+                for plugin in sources
+            )
+            for pod in pods
+        )
+
     for plugin, configuration in sources.items():
 
         def check(plugin=plugin, configuration=configuration):
@@ -92,7 +110,7 @@ def main():
             live.settled()
             source = live.get("dc")
             assert source["spec"]["replicas"] == 0
-            assert not json.loads(live.oc("get", "pods", "-o", "json").stdout)["items"]
+            live.wait(no_application_pods)
             outputs = []
             for mode in ("generate", "plan"):
                 output = live.tool(mode, expected=1)
@@ -119,9 +137,10 @@ def main():
             assert plugin in stage["results"][0]["error"]
             assert live.get("dc")["spec"] == source["spec"]
             assert live.get("dc")["metadata"]["uid"] == source["metadata"]["uid"]
-            assert not json.loads(
-                live.oc("get", "deployment,pods", "-o", "json").stdout
-            )["items"]
+            assert not json.loads(live.oc("get", "deployment", "-o", "json").stdout)[
+                "items"
+            ]
+            assert no_application_pods()
             return {
                 "plugin": plugin,
                 "sourceUID": source["metadata"]["uid"],
@@ -130,7 +149,8 @@ def main():
                 "pausedReviewPreservesVolume": True,
                 "generationAndPlan": outputs,
                 "stageRefusedWithoutDestination": True,
-                "podsCreated": 0,
+                "applicationPodsCreated": 0,
+                "completedDeployerPodsAllowed": True,
             }
 
         live.run_case(plugin, check)
