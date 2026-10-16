@@ -127,24 +127,24 @@
         "k8s.io/apimachinery": "v0.31.3",
         "k8s.io/client-go": "v0.31.3"
       },
-      "testedAt": "2026-10-16T00:41:43.930520+00:00",
+      "testedAt": "2026-10-16T02:03:35.741842+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "partial (actual cluster; see linked session evidence)",
       "limitations": [
-        "Only OpenShift 4.21.36 and the recorded darwin/arm64 binary were exercised live; 4.14, other minors and other platform artifacts remain unqualified.",
-        "The new-app suite and automatic baseline pass their assertions; this session is not full release-matrix qualification and the baseline has outstanding supplemental variants.",
-        "The gp3 CSI case verifies a single-node ReadWriteOnce volume, marker preservation and sampled exclusive ownership; cross-node detach/attach and node failure were not tested.",
-        "Pod ownership sampling cannot observe every instant; the volume case recorded 100 samples with no overlap or read errors.",
-        "Earlier static hostPath setup failed its marker precondition and remains a failed attempt; it was superseded by an authorized regular PVC test. No hostmount-anyuid-v2 binding was applied.",
-        "Not every admission/SCC rejection policy or unavailable registry/image combination has been exercised."
+        "Only OpenShift 4.21.36 and the recorded darwin/arm64 artifact were exercised live; 4.14, other minors and other platform artifacts remain unqualified.",
+        "Final artifact passed 26 targeted cases (16 constraint checks, three new-app variants, six multi-namespace cases, one reused CSI volume) and 13 automatic baseline scenario IDs. Full release qualification remains partial.",
+        "Preflight is point-in-time, not a reservation or startup guarantee; conservative capacity includes all source consumption and full destination plus surge.",
+        "Single-node ReadWriteOnce CSI evidence does not test cross-node detach/attach or node failure.",
+        "Earlier 39-case new-app and six-case namespace sessions retain their original binary hashes in additionalEvidence; they are historical evidence."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
-      "artifactSHA256": "b21b39c83941a3944c528387293e4c3355fb57137fc1f1874cc452c237b370fb",
+      "evidence": "compatibility/evidence/2026-10-16-preflight-4.21.36.json",
+      "artifactSHA256": "f19a4c006e239b3c1a332f9aefc3c4ee5dc646dfba41e029a22634e98f0bb3f7",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-new-app-4.21.36.json",
         "compatibility/evidence/2026-10-15-4.21.36.json",
         "compatibility/evidence/2026-10-16-multiple-namespaces-4.21.36.json"
       ]
