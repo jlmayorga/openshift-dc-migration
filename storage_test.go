@@ -113,6 +113,48 @@ func TestAdmissionAddedLegacyStorageBlocksBeforeRetirement(t *testing.T) {
 	}
 }
 
+func TestRecoveryOfPreviouslySavedLegacyVolumePlanRemainsAvailable(t *testing.T) {
+	for plugin, volume := range legacyInlineFixtures() {
+		t.Run(plugin, func(t *testing.T) {
+			r, c, path := cutoverTest(t, "exclusive", true)
+			if err := r.Run(context.Background()); err != nil {
+				t.Fatal(err)
+			}
+			p, err := loadPlan(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&volume)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Reconstruct a completed migration performed by an earlier binary
+			// on a server where this plugin worked. Recovery must still stop
+			// the destination before attempting the original source restoration.
+			for _, source := range []*unstructured.Unstructured{p.Source, c.source} {
+				if err = unstructured.SetNestedSlice(source.Object, []interface{}{object}, "spec", "template", "spec", "volumes"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			p.Desired.Spec.Template.Spec.Volumes = []corev1.Volume{volume}
+			c.destination.Spec.Template.Spec.Volumes = []corev1.Volume{volume}
+			p.Progress.AdmittedSpec.Template.Spec.Volumes = []corev1.Volume{volume}
+			c.destination.Annotations[planAnnotation] = planDigest(p)
+			c.hpas[0].Annotations[planAnnotation] = planDigest(p)
+			if err = savePlan(path, p); err != nil {
+				t.Fatal(err)
+			}
+			r.Options.Mode = "rollback"
+			if err = r.Run(context.Background()); err != nil {
+				t.Fatal("new storage guard prevented recovery of an old plan", err)
+			}
+			if !reflect.DeepEqual(c.source.Object["spec"], p.Source.Object["spec"]) || *c.destination.Spec.Replicas != 0 || !c.destination.Spec.Paused || c.hpas[0].Spec.ScaleTargetRef.Kind != "DeploymentConfig" {
+				t.Fatal("old-plan recovery did not restore source and autoscaler")
+			}
+		})
+	}
+}
+
 func assertStorageRefusal(t *testing.T, r *Runner, c *contractCluster, path, plugin string) {
 	t.Helper()
 	before := c.source.DeepCopy()

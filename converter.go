@@ -176,7 +176,17 @@ func (r *Runner) Convert(dc *unstructured.Unstructured) (Conversion, error) {
 	}
 	dep.Spec.Template.ObjectMeta = metav1.ObjectMeta{Labels: dep.Spec.Template.Labels, Annotations: dep.Spec.Template.Annotations}
 	c.Deployment = dep
-	c.Unsupported = append(c.Unsupported, unsupportedInlineVolumes(dep.Spec.Template.Spec.Volumes)...)
+	storageProblems := unsupportedInlineVolumes(dep.Spec.Template.Spec.Volumes)
+	if r.Options.Mode == "rollback" {
+		// A newly introduced portability guard must not prevent explicit
+		// recovery of an older saved plan. Ownership, source semantics and
+		// restored readiness/health remain verified by the recovery procedure.
+		if len(storageProblems) > 0 {
+			c.Warnings = append(c.Warnings, "Legacy storage portability checks are bypassed for explicit recovery; restored source readiness and health are still required.")
+		}
+	} else {
+		c.Unsupported = append(c.Unsupported, storageProblems...)
+	}
 	for key := range raw {
 		if !contains([]string{"replicas", "selector", "template", "paused", "test", "minReadySeconds", "revisionHistoryLimit", "strategy", "triggers"}, key) {
 			c.Unsupported = append(c.Unsupported, "spec."+key+" needs a manual equivalent")
