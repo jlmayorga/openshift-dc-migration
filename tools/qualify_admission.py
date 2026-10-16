@@ -136,6 +136,16 @@ def main():
 
     def check():
         live.app("required-scc")
+        subject = f"system:serviceaccount:{live.ns}:{sa_name}"
+        subject_groups = {
+            "system:serviceaccounts",
+            f"system:serviceaccounts:{live.ns}",
+            "system:authenticated",
+        }
+        assert subject not in scc.get("users", [])
+        assert not subject_groups.intersection(
+            scc.get("groups", [])
+        ), "Fixture SCC has a direct grant that revocation of test RBAC cannot remove"
         namespace = live.get("namespace", live.ns)
         uid = int(
             namespace["metadata"]["annotations"]["openshift.io/sa.scc.uid-range"].split(
