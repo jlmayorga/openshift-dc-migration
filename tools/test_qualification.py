@@ -233,6 +233,31 @@ class StorageAuthorization(unittest.TestCase):
             self.assertIn("Explicit disposable target", proc.stderr)
 
 
+class AdmissionAuthorization(unittest.TestCase):
+    def test_scc_binding_requires_ack_before_access(self):
+        script = pathlib.Path(__file__).with_name("qualify_admission.py")
+        command = [
+            sys.executable,
+            str(script),
+            "--context",
+            "test",
+            "--kubeconfig",
+            "/nonexistent",
+            "--binary",
+            "/nonexistent",
+            "--image",
+            "example@sha256:00",
+            "--namespace-prefix",
+            "dcmig-test",
+            "--output",
+            "/nonexistent",
+            "--allow-test-mutations",
+        ]
+        proc = subprocess.run(command, capture_output=True, text=True, timeout=10)
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn("SCC-binding acknowledgements", proc.stderr)
+
+
 class ConstraintAuthorization(unittest.TestCase):
     def invoke(self, output, cases, acknowledge):
         script = pathlib.Path(__file__).with_name("qualify_constraints.py")
