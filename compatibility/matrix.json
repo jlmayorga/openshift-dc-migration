@@ -1,6 +1,6 @@
 {
   "schemaVersion": "v1",
-  "updatedAt": "2026-10-16",
+  "updatedAt": "2026-10-16T04:44:51.081654+00:00",
   "minimum": "4.14",
   "newestGA": "4.22",
   "newestGASource": "https://developers.redhat.com/articles/2026/07/14/whats-new-developers-red-hat-openshift-4-22",
@@ -134,24 +134,26 @@
         "k8s.io/apimachinery": "v0.31.3",
         "k8s.io/client-go": "v0.31.3"
       },
-      "testedAt": "2026-10-16T04:03:20.324756+00:00",
+      "testedAt": "2026-10-16T04:44:51.081654+00:00",
       "fixtureResult": "passed (synthetic baseline fixture; not a cluster result)",
       "simulatedAPIResult": "passed (shared JSON contract suite; not a server-specific result)",
       "integrationResult": "partial (actual cluster; see linked session evidence)",
       "limitations": [
-        "Only OpenShift 4.21.36 and the recorded darwin/arm64 artifact were exercised live; full release qualification remains partial.",
-        "Current admission/SCC artifact passed two targeted cases and 13 automatic baseline scenario IDs. Actual SCC permission revocation preserves the healthy original source, HPA and paused target; restoring the grant permits cutover and recovery.",
-        "Raw post-baseline field injection cases are local request-contract tests. Actual normal SCC/Pod dry-run probes selected restricted-v2, including hostUsers=false; restricted-v3 runtime is not qualified.",
-        "Earlier storage, 48-case, new-app and namespace results remain historical for their original hashes. Supplemental variants require exact-artifact requalification.",
-        "Point-in-time checks do not reserve capacity or guarantee startup. Single-node CSI evidence does not qualify cross-node storage or node failure.",
-        "OpenShift 4.14\u20134.20 review remains in progress, including other raw response boundaries; no older-version compatibility assumption is claimed."
+        "Only OpenShift4.21.36 and the recorded darwin/arm64 artifact were live-tested; full release qualification remains partial.",
+        "Current raw-response artifact passed two targeted cases and 13 automatic baseline scenario IDs. Live field refusal preserves the original source Pod and HPA; explicit recovery preserves unfamiliar target fields.",
+        "The initial artifact failed activation on a null template timestamp difference; explicit recovery passed. The correction is locally regression-tested and the final baseline completed.",
+        "Admission-response-only injection remains loopback contract evidence, not actual webhook injection. No restricted-v3 runtime result.",
+        "Earlier SCC/storage/48-case/new-app/multiple-namespace evidence remains historical for original hashes; broader exact-artifact variants remain pending.",
+        "Preflight does not reserve capacity or guarantee startup. Single-node CSI evidence does not establish cross-node detach/attach or node-failure behavior.",
+        "OpenShift4.14\u20134.20 review remains incomplete; no older-version compatibility assumption yet."
       ],
       "fixture": "testdata/ocp-4.21-dc.json",
       "fixtureTestDate": "2026-10-15",
-      "evidence": "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
-      "artifactSHA256": "910d09ff213e33aca25008ddce7808cdfd40d9d594803dc44f2a5c764b8a55c3",
+      "evidence": "compatibility/evidence/2026-10-16-raw-responses-4.21.36.json",
+      "artifactSHA256": "41a63e14db9753aecd043d985095b144e9fec0746b9fd040e6613eb866d015b8",
       "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
       "additionalEvidence": [
+        "compatibility/evidence/2026-10-16-admission-scc-4.21.36.json",
         "compatibility/evidence/2026-10-16-storage-guard-4.21.36.json",
         "compatibility/evidence/2026-10-16-worker-expiry-4.21.36.json",
         "compatibility/evidence/2026-10-16-runtime-recovery-4.21.36.json",
