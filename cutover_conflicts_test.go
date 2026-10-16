@@ -15,7 +15,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -143,7 +142,7 @@ type sourceRetryRoundTripper func(*http.Request) (*http.Response, error)
 func (f sourceRetryRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 
 func TestSourceUncertainWriteIsNeverRetried(t *testing.T) {
-	for _, scenario := range []string{"lost-response", "eof", "timeout", "unavailable"} {
+	for _, scenario := range []string{"lost-response", "eof", "timeout", "unavailable", "timeout-retry-after"} {
 		t.Run(scenario, func(t *testing.T) {
 			r, c, path := stageTest(t)
 			p, _ := loadPlan(path)
@@ -179,18 +178,23 @@ func TestSourceUncertainWriteIsNeverRetried(t *testing.T) {
 							response.ContentLength = int64(len(body))
 							response.Header.Set("Content-Type", "application/json")
 							response.Header.Del("Content-Length")
+							if scenario == "timeout-retry-after" {
+								response.Header.Set("Retry-After", "0")
+							}
 							return response, nil
 						}
 					}
 					return response, err
 				})
 			}
-			r.Dynamic, err = dynamic.NewForConfig(cfg)
+			r.Dynamic, err = newJSONDynamicClient(cfg)
 			if err != nil {
 				t.Fatal(err)
 			}
 			desired := sourceSpec(p, false, false)
-			err = r.setSourceSpec(context.Background(), p, desired, "quiesce source")
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			err = r.setSourceSpec(ctx, p, desired, "quiesce source")
 			if err == nil || !strings.Contains(err.Error(), "state may be uncertain") {
 				t.Fatal(err)
 			}

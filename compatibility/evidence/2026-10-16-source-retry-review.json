@@ -1,11 +1,11 @@
 {
   "schemaVersion": "v1",
   "kind": "release-note-compatibility-review",
-  "reviewedAt": "2026-10-16T14:30:18.689195+00:00",
+  "reviewedAt": "2026-10-16T15:03:19.879083+00:00",
   "result": "assumed-compatible-with-prerequisites",
   "reviewComplete": true,
   "scope": "Conventional Kubernetes1.27 baseline workload semantics and the inventoried converter/qualification resources, with explicit manual feature guards and platform/runtime prerequisites. Official OpenShift4.14\u20134.21 and Kubernetes1.27\u20131.34 source-impact review; not a blanket security, scheduler or arbitrary-extension certification. Refreshed for aligned Kubernetes0.37.1 and the narrowly assessed client/source changes below; prior0.31.3 results remain historical.",
-  "productionSourceSHA256": "def725da76f7f50cdc0a18b5f689b57f53c4124940c3b2d11f67a5b70bc0f2ef",
+  "productionSourceSHA256": "fbce666721a53fcb5c61dd268ec88b2ebb32daec8a71a8a6026efe73fbfedd19",
   "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
   "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
   "assumedCompatibleReleases": [
@@ -363,16 +363,17 @@
     ]
   },
   "validation": {
-    "raceTestsIncludingSubtests": 380,
+    "raceTestsIncludingSubtests": 381,
     "topLevelTests": 83,
-    "coveragePercent": 77.5,
+    "coveragePercent": 77.6,
     "vet": "passed",
     "moduleVerify": "passed",
     "tidyDiff": "empty",
     "govulncheckFindings": 0,
     "gosecProductionIssues": 0,
     "gosecProductionFiles": 20,
-    "scope": "Changed current production source; fresh actual OpenShift qualification recorded separately."
+    "scope": "Changed current production source; fresh actual OpenShift qualification recorded separately.",
+    "SDKRetryAfterRegression": "Before guard, committed source update attempted11HTTP PUTs; with guard exactly1PUT and explicit recovery error. Same constructor used in production."
   },
   "remainingReleaseQualification": [
     "Broader supplemental scenarios on the final exact artifact remain required.",
@@ -395,8 +396,30 @@
       "Only definite source Update conflict responses are retried. Each attempt refetches, checks original UID/deletion, and pins the entire initially observed spec; any spec drift stops even if it matches another migration state.",
       "StrictJSON and baseline-field protections remain unchanged. Repeated server dry run uses the same baseline API and current resourceVersion. Initial staged-plan freshness is still strict.",
       "Lost committed-write responses, EOF,504Timeout and503ServiceUnavailable are not retried; intent journal and explicit rollback path preserved.",
-      "No SDK/dependency/fixture change, optional discovery change, newer API dependency or server feature requirement. Existing4.14\u20134.20 assumptions and conditional prerequisites remain applicable to this bounded delta."
+      "No SDK/dependency/fixture change, optional discovery change, newer API dependency or server feature requirement. Existing4.14\u20134.20 assumptions and conditional prerequisites remain applicable to this bounded delta.",
+      "Dynamic PUT requests set MaxRetries(0) on the existing REST request. This prevents hidden SDK replays of503/504 responses with Retry-After. The source loop remains the sole retry owner; no API fields, permissions or dependency changes."
     ],
-    "basis": "Task-directed current source/HTTP-contract review atop completed official4.14\u20134.21 release/Kubernetes assessments. No new old-server integration result inferred."
-  }
+    "basis": "Task-directed current source/HTTP-contract review atop completed official4.14\u20134.21 release/Kubernetes assessments. No new old-server integration result inferred.",
+    "clientSourceEvidence": [
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/with_retry.go",
+        "sha256": "72f140a151ca1fa553644ab503b2148d09dff0c819892a5bc9952fe54874dd16"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "rest/request.go",
+        "sha256": "d6c270a6b408fe9266a5e828c9d6033019742d511fb7e4c1433beaa67e37e044"
+      },
+      {
+        "module": "k8s.io/client-go",
+        "version": "v0.37.1",
+        "file": "dynamic/simple.go",
+        "sha256": "e0eac85a93eb7be8577e5ca053520eb9020de748e458d23e0aa0cec7a8516b10"
+      }
+    ]
+  },
+  "boundedRetryProductionSourceSHA256": "def725da76f7f50cdc0a18b5f689b57f53c4124940c3b2d11f67a5b70bc0f2ef"
 }

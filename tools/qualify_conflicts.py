@@ -126,6 +126,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 status = 504
                 data = json.dumps({"apiVersion": "v1", "kind": "Status", "status": "Failure", "reason": "Timeout", "code": 504, "message": "Qualification: committed source response withheld"}).encode()
                 output_headers = [("Content-Type", "application/json")]
+                if self.server.change == "uncertain-retry-after":
+                    output_headers.append(("Retry-After", "0"))
             self.send_response(status)
             for key, value in output_headers:
                 if key.lower() not in {"content-length", "connection", "transfer-encoding"}:
@@ -264,7 +266,7 @@ def main():
         cases = [(f"{stage}-{count}", stage, count, "status", False) for stage in ["dry-run", "write"] for count in [1, 2, 5]]
         cases += [(f"{stage}-{change}", stage, 1, change, False) for stage in ["dry-run", "write"] for change in ["deep-spec", "migration-state", "uid"]]
         cases += [("cancel-backoff", "dry-run", 5, "status", True)]
-        cases += [(change, "write", 1, change, False) for change in ["uncertain-timeout", "uncertain-eof"]]
+        cases += [(change, "write", 1, change, False) for change in ["uncertain-timeout", "uncertain-eof", "uncertain-retry-after"]]
         for name, stage, count, change, cancel in cases:
             if args.cases and name not in args.cases.split(","):
                 continue

@@ -8,6 +8,14 @@ import (
 
 type jsonOnlySerializer struct{ runtime.NegotiatedSerializer }
 
+type singleAttemptUpdateClient struct{ rest.Interface }
+
+func (c singleAttemptUpdateClient) Put() *rest.Request {
+	// client-go can replay 5xx responses carrying Retry-After. Only our
+	// guarded conflict loop may repeat updates; other errors can be uncertain.
+	return c.Interface.Put().MaxRetries(0)
+}
+
 func (s jsonOnlySerializer) SupportedMediaTypes() []runtime.SerializerInfo {
 	for _, info := range s.NegotiatedSerializer.SupportedMediaTypes() {
 		if info.MediaType == "application/json" {
@@ -29,5 +37,5 @@ func newJSONDynamicClient(config *rest.Config) (dynamic.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dynamic.New(client), nil
+	return dynamic.New(singleAttemptUpdateClient{client}), nil
 }
