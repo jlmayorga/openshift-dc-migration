@@ -2,7 +2,7 @@
 
 Ordinary builds, Python tests, Go tests and security checks do not require OpenShift. Live qualification is an explicit development operation against an authorized disposable target. It can create, scale and interrupt test applications; it provisions no cluster and must never select the operator's current kubeconfig implicitly.
 
-[Compatibility](compatibility.md) summarizes completed historical results and untested targets. Exact historical Linux amd64 and Darwin arm64 binaries qualified on OpenShift 4.21.36 / Kubernetes v1.34.9. The maintenance source delta has been reassessed; all changed current binaries still need new actual evidence, and historical live passes do not transfer. The wider full-matrix gate remains incomplete. Qualification, candidate builds and [historical release verification](release-scope.md) are separate operations.
+[Compatibility](compatibility.md) summarizes completed historical results and untested targets. Exact historical Linux amd64 and Darwin arm64 binaries qualified on OpenShift 4.21.36 / Kubernetes v1.34.9. The maintenance source delta has been reassessed, and the exact Linux amd64 and Darwin arm64 artifacts pinned by the separate [current release policy](../compatibility/current-release-scope.json) completed fresh actual qualification. Other changed binaries still need their own actual evidence; historical live passes do not transfer. The wider full-matrix gate remains incomplete. Qualification, candidate builds and [release verification](release-scope.md) are separate operations.
 
 ## Select a development target
 

@@ -26,7 +26,7 @@ Select a context explicitly and follow the [migration and recovery procedure](do
 
 Labels, supported Rolling/Recreate behavior, replica settings and supported ImageChange triggers are preserved. Hooks, custom/test deployment semantics, ambiguous triggers and unfamiliar fields require manual migration. See [conversion coverage](docs/feature-mapping.md). Preflight is a point-in-time assessment; it does not reserve capacity or guarantee image pulls, CSI mounts, application readiness or every network path.
 
-The minimum compatibility target is OpenShift 4.14 / Kubernetes 1.27. Historical source assessments support conditional 4.14–4.20 assumptions, and exact historical Linux amd64 and Darwin arm64 binaries completed actual qualification on OpenShift 4.21.36 / Kubernetes v1.34.9. The [maintenance source delta](compatibility/reviews/maintenance-refresh.json) has been reassessed with the same prerequisites; **current binaries still need new actual qualification.** OpenShift 4.22 and other native platforms remain untested. [Compatibility](docs/compatibility.md) explains these distinct evidence bases; tool compatibility is separate from Red Hat's cluster support lifecycle.
+The minimum compatibility target is OpenShift 4.14 / Kubernetes 1.27. Completed source assessments and the [maintenance delta review](compatibility/reviews/maintenance-refresh.json) support conditional 4.14–4.20 assumptions with prerequisites. The exact Linux amd64 and Darwin arm64 artifacts in the [current release policy](compatibility/current-release-scope.json) completed fresh actual qualification on OpenShift 4.21.36 / Kubernetes v1.34.9. Historical qualification remains bound to its original artifacts. Other builds need their own qualification; OpenShift 4.22 and other native platforms remain untested. [Compatibility](docs/compatibility.md) explains these distinct evidence bases; tool compatibility is separate from Red Hat's cluster support lifecycle.
 
 Plans and reports can contain sensitive workload values; keep them private. The canonical report is JSON; `--report-path ''` disables optional PDF output. Unsupported/manual cases and operation or report failures return nonzero status.
 
@@ -35,4 +35,4 @@ Plans and reports can contain sensitive workload values; keep them private. The 
 - [Migration, preflight and recovery](docs/migration.md) · [RBAC](docs/rbac.md)
 - [Feature mapping](docs/feature-mapping.md) · [Compatibility prerequisites](docs/compatibility-review.md)
 - [Development and tool commands](docs/development.md) · [Dependencies](docs/dependencies.md) · [Security](docs/security.md)
-- [Developer-run live qualification](docs/qualification.md) · [Historical release verification](docs/release-scope.md) · [Follow-up backlog](docs/backlog.md)
+- [Developer-run live qualification](docs/qualification.md) · [Release verification](docs/release-scope.md) · [Follow-up backlog](docs/backlog.md)
