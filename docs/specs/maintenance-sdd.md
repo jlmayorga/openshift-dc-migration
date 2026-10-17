@@ -2,6 +2,8 @@
 
 Status: maintenance design implemented. The reconciled starting snapshot is repository revision `c60b7db`; its conditions are retained below as design context. The current source delta assessment is recorded separately; current binaries still require actual qualification. The completed historical scoped result remains bound to its immutable source and exact artifacts. Execution notes, validation output and independent documentation reviews are kept in ignored private storage.
 
+Release follow-up decision: new maintenance qualification uses a separate current-release policy and explicit `--current-scope` gate, with refreshed source reviews and new exact-artifact actual records. Historical scope/reproduction retain their original defaults and pins. Policy-only commits may advance without restamping tested binaries; changed production, dependency, fixture or artifact identities require new qualification. The approved platform/version scope remains Linux amd64 and Darwin arm64 on actual 4.21, with conditional 4.14–4.20 source assumptions; unavailable targets remain outside it. Live qualification remains developer-run against explicitly selected development clusters.
+
 This specification turns the maintenance TODO into bounded work for AI coding agents using specification driven development (SDD). The intended result is a project that is easy to build, understand, maintain and use, with truthful documentation and optional development testing against disposable OpenShift clusters.
 
 Execute waves in order. Keep only one wave active, and finish one task and its checks before starting the next task. Completing this specification does not require a running OpenShift cluster or imply that release qualification has passed.

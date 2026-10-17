@@ -1,4 +1,17 @@
-# Historical release policy
+# Release verification
+
+Current maintenance releases use a separate `compatibility/current-release-scope.json` policy and the explicit `--current-scope` gate. That policy must pin fresh actual records for the exact Linux amd64 and Darwin arm64 binaries, the tested revision and production/dependency/fixture identities. It retains the existing 4.14–4.21 scope and does not qualify 4.22 or additional platforms. The original historical policy below remains immutable.
+
+```sh
+python3 tools/release_gate.py --current-scope --artifacts /path/to/tested-dist \
+  --evidence-root /path/to/current-bundle --export-evidence /path/to/verified
+```
+
+The current bundle must include its pinned actual records and the refreshed source-review overlay with the unchanged historical review chain. The gate rejects missing, stale, changed, ambiguous or extra artifacts. It records the tested source revision separately from the policy revision. `--current-scope` cannot be combined with historical-source or full-matrix mode. An ordinary candidate build remains unqualified until its exact output has passed developer-run live tests and the scope has been explicitly reviewed and pinned.
+
+Release preparation copies the tested bytes and their original build metadata; it does not relink them with a tag or later policy commit. Preserve per-artifact build metadata when the two platforms were built at different times. Keep actual observations and command archives private, and publish only deliberately selected binaries, checksums, provenance, policy and gate summary after verification. A maintainer can publish the locally verified set when authorized; the historical draft workflow is not a current-source release path.
+
+## Historical release policy
 
 The completed historical scope covers exactly Linux amd64 and Darwin arm64 binaries on OpenShift 4.21.36 / Kubernetes v1.34.9. OpenShift 4.14–4.20 have completed source-review assumptions with [prerequisites](compatibility-review.md). OpenShift 4.22 and other platforms remain outside that scope. The maintenance source delta has been reassessed separately; current candidates still require new actual qualification.
 

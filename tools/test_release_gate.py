@@ -465,6 +465,52 @@ class CurrentSourceReviewTests(unittest.TestCase):
             evidence=self.current_name, evidenceSHA256=digest(self.current)
         )
 
+    def test_separate_current_scope_requires_fresh_bytes_and_refreshed_reviews(self):
+        scope = copy.deepcopy(self.scope)
+        scope.update(name="current-maintenance-4.21", revision="b" * 40,
+                     productionSourceSHA256="current-source")
+        rows = []
+        for index, (name, item) in enumerate(scope["artifacts"].items(), 3):
+            item["sha256"] = str(index) * 64
+            item["evidence"] = "compatibility/evidence/current-" + name + ".json"
+            row = dict(self.rows[index - 3], artifactSHA256=item["sha256"],
+                       revision=scope["revision"], productionSourceSHA256="current-source")
+            path = self.root / item["evidence"]
+            path.write_text(json.dumps(row))
+            item["evidenceSHA256"] = digest(path)
+            rows.append(row)
+        (self.root / "compatibility/current-release-scope.json").write_text(json.dumps(scope))
+        with mock.patch("release_gate.REPO_ROOT", self.root):
+            self.assertEqual(load_scope(self.matrix, self.root), self.scope)
+            self.assertEqual(load_scope(self.matrix, self.root, current_scope=True), scope)
+            missing_review = dict(self.matrix)
+            del missing_review["currentSourceReview"]
+            with self.assertRaisesRegex(ValueError, "explicit current source review"):
+                load_scope(missing_review, self.root, current_scope=True)
+        artifacts = {n: a["sha256"] for n, a in scope["artifacts"].items()}
+        args = (self.matrix, scope, rows, artifacts, *self.hashes[:2], "current-source")
+        self.assertTrue(verify_scope(*args, evidence_root=self.root, current_source=True))
+        with self.assertRaisesRegex(ValueError, "Stale compatibility review"):
+            verify_scope(*args, evidence_root=self.root)
+        # Historical rows cannot qualify different binary bytes or source.
+        with self.assertRaisesRegex(ValueError, "Missing or ambiguous scoped evidence"):
+            verify_scope(self.matrix, scope, self.rows, artifacts, *self.hashes[:2],
+                         "current-source", evidence_root=self.root, current_source=True)
+        with self.assertRaisesRegex(ValueError, "4.22"):
+            verify(self.matrix, rows, artifacts, scope["revision"], *self.hashes[:2],
+                   "current-source", load_reviews(self.matrix, self.root, current_source=True))
+
+    def test_current_scope_cli_cannot_select_historical_or_full_matrix_mode(self):
+        import subprocess
+        import sys
+        script = pathlib.Path(__file__).with_name("release_gate.py")
+        for other in ["--historical-source", "--full-matrix"]:
+            result = subprocess.run([sys.executable, str(script), "--artifacts", "unused",
+                                     "--evidence-root", "unused", "--current-scope", other],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("cannot be combined", result.stderr)
+
     def test_current_and_historical_reviews_are_selected_independently(self):
         self.assertEqual(
             load_reviews(self.matrix, self.root)[0]["productionSourceSHA256"], "source"

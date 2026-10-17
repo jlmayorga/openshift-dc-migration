@@ -382,16 +382,24 @@ def load_reviews(matrix, evidence_root=None, *, current_source=False):
     return reviews
 
 
-def load_scope(matrix, evidence_root=None):
-    """Load the explicit frozen-candidate exception, preserving the GA inventory."""
-    path = pathlib.Path(matrix["activeReleaseScope"])
-    if path != pathlib.Path("compatibility/release-scope.json"):
+def load_scope(matrix, evidence_root=None, *, current_scope=False):
+    """Load one explicit scope without changing the historical default or GA inventory."""
+    if current_scope and not matrix.get("currentSourceReview"):
+        raise ValueError("Current scope requires an explicit current source review")
+    expected_path = pathlib.Path(
+        "compatibility/current-release-scope.json"
+        if current_scope
+        else "compatibility/release-scope.json"
+    )
+    path = expected_path if current_scope else pathlib.Path(matrix["activeReleaseScope"])
+    if path != expected_path:
         raise ValueError("Invalid release scope path")
     scope = json.loads((REPO_ROOT / path).read_text())
     if (
         scope.get("schemaVersion") != "v1"
         or scope.get("kind") != "scoped-maintenance-release"
-        or scope.get("name") != "maintenance-4.21"
+        or scope.get("name")
+        != ("current-maintenance-4.21" if current_scope else "maintenance-4.21")
         or not scope.get("authorization", {}).get("instruction")
         or scope.get("requiredMinors") != ["4." + str(n) for n in range(14, 22)]
         or scope.get("actualMinor") != "4.21"
@@ -429,6 +437,8 @@ def verify_scope(
     dependency_hash,
     source_hash,
     evidence_root=None,
+    *,
+    current_source=False,
 ):
     """Allow documentation/policy commits while retaining exact tested bytes."""
     for key, value in [
@@ -469,7 +479,7 @@ def verify_scope(
         fixture_hash,
         dependency_hash,
         source_hash,
-        load_reviews(matrix, evidence_root),
+        load_reviews(matrix, evidence_root, current_source=current_source),
         required_minors=scope["requiredMinors"],
     )
 
@@ -494,13 +504,20 @@ def main():
         "--full-matrix", action="store_true", help="Require the entire GA inventory"
     )
     p.add_argument(
+        "--current-scope",
+        action="store_true",
+        help="Verify the separately pinned current scope with refreshed source reviews",
+    )
+    p.add_argument(
         "--export-evidence", help="Export validated policy, records and gate result"
     )
     a = p.parse_args()
+    if a.current_scope and (a.historical_source or a.full_matrix):
+        p.error("--current-scope cannot be combined with --historical-source or --full-matrix")
     matrix = json.loads((REPO_ROOT / "compatibility/matrix.json").read_text())
     scope = (
-        load_scope(matrix, a.evidence_root)
-        if matrix.get("activeReleaseScope") and not a.full_matrix
+        load_scope(matrix, a.evidence_root, current_scope=a.current_scope)
+        if a.current_scope or (matrix.get("activeReleaseScope") and not a.full_matrix)
         else None
     )
     evidence_paths = actual_evidence_paths(a.evidence_root, scope, a.evidence)
@@ -541,10 +558,12 @@ def main():
     tested_revision = scope["revision"] if scope else revision
     if provenance.get("revision") != tested_revision:
         raise ValueError("Candidate tested revision mismatch")
-    reviews = load_reviews(matrix, a.evidence_root, current_source=scope is None)
+    current_source = a.current_scope or scope is None
+    reviews = load_reviews(matrix, a.evidence_root, current_source=current_source)
     if scope:
         verify_scope(
-            matrix, scope, evidence, artifacts, *hashes, evidence_root=a.evidence_root
+            matrix, scope, evidence, artifacts, *hashes, evidence_root=a.evidence_root,
+            current_source=current_source,
         )
     else:
         verify(matrix, evidence, artifacts, revision, *hashes, reviews)
@@ -554,7 +573,7 @@ def main():
         paths = evidence_paths + [REPO_ROOT / "compatibility/matrix.json"]
         paths += [
             evidence_path(a.evidence_root, name)
-            for name, _ in review_bindings(matrix, current_source=scope is None)
+            for name, _ in review_bindings(matrix, current_source=current_source)
         ]
         for review in reviews:
             paths += [
@@ -574,7 +593,12 @@ def main():
                 paths.append(base_path)
                 current = json.loads(base_path.read_text())
         if scope:
-            paths.append(REPO_ROOT / matrix["activeReleaseScope"])
+            paths.append(
+                REPO_ROOT / (
+                    "compatibility/current-release-scope.json"
+                    if a.current_scope else matrix["activeReleaseScope"]
+                )
+            )
         for path in set(paths):
             shutil.copyfile(path, out / path.name)
         (out / "gate-result.json").write_text(
