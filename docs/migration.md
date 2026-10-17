@@ -1,14 +1,22 @@
-# Controlled migration
+# Controlled migration and recovery
+
+Use a built `openshift-dc-converter` binary with a live OpenShift target and the [permissions for each mode](rbac.md). Select `--context` explicitly; `--kubeconfig` overrides normal loading, otherwise `KUBECONFIG` and standard kubeconfig rules apply. Review [feature limits](feature-mapping.md) and [compatibility prerequisites](compatibility-review.md) before planning.
+
+## Generate and plan
 
 Generation is read-only against the cluster. Every generated manifest is accompanied by a review plan containing the original DC snapshot, intended replicas, semantics, warnings, blockers and recovery instructions. Offline/generation plans have incomplete dependent-resource inventory and cannot execute.
 
 Create a live plan with `--mode plan --projects example --context TEST_CONTEXT`. This inventories namespace Services, HPAs and controllers without changing them. A later stage revalidates the source UID/resource version, source spec, dependencies and controller overlap. Permissions for optional planning are separate from ordinary generation. Review the plan, pod labels, selected context, dependent resources and warnings before application.
+
+## Validate and stage
 
 `--mode dry-run --plan-file PATH --context TEST_CONTEXT` submits only a paused, zero-replica destination for server dry run. `--mode stage` performs the same dry run then creates that destination. Image triggers are removed during staging. Existing destinations require explicit source and plan ownership and must still match the admitted staged spec. Foreign objects, changed plans, active destinations and conflicting creates are never overwritten. A journal records creation intent before mutation; a safe rerun discovers a previously created owned destination. The plan uses a local exclusive lock; after process death, inspect the process/cluster/journal before removing a stale `.lock` file.
 
 The old `--apply-changes` flag now aliases staging and requires `--plan-file`; it cannot start a second active workload. Staging does not retire the DC or move traffic. Unsupported semantics produce manual diagnostics and prevent staging. Admission changes to protected identity, selector, images, pod labels, pause or replica count fail the operation. Other defaults/admission changes are recorded for review.
 
 Use private storage for plans: snapshots can contain environment values. Keep the DC for recovery. Cutover and recovery procedures must always stop and verify the destination before restarting an exclusive source; never delete the DC as an automatic cleanup step.
+
+## Cut over
 
 `--mode cutover --plan-file PATH --context TEST_CONTEXT --automation-quiesced` executes only a staged plan. The acknowledgement means external GitOps, operators, scheduled scalers, other migration invocations and application jobs have been paused or coordinated. Use one operator/process for a migration; the local lock is not a distributed lease. The plan's source version is checked strictly, including status-only resource-version changes; inspect stale plans before replanning. A new plan cannot silently adopt a staged object with a different plan digest.
 
@@ -18,11 +26,17 @@ For **overlap**, choose `--cutover-mode overlap --overlap-justification 'REASON'
 
 A nonzero workload requires a credential-free `--health-url https://APPLICATION/health` recorded during planning. Queries, fragments, URL credentials and redirects are rejected. HTTP is available for isolated test networks. A successful response must be 2xx. Health failures are retried within the readiness timeout to allow Route/backend convergence; a persistent failure retains the last health error and cannot count as ready or restored. A zero-replica workload does not require endpoints or an application-health request. Readiness/retirement have `--readiness-timeout`; all requests share the operation context and retain per-request deadlines.
 
+## Recover explicitly
+
+The journal is the `progress` object inside the same private JSON plan supplied with `--plan-file`. Retain that plan through staging, cutover and rollback. Before recovery, compare its `phase`, `events`, recorded destination UID and source version with live ownership and workload state; also compare the plan's original `source` and `hpas` snapshots with the live resources. Those original snapshots are top-level plan fields, separate from `progress`. Inspect these records without manually editing the journal or snapshots.
+
 A failed or interrupted cutover is not automatically declared recovered. Run `--mode rollback --plan-file PATH --context TEST_CONTEXT` after inspecting the journal. Recovery removes migrated HPAs, stops/pauses the owned destination, disables its image triggers, and waits for destination pods to disappear before restoring the source spec and HPA targets. It preserves the DC, original replica count and dependent snapshots. It verifies restored source availability and health before recording recovery. If access is lost, source/destination ownership changes, an unrelated spec changes or a journal cannot be saved, stop and inspect the cluster; the tool returns failure and never claims recovery. Do not restart an exclusive source until destination termination is verified. A stale local lock may need manual removal after process/cluster inspection.
+
+## Concurrency and admission safeguards
 
 Source updates during cutover and rollback retry definite resource-version conflicts at most **five total attempts per transition**. The four waits are 100, 200, 400 and 800 milliseconds, bounded by cancellation and the operation deadline. Every attempt reads the source again, verifies its original UID and non-deleting state, compares its complete spec with the spec pinned at the start of that transition, and repeats server dry run before a real update. Status or metadata churn can therefore be tolerated, but any spec change stops the retry, even if it resembles another valid migration state. The initial staged-plan freshness check remains strict.
 
-Retries apply only to confirmed conflict responses from source dry-run/update requests. Dynamic PUT requests disable client-go's internal `Retry-After` replays so an uncertain response reaches the guarded recovery path without an opaque SDK retry. Lost responses, EOFs, timeouts, other API errors and mismatched persisted admission remain failures on the explicit recovery path. Earlier migration steps may already have changed triggers, replicas or HPAs. Exhausted conflicts retain the journal and require inspection and explicit rollback; the tool does not restart the whole cutover automatically. Other resource mutations retain their existing recovery behavior. The [live conflict-test evidence](source-conflict-live-tests.md) records the bounded retries, drift refusals and uncertain-write recovery checks.
+Retries apply only to confirmed conflict responses from source dry-run/update requests. Dynamic PUT requests disable client-go's internal `Retry-After` replays so an uncertain response reaches the guarded recovery path without an opaque SDK retry. Lost responses, EOFs, timeouts, other API errors and mismatched persisted admission remain failures on the explicit recovery path. Earlier migration steps may already have changed triggers, replicas or HPAs. Exhausted conflicts retain the journal and require inspection and explicit rollback; the tool does not restart the whole cutover automatically. Other resource mutations retain their existing recovery behavior. Historical [observed coverage](compatibility.md) includes conflict handling, drift refusal and uncertain-write recovery for its recorded artifacts.
 
 HPA recreation is explicit and temporarily interrupts autoscaling; owner-managed or finalizer-bearing HPAs require manual coordination. No source manifest or Service is deleted. Resource updates use optimistic concurrency and server dry run; webhook differences between dry run and persistence are failures requiring inspection. SCC pod admission and image-controller behavior remain actual-cluster qualification requirements.
 
@@ -64,3 +78,44 @@ Namespace and admin policy Pod selectors that depend on `pod-template-hash` requ
 Capacity covers the reviewed replica count and rolling surge; it does not reserve capacity for future HPA scaling. Preflight is **a point-in-time assessment, not a reservation or a guarantee of startup**. Policies, quotas and allocations can change after it; image pulls, application readiness, controller-user/generated-name-specific webhooks, custom scheduler plugins, CSI attachment/mounting and external dependencies can still fail. These limits are shown before retirement. Keep runtime readiness/health checks and a recovery plan. No duplicate test Pod is started to guess whether an exclusive worker is safe.
 
 The distinction follows Kubernetes' [dry-run semantics](https://kubernetes.io/docs/reference/using-api/api-concepts/#dry-run), [Pod admission and quota behavior](https://kubernetes.io/docs/concepts/policy/resource-quotas/) and OpenShift's [SCC subject-review API](https://docs.redhat.com/en/documentation/openshift_container_platform/4.14/html/security_apis/podsecuritypolicysubjectreview-security-openshift-io-v1). Actual 4.14 qualification remains separate from using these baseline APIs.
+
+## Example operation sequence
+
+After building, place the binary on PATH or substitute its absolute path below. Choose an authorized context, project and health endpoint. The example assumes DC `web` in project `example`; replace these for your workload. Each executing mode accepts one reviewed plan, even when generation/planning covers multiple projects.
+
+```sh
+REVIEW_DIR=$(mktemp -d)
+openshift-dc-converter --mode plan --projects example --context AUTHORIZED_CONTEXT \
+  --health-url https://APPLICATION/health --output-dir "$REVIEW_DIR" \
+  --json-report "$REVIEW_DIR/planning.json" --report-path ''
+# Inspect the plan and all diagnostics before continuing.
+openshift-dc-converter --mode dry-run --plan-file "$REVIEW_DIR/example/web.plan.json" \
+  --context AUTHORIZED_CONTEXT --json-report "$REVIEW_DIR/dry-run.json" --report-path ''
+openshift-dc-converter --mode stage --plan-file "$REVIEW_DIR/example/web.plan.json" \
+  --context AUTHORIZED_CONTEXT --json-report "$REVIEW_DIR/staging.json" --report-path ''
+openshift-dc-converter --mode preflight --plan-file "$REVIEW_DIR/example/web.plan.json" \
+  --context AUTHORIZED_CONTEXT --json-report "$REVIEW_DIR/preflight.json" --report-path ''
+# After coordinating external reconcilers/scalers and accepting disruption:
+openshift-dc-converter --mode cutover --plan-file "$REVIEW_DIR/example/web.plan.json" \
+  --context AUTHORIZED_CONTEXT --automation-quiesced \
+  --json-report "$REVIEW_DIR/cutover.json" --report-path ''
+```
+
+If a run fails or is interrupted, inspect the journal and workload state, restore access if needed, and request recovery explicitly:
+
+```sh
+openshift-dc-converter --mode rollback --plan-file "$REVIEW_DIR/example/web.plan.json" \
+  --context AUTHORIZED_CONTEXT --json-report "$REVIEW_DIR/recovery.json" --report-path ''
+```
+
+`--projects` deduplicates project names and skips reserved namespaces before access checks. Multi-project generation/planning writes artifacts under separate namespace directories; failures remain in the aggregate report while other projects can still be processed. Executing modes do not automatically loop over generated plans.
+
+## Reports, files and exit status
+
+Each generated workload has YAML and a JSON review plan. A manifest expresses intended replicas; applying it directly while the DC is active can start a duplicate workload. Use the staged procedure instead. Plans include source snapshots and may contain environment values; keep them private.
+
+The canonical report defaults to `conversion_report.json`; `--json-report` changes its path. Optional PDF defaults to `conversion_report.pdf`; `--report-path ''` disables it. Reports retain per-source identity, destination, stage, outcome, warnings, unsupported features and errors. Generated, staged/applied, ready, manual, failed and skipped totals remain distinct. Report/log/input/plan paths must be distinct. Files are written by private atomic replacement.
+
+Exit 0 means the requested operation completed, including explicit skips or empty namespaces. Validation, unsupported/manual migration, conversion, save, admission, apply, readiness, cancellation and report failures return exit 1. A partial run preserves its report where storage remains writable. A generated manifest or successful preflight never means the workload is ready.
+
+`--request-timeout`, `--operation-timeout` and `--readiness-timeout` bound API and operation work. SIGINT/SIGTERM cancel requests and retain journals/reports where possible. Lost connectivity and unverified restoration are failures, never successful recovery.

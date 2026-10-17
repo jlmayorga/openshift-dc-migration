@@ -1,15 +1,30 @@
 # Security validation
 
-On 2026-10-15, govulncheck 1.9.0 with Go 1.27.2 found eight advisory IDs with symbol-level paths before transitive upgrades:
+Treat manifests, plans, snapshots and reports as private workload data: they can include environment values and admission diagnostics. Created files use mode 0600 and directories 0700; writes replace files atomically. Kubeconfig credentials are not intentionally copied into plans or reports. Restrict access to retained failure artifacts and qualification credentials.
 
-GO-2026-4918, GO-2026-5026, GO-2026-5970, GO-2026-6603, GO-2026-6610, GO-2026-6611, GO-2026-6612, GO-2026-6617.
+## Pinned scanners
 
-They affect x/net HTTP/2/IDNA and x/text normalization. Symbol reachability includes broad interface/formatting paths into HTTP/2 server code; this CLI does not start an HTTP/2 server. That observation does not waive the findings: all affected libraries were upgraded. x/net 0.61.0, x/text 0.43.0, x/sys 0.49.0 and its aligned x/term requirement replace vulnerable versions. The post-upgrade scan has no symbol-level advisory findings. Keep current scan artifacts; these are time-specific results, not a permanent security claim.
+Application dependencies and scanner dependencies are separate. `tools/security/go.mod` and `go.sum` pin gosec, govulncheck and their transitive libraries, including gRPC 1.83.2. The gRPC fix addresses [GHSA-2v4p-qf9q-27wj](https://github.com/grpc/grpc-go/security/advisories/GHSA-2v4p-qf9q-27wj). The tooling module retains x/tools 0.52.0 for Go 1.27 export-data compatibility. Scanner updates do not themselves change the application's dependency hash or qualify a migration artifact.
 
-CI preserves the complete JSON event stream and enforces symbol-level findings with `tools/check-vulnerabilities.py`; scanner command errors also fail the job. Scanner failures are not treated as clean scans. Reevaluate advisories with parent dependency changes and before releases. Local before/after streams are retained in the ignored progress directory; CI uploads fresh streams rather than committing potentially large artifacts.
+Build scanners from the locked module and scan from the repository root:
 
-Input manifests, migration plans, backups and reports may include environment values. Files use mode 0600 and directories 0700 where created. Keep output private. Kubeconfig credentials are never intentionally included in plans or reports. Kubernetes errors can contain admission diagnostics and object values; protect reports accordingly.
+```sh
+SECURITY_DIR=$(mktemp -d)
+go -C tools/security mod download
+go -C tools/security mod verify
+go -C tools/security build -mod=readonly -o "$SECURITY_DIR/govulncheck" golang.org/x/vuln/cmd/govulncheck
+go -C tools/security build -mod=readonly -o "$SECURITY_DIR/gosec" github.com/securego/gosec/v2/cmd/gosec
+"$SECURITY_DIR/govulncheck" -json ./... > "$SECURITY_DIR/govulncheck.json"
+python3 tools/check_vulnerabilities.py "$SECURITY_DIR/govulncheck.json"
+"$SECURITY_DIR/gosec" -fmt=json -out="$SECURITY_DIR/gosec.json" ./cmd/... ./internal/...
+"$SECURITY_DIR/govulncheck" -mode=binary -json "$SECURITY_DIR/govulncheck" > "$SECURITY_DIR/scanner-vulnerabilities.json"
+python3 tools/check_vulnerabilities.py "$SECURITY_DIR/scanner-vulnerabilities.json"
+"$SECURITY_DIR/govulncheck" -mode=binary -json "$SECURITY_DIR/gosec" > "$SECURITY_DIR/gosec-vulnerabilities.json"
+python3 tools/check_vulnerabilities.py "$SECURITY_DIR/gosec-vulnerabilities.json"
+```
 
-The upstream gosec 2.29.0 dependency on x/tools 0.49.0 cannot decode Go 1.27 export data. `tools/security/go.mod` locks gosec and govulncheck with x/tools 0.52.0 and full checksums; CI builds these tools from that module and fails on scanner errors. The explicit-path offline reader's G304 annotation documents its intended CLI file access, not a suppression of cluster-derived file paths.
+Check every command's exit status. Scanner failures fail validation and cannot count as clean scans. `check_vulnerabilities.py` enforces symbol-level findings from the full JSON event stream. The explicit gosec paths cover all shipped packages without traversing private scratch research or the scanner module. The ordinary Go package pattern for govulncheck remains `./...`.
 
-On 2026-10-16, the separate security-tooling module upgraded `google.golang.org/grpc` from 1.83.1 to **1.83.2**, addressing [GHSA-2v4p-qf9q-27wj](https://github.com/grpc/grpc-go/security/advisories/GHSA-2v4p-qf9q-27wj), an xDS server denial of service via missing authority/Host headers. The module checksum lock was refreshed. Both pinned scanners rebuilt successfully, and the gosec binary embeds gRPC 1.83.2. Vulnerability scans of the application and both scanner binaries reported no symbol-level advisory findings; gosec reported no application issues. Application dependencies and qualified migration artifacts are unchanged.
+Preserve complete scanner output in private storage or CI artifacts. Recheck advisories after dependency changes and before release; a past clean result is not a permanent security claim. Address findings through reviewed parent/transitive updates and rerun relevant behavioral tests. The explicit offline-input reader's G304 annotation records intended CLI file access; do not broaden it to cluster-derived paths or suppress findings to pass checks.
+
+See [dependency policy](dependencies.md) for the application/client boundary and [release policy](release-scope.md) for exact-artifact qualification.

@@ -1,71 +1,38 @@
 # OpenShift DeploymentConfig migration
 
-Convert exported or live `apps.openshift.io/v1` DeploymentConfigs into baseline `apps/v1` Deployments, review migration plans, and stage or explicitly cut over supported workloads.
+Convert exported or live `apps.openshift.io/v1` DeploymentConfigs into baseline `apps/v1` Deployments, review migration plans, and stage or cut over supported workloads. This CLI is for OpenShift application operators coordinating a controlled migration and recovery procedure.
 
-The minimum compatibility target remains **OpenShift 4.14 / Kubernetes 1.27**. Newer clusters are accepted through API discovery without an arbitrary maximum version. **The scoped maintenance release gate is open for Linux amd64 and Darwin arm64 on OpenShift 4.21.36.** On **OpenShift 4.21.36 / Kubernetes v1.34.9**, the recorded Darwin arm64 and current Linux amd64 binaries each passed all 22 required scenario groups. See the [source-conflict qualification](docs/source-conflict-live-tests.md) and [full Linux results](docs/linux-execution-tests.md), including actual Linux unit tests and multi-namespace migration/recovery. OpenShift 4.22 and unavailable native platforms remain untested; other platform cross-builds do not establish execution compatibility. Earlier [new-app and client-upgrade sessions](docs/client-upgrade-live-tests.md) retain their own binary provenance. See the [qualification matrix](compatibility/matrix.json) and [release requirements](docs/qualification.md). Tool compatibility is separate from Red Hat's support lifecycle for a cluster.
+## Build and try offline conversion
 
-The [parallel release-note assessment](docs/compatibility-review.md) supports **assumed compatibility for 4.14–4.20**, with explicit manual-feature and cluster prerequisites. OpenShift 4.21 was also reviewed. This source-bound assumption is separate from actual integration results; code/dependency changes require reassessment. The [active release scope](docs/release-scope.md) retains exact tested binary hashes; broader qualification is follow-up work.
-
-The [raw-response tests](docs/raw-response-live-tests.md) verify refusal of an unfamiliar field on a staged Deployment, preservation during explicit recovery, and the existing CSI volume. They also document an activation serialization failure, its recovery and correction, followed by 13 successful baseline scenarios on the rebuilt binary.
-
-The subsequent [cluster admin-policy tests](docs/admin-policy-live-tests.md) verify pre-retirement refusal for ANP/BANP subjects, peers and future Deployment hash selectors, followed by successful migration/recovery after removing the isolated test policies. Earlier binaries retain their own evidence scope.
-
-Use Go **1.27.2**:
+From a checkout, use **Go 1.27.2** and Git. Maintainer Python tools require **Python 3.12 or later**. Building needs dependency-download access; conversion of exported input needs no cluster, `oc`, kubeconfig or credentials.
 
 ```sh
 go mod download
 go mod verify
-go build -mod=readonly -trimpath -o /tmp/openshift-dc-converter .
+DEMO_DIR=$(mktemp -d)
+go build -mod=readonly -trimpath -o "$DEMO_DIR/openshift-dc-converter" ./cmd/openshift-dc-converter
+"$DEMO_DIR/openshift-dc-converter"   --input internal/migration/testdata/ocp-4.14-dc.yaml   --output-dir "$DEMO_DIR/review"   --json-report "$DEMO_DIR/conversion_report.json" --report-path ''
 ```
 
-Generation is read-only against the cluster and is the default:
+This supplied fixture is synthetic. Success writes `review/example/web.yaml`, `review/example/web.plan.json` and the JSON report under `$DEMO_DIR`. It does not deploy the fixture image. Exported YAML, JSON, lists and multiple YAML documents are accepted; every input object needs a namespace. Offline plans lack live dependency inventory and cannot execute a migration.
 
-```sh
-# Exported YAML, JSON, lists or multiple YAML documents; no kubeconfig is loaded.
-/tmp/openshift-dc-converter --input exported-dc.yaml --output-dir ./review
+## Live workflow
 
-# Live generation with namespace-scoped permissions and an explicitly selected context.
-/tmp/openshift-dc-converter --projects example --context TEST_CONTEXT --output-dir ./review
-```
+Generation is the default and reads DeploymentConfigs without changing workloads. Live `plan` also inventories dependencies. `dry-run` validates a paused, zero-replica destination without persistence; `stage` creates that destination. `preflight` assesses admission, quota, policy and placement before retirement. `cutover` changes HPAs and source/destination workloads and can interrupt service. The default exclusive cutover verifies source Pods have stopped before activating the destination. `rollback` is explicit recovery and also changes workloads; it stops the destination before restoring an exclusive source.
 
-Offline objects require an explicit namespace. `--projects` deduplicates names and skips reserved namespaces before access checks. `--kubeconfig` and `--context` override standard loading rules; otherwise `KUBECONFIG` and the normal default file apply. Basic conversion never needs namespace-object or cluster-version access. If the DC API is absent or disabled, live discovery fails clearly; exported-file conversion remains available.
+Select a context explicitly and follow the [migration and recovery procedure](docs/migration.md) with [permissions for each mode](docs/rbac.md). Coordinate external reconcilers and scalers before cutover. The legacy `--apply-changes` flag aliases zero-replica staging and requires a reviewed plan.
 
-Every workload gets a YAML manifest and JSON review plan. Pod labels, including Service-facing `deploymentconfig`, are retained. A separate migration label identifies the destination selector. Explicit zero replicas, pause, readiness/history settings, Rolling/Recreate behavior and supported image triggers are mapped. Unsupported hooks, custom/test behavior, disabled ConfigChange rollouts and ambiguous triggers produce manual diagnostics and block application. Read the [feature mapping](docs/feature-mapping.md).
+## Capabilities and limits
 
-A generated manifest describes intended replicas. Review it through the staged procedure below before applying it while the DC is active.
+Labels, supported Rolling/Recreate behavior, replica settings and supported ImageChange triggers are preserved. Hooks, custom/test deployment semantics, ambiguous triggers and unfamiliar fields require manual migration. See [conversion coverage](docs/feature-mapping.md). Preflight is a point-in-time assessment; it does not reserve capacity or guarantee image pulls, CSI mounts, application readiness or every network path.
 
-```sh
-# Inspect dependencies and produce a live plan without cluster writes.
-/tmp/openshift-dc-converter --mode plan --projects example --context TEST_CONTEXT \
-  --health-url https://APPLICATION/health --output-dir ./review
+The minimum compatibility target is OpenShift 4.14 / Kubernetes 1.27. Completed source assessments and the [maintenance delta review](compatibility/reviews/maintenance-refresh.json) support conditional 4.14–4.20 assumptions with prerequisites. The exact Linux amd64 and Darwin arm64 artifacts in the [current release policy](compatibility/current-release-scope.json) completed fresh actual qualification on OpenShift 4.21.36 / Kubernetes v1.34.9. Historical qualification remains bound to its original artifacts. Other builds need their own qualification; OpenShift 4.22 and other native platforms remain untested. [Compatibility](docs/compatibility.md) explains these distinct evidence bases; tool compatibility is separate from Red Hat's cluster support lifecycle.
 
-# Validate admission, then stage a paused destination with zero replicas.
-/tmp/openshift-dc-converter --mode dry-run --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
-/tmp/openshift-dc-converter --mode stage --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
+Plans and reports can contain sensitive workload values; keep them private. The canonical report is JSON; `--report-path ''` disables optional PDF output. Unsupported/manual cases and operation or report failures return nonzero status.
 
-# Check Pod admission, quota and node capacity while the source stays up.
-/tmp/openshift-dc-converter --mode preflight --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
+## Further guidance
 
-# After pausing other reconcilers/scalers and reviewing the plan:
-/tmp/openshift-dc-converter --mode cutover --plan-file ./review/example/web.plan.json \
-  --context TEST_CONTEXT --automation-quiesced
-
-# Explicit recovery after inspecting a failed/interrupted migration:
-/tmp/openshift-dc-converter --mode rollback --plan-file ./review/example/web.plan.json --context TEST_CONTEXT
-```
-
-Cutover reruns the constraint preflight before changing any HPA or source. A refusal leaves the source running and the destination paused at zero. See [pre-retirement constraints](docs/migration.md#constraints-before-source-retirement), including the extra read/dry-run permissions and point-in-time limits, and [actual live-test evidence](docs/preflight-live-tests.md).
-
-The legacy `--apply-changes` now aliases **zero-replica staging** and requires a reviewed `--plan-file`. It cannot create an active duplicate. Exclusive cutover stops and verifies source pods before starting the destination. Overlap requires an explicit planning choice and justification and is blocked for volume/host-bound workloads. The DC is retained for recovery. See the [migration and recovery procedure](docs/migration.md) and [RBAC reference](docs/rbac.md).
-
-The canonical report is `conversion_report.json`; the optional PDF defaults to `conversion_report.pdf` (`--report-path ''` disables it). `--json-report` selects the canonical path; report, log, input and plan paths must be distinct. Reports contain per-source identities, destination, stage, outcome, warnings, unsupported features and errors. Generation, application, readiness, manual cases, failures and skips have separate totals. Exit status is **0** for completed requested operations (including explicit skips/empty namespaces) and **1** for validation, manual migration, conversion, save, admission, apply, readiness, cancellation or report failures. Partial runs retain reports where storage is writable.
-
-Files use atomic replacement with restrictive permissions. Plans contain original manifests and may contain environment values; keep them private. `--request-timeout`, `--operation-timeout` and `--readiness-timeout` bound work. SIGINT/SIGTERM cancel API requests and preserve the journal/report where possible. Lost connectivity or unverified recovery is a failure, never a success.
-
-```sh
-go test -mod=readonly -race ./...
-go vet -mod=readonly ./...
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tools -p 'test_*.py'
-```
-
-Development details, dependency decisions, vulnerability remediation and actual-cluster setup are in [docs/development.md](docs/development.md), [docs/dependencies.md](docs/dependencies.md), [docs/security.md](docs/security.md) and [docs/qualification.md](docs/qualification.md). Release automation reproduces the two frozen tested binaries, attaches checksums and provenance, validates their exact actual-cluster evidence, and creates a draft for maintainer review. No release is published by this maintenance work.
+- [Migration, preflight and recovery](docs/migration.md) · [RBAC](docs/rbac.md)
+- [Feature mapping](docs/feature-mapping.md) · [Compatibility prerequisites](docs/compatibility-review.md)
+- [Development and tool commands](docs/development.md) · [Dependencies](docs/dependencies.md) · [Security](docs/security.md)
+- [Developer-run live qualification](docs/qualification.md) · [Release verification](docs/release-scope.md) · [Follow-up backlog](docs/backlog.md)

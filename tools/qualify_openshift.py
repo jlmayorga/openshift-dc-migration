@@ -18,7 +18,13 @@ import sys
 import tempfile
 import time
 import uuid
-from release_gate import SCENARIOS, digest, tree_digest, dependency_digest
+from release_gate import (
+    SCENARIOS,
+    digest,
+    fixture_digest,
+    dependency_digest,
+    production_source_digest,
+)
 
 OWNER = "migration.openshift-dc.io/qualification-run"
 
@@ -88,7 +94,13 @@ def main():
         "result": "failed",
         "minor": None,
         "artifactSHA256": digest(binary),
-        "fixtureSHA256": tree_digest("testdata"),
+        "fixtureSHA256": fixture_digest(),
+        "productionSourceSHA256": production_source_digest(),
+        "nativeExecutionPlatform": __import__("platform").system().lower()
+        + "/"
+        + {"x86_64": "amd64", "aarch64": "arm64", "arm64": "arm64"}.get(
+            __import__("platform").machine(), __import__("platform").machine()
+        ),
         "dependencySHA256": dependency_digest(),
         "revision": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True

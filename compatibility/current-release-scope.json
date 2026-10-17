@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "v1",
+  "kind": "scoped-maintenance-release",
+  "name": "current-maintenance-4.21",
+  "authorization": {
+    "date": "2026-10-16",
+    "instruction": "Clean up the cluster, commit, push and release. Release everything."
+  },
+  "requiredMinors": [
+    "4.14",
+    "4.15",
+    "4.16",
+    "4.17",
+    "4.18",
+    "4.19",
+    "4.20",
+    "4.21"
+  ],
+  "actualMinor": "4.21",
+  "openshiftPatch": "4.21.36",
+  "kubernetesVersion": "v1.34.9",
+  "releaseImage": "quay.io/openshift-release-dev/ocp-release@sha256:d00a000883878045a9175d7526667104e3ac8a90b7fbaa0450d4e5f8fce6fa61",
+  "revision": "1d1bd3421cd52e29890cc765d170b9745172b8ed",
+  "productionSourceSHA256": "c991d38a83d5b3428f267fbff6cee4daae45a26454461fa649fdb2af91fd100f",
+  "dependencySHA256": "4db9cf16dc5862049bf804643f0ba88d80d2e94b0ee2d075a1bfe426fe218da6",
+  "fixtureSHA256": "4a491533af80233d02444936f15912666cffa7158923b0f69ef8fef76ed8bf22",
+  "build": {
+    "goVersion": "go1.27.2",
+    "artifactBuilds": {
+      "openshift-dc-converter-linux-amd64": {
+        "version": "dev",
+        "commit": "1d1bd3421cd52e29890cc765d170b9745172b8ed",
+        "buildDate": "2026-10-17T00:26:47Z"
+      },
+      "openshift-dc-converter-darwin-arm64": {
+        "version": "dev",
+        "commit": "1d1bd3421cd52e29890cc765d170b9745172b8ed",
+        "buildDate": "2026-10-16T22:05:16Z"
+      }
+    },
+    "preserveTestedBytes": true
+  },
+  "artifacts": {
+    "openshift-dc-converter-linux-amd64": {
+      "platform": "linux/amd64",
+      "sha256": "ae27b6bc21c054c673290beafcb285843c50c122207215249e7c93e3f86bb5ce",
+      "evidence": "compatibility/evidence/maintenance-current-linux-amd64-4.21.36.json",
+      "evidenceSHA256": "8fcf01db93c7fbbf2867f614135e495d90356c4345aafae48947f23753c40498"
+    },
+    "openshift-dc-converter-darwin-arm64": {
+      "platform": "darwin/arm64",
+      "sha256": "b4b4765b72d94737827f582153bff535ab7027ac132b860b00f553f9c17ff41e",
+      "evidence": "compatibility/evidence/maintenance-current-darwin-arm64-4.21.36.json",
+      "evidenceSHA256": "f2498178f76ca343b342554957bb4e18b423f389def6ddd0f25e60a6f150b613"
+    }
+  },
+  "limitations": [
+    "4.14\u20134.20 are source-review assumptions with prerequisites, not actual integration passes.",
+    "Only the exact Linux amd64 and Darwin arm64 artifacts in this policy are live qualified on OpenShift 4.21.36 / Kubernetes v1.34.9.",
+    "4.22, Linux arm64, Darwin amd64, Windows amd64 and next-development smoke remain untested and outside this release scope.",
+    "Original dev/1d1bd342 embedded metadata and per-artifact build dates are retained. Different binary bytes require new actual evidence."
+  ],
+  "followUpBacklog": "docs/backlog.md",
+  "releaseTag": "v1.0.0-alpha-7"
+}

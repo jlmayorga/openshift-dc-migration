@@ -14,10 +14,10 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go mod download && go mod verify
-      - run: test -z "$(gofmt -l *.go)"
+      - run: test -z "$(gofmt -l cmd internal)"
       - run: go test -mod=readonly -race -count=1 -coverprofile=coverage.out ./...
       - run: go vet -mod=readonly ./...
-      - run: go build -mod=readonly -trimpath -o /tmp/openshift-dc-converter .
+      - run: go build -mod=readonly -trimpath -o /tmp/openshift-dc-converter ./cmd/openshift-dc-converter
       - run: python3 -m unittest discover -s tools -p 'test_*.py'
       - run: go mod tidy && git diff --exit-code -- go.mod go.sum
       - run: go -C tools/security mod tidy && git diff --exit-code -- tools/security/go.mod tools/security/go.sum
@@ -39,8 +39,8 @@ jobs:
           go -C tools/security build -mod=readonly -o /tmp/security-tools/govulncheck golang.org/x/vuln/cmd/govulncheck
           go -C tools/security build -mod=readonly -o /tmp/security-tools/gosec github.com/securego/gosec/v2/cmd/gosec
       - run: /tmp/security-tools/govulncheck -json ./... > govulncheck.json
-      - run: python3 tools/check-vulnerabilities.py govulncheck.json
-      - run: /tmp/security-tools/gosec -fmt=json -out=gosec.json ./...
+      - run: python3 tools/check_vulnerabilities.py govulncheck.json
+      - run: /tmp/security-tools/gosec -fmt=json -out=gosec.json ./cmd/... ./internal/...
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

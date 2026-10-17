@@ -16,7 +16,7 @@ import threading
 import time
 
 from qualify_configurations import Live
-from release_gate import dependency_digest, digest, tree_digest
+from release_gate import dependency_digest, digest, fixture_digest
 
 WORKER = r"""
 set -eu
@@ -113,7 +113,7 @@ def main():
             ["git", "rev-parse", "HEAD"], text=True
         ).strip(),
         driverSHA256=digest(__file__),
-        fixtureSHA256=tree_digest("testdata"),
+        fixtureSHA256=fixture_digest(),
         dependencySHA256=dependency_digest(),
     )
     (live.root / "metadata.json").write_text(json.dumps(metadata, indent=2))

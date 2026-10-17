@@ -4,3 +4,15 @@ conversion_log.txt
 conversion_report.pdf
 conversion_report.json
 openshift-dc-migration
+.scratchpad/
+__pycache__/
+*.py[cod]
+/dist/
+/converted_deployments/
+/coverage.out
+/govulncheck.json
+/gosec.json
+/evidence/
+/compatibility/results/
+/openshift-dc-converter
+/frozen-dist/

@@ -16,7 +16,7 @@ import re
 import subprocess
 
 from qualify_new_app import NewApp
-from release_gate import dependency_digest, digest, tree_digest
+from release_gate import dependency_digest, digest, fixture_digest
 
 
 def main():
@@ -80,7 +80,7 @@ def main():
         "revisionAtInvocation": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True
         ).strip(),
-        "fixtureSHA256": tree_digest("testdata"),
+        "fixtureSHA256": fixture_digest(),
         "dependencySHA256": dependency_digest(),
         "clusterVersion": live.get("clusterversion", "version"),
         "kubernetesVersion": json.loads(live.oc("get", "--raw=/version").stdout),

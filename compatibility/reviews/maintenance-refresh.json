@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "v1",
+  "kind": "production-source-delta-assessment",
+  "reviewedRevision": "3a7a71244c7b47492480f403d31eb358228bf5e2",
+  "baselineRevision": "eb8fb9d6be6274f059211c913191345ab25a9cb1",
+  "conclusion": "no-new-applicable-breaking-change-identified",
+  "unresolvedApplicableFindings": [],
+  "evidenceBasis": "Bounded committed-source comparison and local contract verification, inheriting completed official-source assessments. No new survey of upstream release notes or advisory feeds.",
+  "scope": {
+    "assumedCompatibleReleases": [
+      "4.14",
+      "4.15",
+      "4.16",
+      "4.17",
+      "4.18",
+      "4.19",
+      "4.20"
+    ],
+    "additionalSourceAssessment": [
+      "4.21"
+    ],
+    "baselineKubernetesSemantics": "1.27",
+    "excluded": [
+      "new OpenShift versions or platforms",
+      "arbitrary extensions and scheduler plugins",
+      "actual integration or native execution qualification",
+      "new upstream advisory certification"
+    ]
+  },
+  "inheritedAssessments": [
+    {
+      "minor": "4.14",
+      "summary": "compatibility/reviews/4.14-assessment.json"
+    },
+    {
+      "minor": "4.15",
+      "summary": "compatibility/reviews/4.15-assessment.json"
+    },
+    {
+      "minor": "4.16",
+      "summary": "compatibility/reviews/4.16-assessment.json"
+    },
+    {
+      "minor": "4.17",
+      "summary": "compatibility/reviews/4.17-assessment.json"
+    },
+    {
+      "minor": "4.18",
+      "summary": "compatibility/reviews/4.18-assessment.json"
+    },
+    {
+      "minor": "4.19",
+      "summary": "compatibility/reviews/4.19-assessment.json"
+    },
+    {
+      "minor": "4.20",
+      "summary": "compatibility/reviews/4.20-assessment.json"
+    },
+    {
+      "minor": "4.21",
+      "summary": "compatibility/reviews/4.21-assessment.json"
+    }
+  ],
+  "findings": [
+    {
+      "id": "LAYOUT",
+      "change": "Root main implementation moved into internal/migration with a thin executable under cmd.",
+      "disposition": "equivalent-source-structure",
+      "reason": "All implementation/test files map to the historical source after package renaming, explicit metadata transport and the separately assessed membership substitution. No additional implementation file or initializer was introduced. Package identity and binary bytes change; API operations, mutation order and serialized fields do not.",
+      "paths": [
+        "cmd/openshift-dc-converter/main.go",
+        "internal/migration/command.go",
+        "internal/migration/"
+      ]
+    },
+    {
+      "id": "MEMBERSHIP",
+      "change": "Custom string membership loop replaced by slices.Contains.",
+      "disposition": "equivalent-string-comparison",
+      "reason": "The declared Go toolchain implements Contains through an index loop comparing string equality and returning false for no match, including nil/empty slices. The same values and allowlists are passed at every changed call. Option validation, reserved-namespace filtering, field classification and stored-plan mode checks retain their predicates.",
+      "paths": [
+        "internal/migration/converter.go",
+        "internal/migration/runtime.go",
+        "internal/migration/planning.go",
+        "internal/migration/utils.go"
+      ],
+      "primarySource": "Go 1.27.2 src/slices/slices.go: Index and Contains"
+    },
+    {
+      "id": "INPUTS",
+      "change": "Embedded catalog and fixture roots relocated.",
+      "disposition": "unchanged-content",
+      "reason": "Application go.mod/go.sum, the embedded Kubernetes 1.27 catalog and every synthetic fixture are byte-identical to the historical baseline. Relative fixture hashing remains consistent. Existing v0.37.1 client adaptations and baseline field/toleration guards remain unchanged.",
+      "paths": [
+        "go.mod",
+        "go.sum",
+        "internal/migration/compatibility/baseline-1.27.json",
+        "internal/migration/testdata/"
+      ]
+    },
+    {
+      "id": "SAFEGUARDS",
+      "change": "Migration implementation moved without safety-policy changes.",
+      "disposition": "preserved",
+      "reason": "Read-only planning, paused zero-replica staging, ownership/freshness and raw-field validation, SCC/ANP/PV guards, bounded full-spec source-conflict retries, cancellation, uncertain-write recovery, journaling and exclusive stop-before-start ordering retain their reviewed source logic. No required RBAC/API version, admitted field or cluster mutation was added."
+    },
+    {
+      "id": "TOOLING",
+      "change": "Fixture/source provenance and evidence loaders updated; GitHub live dispatch removed.",
+      "disposition": "no-new-workload-api-dependency",
+      "reason": "Supplemental scenario-driver ASTs retain behavior after fixture-root substitution; the baseline driver adds current-source/native-platform provenance. Candidate generation and explicit frozen-source reproduction remain separate. Evidence selections enforce containment, pins and source/platform binding. Developers invoke live drivers explicitly; deleting GitHub dispatch introduces no cluster API dependency."
+    },
+    {
+      "id": "SCANNERS",
+      "change": "Separate scanner module carries the gRPC security patch.",
+      "disposition": "outside-application-binding",
+      "reason": "The existing scanner-only gRPC 1.83.2 update is preserved. It changes neither application dependencies nor the historical application dependency identity."
+    }
+  ],
+  "prerequisites": "All manual feature guards and conditional platform, patch, storage, runtime, SCC, registry and network prerequisites in docs/compatibility-review.md remain in force.",
+  "currentSourceApplicability": "The conditional 4.14\u20134.20 source-review assumptions apply to the refreshed production/dependency/catalog/fixture identities pinned in the external currentSourceReview overlay. Further changes to those inputs require reassessment.",
+  "qualification": "No live tests performed. Every changed native binary still requires its own actual qualification. Historical 4.21.36 results remain bound only to their original source and exact artifacts; 4.22 and other native platforms remain untested."
+}

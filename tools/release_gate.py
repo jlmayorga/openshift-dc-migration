@@ -11,6 +11,9 @@ import shutil
 import subprocess
 import sys
 
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+FIXTURE_ROOT = REPO_ROOT / "internal/migration/testdata"
+
 SCENARIOS = {
     "schema",
     "dry-run",
@@ -41,11 +44,11 @@ def digest(path):
     return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
 
 
-def dependency_digest():
+def dependency_digest(root=REPO_ROOT):
     return hashlib.sha256(
-        pathlib.Path("go.mod").read_bytes()
+        (pathlib.Path(root) / "go.mod").read_bytes()
         + b"\0"
-        + pathlib.Path("go.sum").read_bytes()
+        + (pathlib.Path(root) / "go.sum").read_bytes()
     ).hexdigest()
 
 
@@ -60,6 +63,8 @@ def verify(
     reviews=(),
     required_minors=None,
 ):
+    if not source_hash:
+        raise ValueError("Missing production source identity")
     required = {
         v["minor"]
         for v in matrix["targets"]
@@ -128,8 +133,28 @@ def verify(
                 row.get("revision") != revision
                 or row.get("fixtureSHA256") != fixture_hash
                 or row.get("dependencySHA256") != dependency_hash
+                or row.get("productionSourceSHA256") != source_hash
             ):
                 raise ValueError("Stale evidence: " + minor + " " + artifact)
+            native = (
+                artifact.removeprefix("openshift-dc-converter-")
+                .removesuffix(".exe")
+                .replace("-", "/")
+            )
+            if (
+                native
+                not in {
+                    "linux/amd64",
+                    "linux/arm64",
+                    "darwin/amd64",
+                    "darwin/arm64",
+                    "windows/amd64",
+                }
+                or row.get("nativeExecutionPlatform") != native
+            ):
+                raise ValueError(
+                    "Actual evidence execution platform mismatch: " + artifact
+                )
             if (
                 not re.fullmatch(
                     re.escape(minor) + r"\.\d+", row.get("openshiftPatch", "")
@@ -163,44 +188,183 @@ def verify(
 
 def tree_digest(root):
     h = hashlib.sha256()
+    if not any(p.is_file() for p in pathlib.Path(root).rglob("*")):
+        raise ValueError("Missing or empty fixture root: " + str(root))
     for p in sorted(pathlib.Path(root).rglob("*")):
         if p.is_file():
             h.update(p.relative_to(root).as_posix().encode() + b"\0" + p.read_bytes())
     return h.hexdigest()
 
 
-def production_source_digest():
-    """Bind assumptions to all shipped Go code and the embedded field catalog."""
-    paths = [
-        p for p in pathlib.Path(".").glob("*.go") if not p.name.endswith("_test.go")
-    ]
-    paths.append(pathlib.Path("compatibility/baseline-1.27.json"))
+def source_inventory_digest(root, paths):
     h = hashlib.sha256()
-    for p in sorted(paths):
-        h.update(p.as_posix().encode() + b"\0" + p.read_bytes())
+    for path in sorted(paths):
+        h.update(path.relative_to(root).as_posix().encode() + b"\0" + path.read_bytes())
     return h.hexdigest()
 
 
-def load_reviews(matrix):
-    reviews = []
-    for name in sorted(
-        {
-            v["reviewEvidence"]
-            for v in matrix["targets"]
-            if v.get("qualificationPolicy") == "review-assumption"
-        }
+def production_source_digest(root=REPO_ROOT):
+    """Ship inventory: all cmd/internal Go except tests, plus embedded catalog."""
+    root = pathlib.Path(root)
+    paths = [
+        p
+        for directory in ["cmd", "internal"]
+        for p in (root / directory).rglob("*.go")
+        if not p.name.endswith("_test.go")
+    ]
+    if not paths:
+        raise ValueError("Missing production Go inventory")
+    paths.append(root / "internal/migration/compatibility/baseline-1.27.json")
+    return source_inventory_digest(root, paths)
+
+
+def historical_production_source_digest(root):
+    """Original inventory, exclusively for an explicitly archived tested revision."""
+    root = pathlib.Path(root)
+    paths = [p for p in root.glob("*.go") if not p.name.endswith("_test.go")]
+    if not paths:
+        raise ValueError("Missing historical production source")
+    paths.append(root / "compatibility/baseline-1.27.json")
+    return source_inventory_digest(root, paths)
+
+
+def fixture_digest():
+    return tree_digest(FIXTURE_ROOT)
+
+
+def evidence_path(root, name):
+    """Resolve a declared evidence reference without allowing bundle escape."""
+    if root is None:
+        raise ValueError("An explicit --evidence-root is required")
+    base = pathlib.Path(root).resolve()
+    relative = pathlib.Path(name)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("Invalid evidence path")
+    path = (base / relative).resolve()
+    if not path.is_relative_to(base):
+        raise ValueError("Evidence path escapes declared root")
+    if not path.is_file():
+        raise ValueError("Missing external evidence: " + name)
+    return path
+
+
+def evidence_directory(root, name):
+    if root is None:
+        raise ValueError("An explicit --evidence-root is required")
+    base = pathlib.Path(root).resolve()
+    relative = pathlib.Path(name)
+    path = (base / relative).resolve()
+    if (
+        relative.is_absolute()
+        or ".." in relative.parts
+        or not path.is_relative_to(base)
     ):
+        raise ValueError("Invalid evidence directory")
+    if not path.is_dir():
+        raise ValueError("Missing external evidence directory: " + name)
+    return path
+
+
+def actual_evidence_paths(root, scope=None, directory=None):
+    """Validate every selected record, including overrides, inside its bundle."""
+    if directory is not None or scope is None:
+        records = evidence_directory(root, directory or "compatibility/results")
+        base = pathlib.Path(root).resolve()
+        paths = [
+            evidence_path(base, p.relative_to(base).as_posix())
+            for p in sorted(records.glob("*.json"))
+        ]
+    else:
+        paths = [
+            evidence_path(root, item["evidence"])
+            for item in scope["artifacts"].values()
+        ]
+    if scope is not None:
+        pins = {item["evidenceSHA256"] for item in scope["artifacts"].values()}
+        if len(paths) != len(scope["artifacts"]) or {digest(p) for p in paths} != pins:
+            raise ValueError("Replacement records differ from pinned scoped evidence")
+    return paths
+
+
+def review_bindings(matrix, *, current_source=False):
+    """Select current assumptions explicitly; frozen scope always keeps old pins."""
+    if current_source and matrix.get("currentSourceReview"):
+        item = matrix["currentSourceReview"]
+        return [(item["evidence"], item["evidenceSHA256"])]
+    targets = [
+        t
+        for t in matrix["targets"]
+        if t.get("qualificationPolicy") == "review-assumption"
+    ]
+    bindings = []
+    for name in sorted({t["reviewEvidence"] for t in targets}):
+        pins = {
+            t.get("reviewEvidenceSHA256")
+            for t in targets
+            if t["reviewEvidence"] == name
+        }
+        if len(pins) != 1 or None in pins:
+            raise ValueError("Changed or unpinned review evidence")
+        bindings.append((name, pins.pop()))
+    return bindings
+
+
+def load_reviews(matrix, evidence_root=None, *, current_source=False):
+    reviews = []
+    for name, pin in review_bindings(matrix, current_source=current_source):
         path = pathlib.Path(name)
         if (
             path.parent != pathlib.Path("compatibility/evidence")
             or path.suffix != ".json"
         ):
             raise ValueError("Invalid review evidence path")
+        path = evidence_path(evidence_root, name)
+        if digest(path) != pin:
+            raise ValueError("Changed or unpinned review evidence")
         review = json.loads(path.read_text())
+        current = review
+        seen = {name}
+        while current.get("baseReviewEvidence"):
+            base = current["baseReviewEvidence"]
+            if base in seen:
+                raise ValueError("Cyclic review provenance")
+            seen.add(base)
+            base_path = evidence_path(evidence_root, base)
+            expected = current.get("baseReviewSHA256") or matrix.get(
+                "reviewProvenanceSHA256", {}
+            ).get(base)
+            if not expected or digest(base_path) != expected:
+                raise ValueError("Changed or unpinned base review")
+            current = json.loads(base_path.read_text())
+        if current_source and matrix.get("currentSourceReview"):
+            delta = review.get("sourceDeltaAssessment", {})
+            reference = pathlib.Path(delta.get("path", ""))
+            if (
+                reference.parent != pathlib.Path("compatibility/reviews")
+                or reference.suffix != ".json"
+            ):
+                raise ValueError("Invalid current source delta assessment path")
+            delta_path = evidence_path(evidence_root, str(reference))
+            if digest(delta_path) != delta.get("sha256"):
+                raise ValueError("Changed current source delta assessment")
+            content = json.loads(delta_path.read_text())
+            if (
+                content.get("kind") != "production-source-delta-assessment"
+                or not isinstance(review.get("revision"), str)
+                or not re.fullmatch(r"[a-f0-9]{40}", review["revision"])
+                or content.get("reviewedRevision") != review.get("revision")
+                or content.get("conclusion")
+                != "no-new-applicable-breaking-change-identified"
+                or content.get("unresolvedApplicableFindings") != []
+            ):
+                raise ValueError(
+                    "Incomplete or mismatched current source delta assessment"
+                )
         for assessment in review.get("assessments", []):
             p = pathlib.Path(assessment["path"])
             if p.parent != pathlib.Path("compatibility/reviews") or p.suffix != ".json":
                 raise ValueError("Invalid assessment path")
+            p = evidence_path(evidence_root, str(p))
             if digest(p) != assessment["sha256"]:
                 raise ValueError("Changed release assessment: " + str(p))
             content = json.loads(p.read_text())
@@ -218,16 +382,24 @@ def load_reviews(matrix):
     return reviews
 
 
-def load_scope(matrix):
-    """Load the explicit frozen-candidate exception, preserving the GA inventory."""
-    path = pathlib.Path(matrix["activeReleaseScope"])
-    if path != pathlib.Path("compatibility/release-scope.json"):
+def load_scope(matrix, evidence_root=None, *, current_scope=False):
+    """Load one explicit scope without changing the historical default or GA inventory."""
+    if current_scope and not matrix.get("currentSourceReview"):
+        raise ValueError("Current scope requires an explicit current source review")
+    expected_path = pathlib.Path(
+        "compatibility/current-release-scope.json"
+        if current_scope
+        else "compatibility/release-scope.json"
+    )
+    path = expected_path if current_scope else pathlib.Path(matrix["activeReleaseScope"])
+    if path != expected_path:
         raise ValueError("Invalid release scope path")
-    scope = json.loads(path.read_text())
+    scope = json.loads((REPO_ROOT / path).read_text())
     if (
         scope.get("schemaVersion") != "v1"
         or scope.get("kind") != "scoped-maintenance-release"
-        or scope.get("name") != "maintenance-4.21"
+        or scope.get("name")
+        != ("current-maintenance-4.21" if current_scope else "maintenance-4.21")
         or not scope.get("authorization", {}).get("instruction")
         or scope.get("requiredMinors") != ["4." + str(n) for n in range(14, 22)]
         or scope.get("actualMinor") != "4.21"
@@ -250,13 +422,23 @@ def load_scope(matrix):
             or path.suffix != ".json"
         ):
             raise ValueError("Invalid scoped artifact or evidence path")
+        path = evidence_path(evidence_root, str(path))
         if digest(path) != item["evidenceSHA256"]:
             raise ValueError("Changed scoped evidence: " + str(path))
     return scope
 
 
 def verify_scope(
-    matrix, scope, evidence, artifacts, fixture_hash, dependency_hash, source_hash
+    matrix,
+    scope,
+    evidence,
+    artifacts,
+    fixture_hash,
+    dependency_hash,
+    source_hash,
+    evidence_root=None,
+    *,
+    current_source=False,
 ):
     """Allow documentation/policy commits while retaining exact tested bytes."""
     for key, value in [
@@ -297,7 +479,7 @@ def verify_scope(
         fixture_hash,
         dependency_hash,
         source_hash,
-        load_reviews(matrix),
+        load_reviews(matrix, evidence_root, current_source=current_source),
         required_minors=scope["requiredMinors"],
     )
 
@@ -306,26 +488,39 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--artifacts", required=True)
     p.add_argument(
+        "--historical-source",
+        action="store_true",
+        help="Verify against isolated immutable tested source, never current candidates",
+    )
+    p.add_argument(
+        "--evidence-root",
+        required=True,
+        help="External bundle root for actual records and pinned historical review overlays",
+    )
+    p.add_argument(
         "--evidence", help="Override the scoped canonical records with a directory"
     )
     p.add_argument(
         "--full-matrix", action="store_true", help="Require the entire GA inventory"
     )
     p.add_argument(
+        "--current-scope",
+        action="store_true",
+        help="Verify the separately pinned current scope with refreshed source reviews",
+    )
+    p.add_argument(
         "--export-evidence", help="Export validated policy, records and gate result"
     )
     a = p.parse_args()
-    matrix = json.loads(pathlib.Path("compatibility/matrix.json").read_text())
+    if a.current_scope and (a.historical_source or a.full_matrix):
+        p.error("--current-scope cannot be combined with --historical-source or --full-matrix")
+    matrix = json.loads((REPO_ROOT / "compatibility/matrix.json").read_text())
     scope = (
-        load_scope(matrix)
-        if matrix.get("activeReleaseScope") and not a.full_matrix
+        load_scope(matrix, a.evidence_root, current_scope=a.current_scope)
+        if a.current_scope or (matrix.get("activeReleaseScope") and not a.full_matrix)
         else None
     )
-    evidence_paths = (
-        list(pathlib.Path(a.evidence or "compatibility/results").glob("*.json"))
-        if a.evidence or scope is None
-        else [pathlib.Path(item["evidence"]) for item in scope["artifacts"].values()]
-    )
+    evidence_paths = actual_evidence_paths(a.evidence_root, scope, a.evidence)
     evidence = [json.loads(path.read_text()) for path in evidence_paths]
     artifacts = {
         p.name: digest(p)
@@ -334,25 +529,76 @@ def main():
     }
     if not artifacts:
         raise ValueError("No release binaries")
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-    hashes = (tree_digest("testdata"), dependency_digest(), production_source_digest())
-    if scope:
-        verify_scope(matrix, scope, evidence, artifacts, *hashes)
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True
+    ).strip()
+    if a.historical_source:
+        if scope is None:
+            raise ValueError("Historical source requires an explicit frozen scope")
+        from build_qualified import historical_source, source_directory
+
+        with historical_source(scope["revision"]) as source, source_directory(source):
+            hashes = (
+                tree_digest(source / "testdata"),
+                dependency_digest(source),
+                historical_production_source_digest(source),
+            )
     else:
-        verify(matrix, evidence, artifacts, revision, *hashes, load_reviews(matrix))
+        hashes = (fixture_digest(), dependency_digest(), production_source_digest())
+    provenance = json.loads(
+        (pathlib.Path(a.artifacts) / "build-provenance.json").read_text()
+    )
+    if provenance.get("artifacts") != artifacts or any(
+        provenance.get(k) != v
+        for k, v in zip(
+            ["fixtureSHA256", "dependencySHA256", "productionSourceSHA256"], hashes
+        )
+    ):
+        raise ValueError("Candidate provenance mismatch")
+    tested_revision = scope["revision"] if scope else revision
+    if provenance.get("revision") != tested_revision:
+        raise ValueError("Candidate tested revision mismatch")
+    current_source = a.current_scope or scope is None
+    reviews = load_reviews(matrix, a.evidence_root, current_source=current_source)
+    if scope:
+        verify_scope(
+            matrix, scope, evidence, artifacts, *hashes, evidence_root=a.evidence_root,
+            current_source=current_source,
+        )
+    else:
+        verify(matrix, evidence, artifacts, revision, *hashes, reviews)
     if a.export_evidence:
         out = pathlib.Path(a.export_evidence)
         out.mkdir(parents=True, exist_ok=True)
-        paths = evidence_paths + [pathlib.Path("compatibility/matrix.json")]
+        paths = evidence_paths + [REPO_ROOT / "compatibility/matrix.json"]
         paths += [
-            pathlib.Path(t["reviewEvidence"])
-            for t in matrix["targets"]
-            if t.get("qualificationPolicy") == "review-assumption"
+            evidence_path(a.evidence_root, name)
+            for name, _ in review_bindings(matrix, current_source=current_source)
         ]
-        for review in load_reviews(matrix):
-            paths += [pathlib.Path(r["path"]) for r in review["assessments"]]
+        for review in reviews:
+            paths += [
+                evidence_path(a.evidence_root, r["path"]) for r in review["assessments"]
+            ]
+            if review.get("sourceDeltaAssessment"):
+                paths.append(
+                    evidence_path(
+                        a.evidence_root, review["sourceDeltaAssessment"]["path"]
+                    )
+                )
+            current = review
+            while current.get("baseReviewEvidence"):
+                base_path = evidence_path(
+                    a.evidence_root, current["baseReviewEvidence"]
+                )
+                paths.append(base_path)
+                current = json.loads(base_path.read_text())
         if scope:
-            paths.append(pathlib.Path(matrix["activeReleaseScope"]))
+            paths.append(
+                REPO_ROOT / (
+                    "compatibility/current-release-scope.json"
+                    if a.current_scope else matrix["activeReleaseScope"]
+                )
+            )
         for path in set(paths):
             shutil.copyfile(path, out / path.name)
         (out / "gate-result.json").write_text(
